@@ -12,7 +12,7 @@
         }
 
         h1 {
-            color: #d9534f;
+            color: pink;
         }
 
         h2 {
