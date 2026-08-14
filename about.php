@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Giới thiệu Nhóm 02 - Lập trình Web</title>
+    <title>Giới thiệu Nhóm 02 - Lập Trình Web</title>
     <style>
         body {
             font-family: Arial, sans-serif;
