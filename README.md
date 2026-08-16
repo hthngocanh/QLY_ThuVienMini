@@ -35,7 +35,13 @@
 - Đầu sách
 - Bản sao sách
 ## 4. Các chức năng dự kiến
-
+- Quản lý người dùng
+- Quản lý danh mục sách
+- Quản lý đầu sách
+- Quản lý bản sao sách
+- Quản lý phiếu mượn
+- Tra cứu sách
+- Quản lý mượn và trả sách
 
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
 `
