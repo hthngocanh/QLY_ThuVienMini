@@ -28,12 +28,12 @@
 
 
 ## 3. Các đối tượng dữ liệu chính
-   ├── Vai trò
-   ├── Người dùng
-   ├── Danh mục sách
-   ├── Phiếu mượn
-   ├── Đầu sách
-   └── Bản sao sách
+- Vai trò
+- Người dùng
+- Danh mục sách
+- Phiếu mượn
+- Đầu sách
+- Bản sao sách
 ## 4. Các chức năng dự kiến
 
 
