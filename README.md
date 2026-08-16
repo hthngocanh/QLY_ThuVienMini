@@ -43,12 +43,6 @@
 - Quản lý mượn và trả sách
 
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
-<<<<<<< HEAD
-- Quản lý bản sao sách:
-  - Nhập ID bản sao, ID đầu sách và mã bản sao.
-  - Kiểm tra trạng thái bản sao: Đang mượn, Chưa trả, Đã trả.
-  - Hiển thị kết quả dưới dạng bảng.
-=======
 
 1. Quản lý người dùng
 - Xây dựng form nhập thông tin người dùng.
