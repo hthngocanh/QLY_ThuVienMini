@@ -28,21 +28,17 @@
 
 
 ## 3. Các đối tượng dữ liệu chính
-
-
+   ├── Vai trò
+   ├── Người dùng
+   ├── Danh mục sách
+   ├── Phiếu mượn
+   ├── Đầu sách
+   └── Bản sao sách
 ## 4. Các chức năng dự kiến
 
 
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
-
-
-
-### Các trạng thái phiếu mượn
-
-- **Đang mượn:** Chưa có ngày trả và chưa quá hạn.
-- **Đã trả:** Đã nhập ngày trả.
-- **Quá hạn:** Chưa trả và đã quá hạn trả.
-
+`
 
 ## 6. Công nghệ sử dụng
 
