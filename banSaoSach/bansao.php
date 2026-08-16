@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Quản lý bản sao sách</title>
@@ -115,160 +116,192 @@
             color: #d93025;
             font-weight: bold;
         }
+
+        /*menu */
+        .navbar {
+            background-color: #1e3a8a;
+            padding: 15px 25px;
+            display: flex;
+            gap: 10px;
+            margin: -40px -40px 35px -40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .navbar a:hover {
+            background-color: #2563eb;
+        }
+
+        .navbar a.active {
+            background-color: #2563eb;
+        }
     </style>
 </head>
 
 <body>
 
-<h1>QUẢN LÝ BẢN SAO SÁCH</h1>
+    <body>
 
-<form method="post">
+        <nav class="navbar">
+            <a href="../index.php">🏠 Trang chủ</a>
+            <a href="../nguoiDung/User.php">👤 Người dùng</a>
+            <a href="bansao.php" class="active">📖 Bản sao sách</a>
+        </nav>
 
-    <label for="id_ban_sao">ID bản sao:</label>
-    <input type="text" id="id_ban_sao" name="id_ban_sao" required>
+        <h1>QUẢN LÝ BẢN SAO SÁCH</h1>
 
-    <label for="id_dau_sach">ID đầu sách:</label>
-    <input type="text" id="id_dau_sach" name="id_dau_sach" required>
+        <form method="post">
 
-    <label for="ma_ban_sao">Mã bản sao:</label>
-    <input type="text" id="ma_ban_sao" name="ma_ban_sao" required>
+            <label for="id_ban_sao">ID bản sao:</label>
+            <input type="text" id="id_ban_sao" name="id_ban_sao" required>
 
-    <label for="trang_thai">Trạng thái:</label>
-    <select id="trang_thai" name="trang_thai" required>
-        <option value="Có sẵn">Có sẵn</option>
-        <option value="Đang mượn">Đang mượn</option>
-        <option value="Hỏng">Hỏng</option>
-        <option value="Mất">Mất</option>
-    </select>
+            <label for="id_dau_sach">ID đầu sách:</label>
+            <input type="text" id="id_dau_sach" name="id_dau_sach" required>
 
-    <label for="ngay_nhap">Ngày nhập:</label>
-    <input type="date" id="ngay_nhap" name="ngay_nhap" required>
+            <label for="ma_ban_sao">Mã bản sao:</label>
+            <input type="text" id="ma_ban_sao" name="ma_ban_sao" required>
 
-    <button type="submit" name="them_ban_sao">
-        Thêm bản sao
-    </button>
+            <label for="trang_thai">Trạng thái:</label>
+            <select id="trang_thai" name="trang_thai" required>
+                <option value="Có sẵn">Có sẵn</option>
+                <option value="Đang mượn">Đang mượn</option>
+                <option value="Hỏng">Hỏng</option>
+                <option value="Mất">Mất</option>
+            </select>
 
-</form>
+            <label for="ngay_nhap">Ngày nhập:</label>
+            <input type="date" id="ngay_nhap" name="ngay_nhap" required>
 
+            <button type="submit" name="them_ban_sao">
+                Thêm bản sao
+            </button>
 
-<?php
-
-// Hàm tự định nghĩa để kiểm tra khả năng cho mượn
-function kiemTraBanSao($trangThai)
-{
-    if ($trangThai == "Có sẵn") {
-        return "Có thể cho mượn";
-    } else {
-        return "Không thể cho mượn";
-    }
-}
+        </form>
 
 
-// Mảng lưu danh sách bản sao
-$danhSachBanSao = [];
+        <?php
 
-
-// Kiểm tra người dùng đã bấm nút thêm bản sao
-if (isset($_POST["them_ban_sao"])) {
-
-    // Nhận dữ liệu từ form
-    $idBanSao = $_POST["id_ban_sao"];
-    $idDauSach = $_POST["id_dau_sach"];
-    $maBanSao = $_POST["ma_ban_sao"];
-    $trangThai = $_POST["trang_thai"];
-    $ngayNhap = $_POST["ngay_nhap"];
-
-
-    // Kiểm tra dữ liệu
-    if (
-        empty($idBanSao) ||
-        empty($idDauSach) ||
-        empty($maBanSao) ||
-        empty($trangThai) ||
-        empty($ngayNhap)
-    ) {
-
-        echo "<p class='loi'>Vui lòng nhập đầy đủ thông tin.</p>";
-
-    } else {
-
-        // Tạo mảng chứa thông tin bản sao
-        $banSao = [
-            "id_ban_sao" => $idBanSao,
-            "id_dau_sach" => $idDauSach,
-            "ma_ban_sao" => $maBanSao,
-            "trang_thai" => $trangThai,
-            "ngay_nhap" => $ngayNhap
-        ];
-
-
-        // Thêm bản sao vào danh sách
-        $danhSachBanSao[] = $banSao;
-
-
-        echo "<div class='ket-qua'>";
-
-        echo "<h2>DANH SÁCH BẢN SAO</h2>";
-
-        echo "<table>";
-
-        echo "<tr>";
-        echo "<th>STT</th>";
-        echo "<th>ID bản sao</th>";
-        echo "<th>ID đầu sách</th>";
-        echo "<th>Mã bản sao</th>";
-        echo "<th>Trạng thái</th>";
-        echo "<th>Ngày nhập</th>";
-        echo "<th>Khả năng cho mượn</th>";
-        echo "</tr>";
-
-
-        // Dùng vòng lặp để duyệt danh sách
-        $stt = 1;
-
-        foreach ($danhSachBanSao as $banSao) {
-
-            echo "<tr>";
-
-            echo "<td>" . $stt . "</td>";
-
-            echo "<td>" .
-                htmlspecialchars($banSao["id_ban_sao"]) .
-                "</td>";
-
-            echo "<td>" .
-                htmlspecialchars($banSao["id_dau_sach"]) .
-                "</td>";
-
-            echo "<td>" .
-                htmlspecialchars($banSao["ma_ban_sao"]) .
-                "</td>";
-
-            echo "<td>" .
-                htmlspecialchars($banSao["trang_thai"]) .
-                "</td>";
-
-            echo "<td>" .
-                htmlspecialchars($banSao["ngay_nhap"]) .
-                "</td>";
-
-            // Gọi hàm tự định nghĩa
-            echo "<td>" .
-                kiemTraBanSao($banSao["trang_thai"]) .
-                "</td>";
-
-            echo "</tr>";
-
-            $stt++;
+        // Hàm tự định nghĩa để kiểm tra khả năng cho mượn
+        function kiemTraBanSao($trangThai)
+        {
+            if ($trangThai == "Có sẵn") {
+                return "Có thể cho mượn";
+            } else {
+                return "Không thể cho mượn";
+            }
         }
 
-        echo "</table>";
 
-        echo "</div>";
-    }
-}
+        // Mảng lưu danh sách bản sao
+        $danhSachBanSao = [];
 
-?>
 
-</body>
+        // Kiểm tra người dùng đã bấm nút thêm bản sao
+        if (isset($_POST["them_ban_sao"])) {
+
+            // Nhận dữ liệu từ form
+            $idBanSao = $_POST["id_ban_sao"];
+            $idDauSach = $_POST["id_dau_sach"];
+            $maBanSao = $_POST["ma_ban_sao"];
+            $trangThai = $_POST["trang_thai"];
+            $ngayNhap = $_POST["ngay_nhap"];
+
+
+            // Kiểm tra dữ liệu
+            if (
+                empty($idBanSao) ||
+                empty($idDauSach) ||
+                empty($maBanSao) ||
+                empty($trangThai) ||
+                empty($ngayNhap)
+            ) {
+
+                echo "<p class='loi'>Vui lòng nhập đầy đủ thông tin.</p>";
+            } else {
+
+                // Tạo mảng chứa thông tin bản sao
+                $banSao = [
+                    "id_ban_sao" => $idBanSao,
+                    "id_dau_sach" => $idDauSach,
+                    "ma_ban_sao" => $maBanSao,
+                    "trang_thai" => $trangThai,
+                    "ngay_nhap" => $ngayNhap
+                ];
+
+
+                // Thêm bản sao vào danh sách
+                $danhSachBanSao[] = $banSao;
+
+
+                echo "<div class='ket-qua'>";
+
+                echo "<h2>DANH SÁCH BẢN SAO</h2>";
+
+                echo "<table>";
+
+                echo "<tr>";
+                echo "<th>STT</th>";
+                echo "<th>ID bản sao</th>";
+                echo "<th>ID đầu sách</th>";
+                echo "<th>Mã bản sao</th>";
+                echo "<th>Trạng thái</th>";
+                echo "<th>Ngày nhập</th>";
+                echo "<th>Khả năng cho mượn</th>";
+                echo "</tr>";
+
+
+                // Dùng vòng lặp để duyệt danh sách
+                $stt = 1;
+
+                foreach ($danhSachBanSao as $banSao) {
+
+                    echo "<tr>";
+
+                    echo "<td>" . $stt . "</td>";
+
+                    echo "<td>" .
+                        htmlspecialchars($banSao["id_ban_sao"]) .
+                        "</td>";
+
+                    echo "<td>" .
+                        htmlspecialchars($banSao["id_dau_sach"]) .
+                        "</td>";
+
+                    echo "<td>" .
+                        htmlspecialchars($banSao["ma_ban_sao"]) .
+                        "</td>";
+
+                    echo "<td>" .
+                        htmlspecialchars($banSao["trang_thai"]) .
+                        "</td>";
+
+                    echo "<td>" .
+                        htmlspecialchars($banSao["ngay_nhap"]) .
+                        "</td>";
+
+                    // Gọi hàm tự định nghĩa
+                    echo "<td>" .
+                        kiemTraBanSao($banSao["trang_thai"]) .
+                        "</td>";
+
+                    echo "</tr>";
+
+                    $stt++;
+                }
+
+                echo "</table>";
+
+                echo "</div>";
+            }
+        }
+
+        ?>
+
+    </body>
+
 </html>
