@@ -46,8 +46,6 @@
 - Quản lý bản sao sách:
   - Nhập ID bản sao, ID đầu sách và mã bản sao.
   - Kiểm tra trạng thái bản sao: Đang mượn, Chưa trả, Đã trả.
-  - Xử lý dữ liệu bằng mảng.
-  - Sử dụng hàm tự định nghĩa để kiểm tra trạng thái.
   - Sử dụng điều kiện để xác định trạng thái bản sao.
   - Sử dụng vòng lặp để duyệt và hiển thị dữ liệu.
   - Hiển thị kết quả dưới dạng bảng.
