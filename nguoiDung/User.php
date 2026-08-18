@@ -1,6 +1,6 @@
 <?php
 
-require_once "functions.php";
+require_once "functionsNguoiDung.php";
 
 session_start();
 
