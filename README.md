@@ -13,7 +13,6 @@
 
 **Hệ thống Quản lý Thư viện Mini**
 
----
 
 ## 2. Thành viên và phân công
 
@@ -41,9 +40,7 @@
 - Quản lý phiếu mượn
 - Tra cứu sách
 - Quản lý mượn và trả sách
-
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
-
 1. Quản lý người dùng
 - Xây dựng form nhập thông tin người dùng.
 2. Quản lý phiếu mượn
@@ -64,9 +61,7 @@
 - Sử dụng điều kiện để xác định trạng thái bản sao.
 - Sử dụng vòng lặp để duyệt và hiển thị dữ liệu.
 - Hiển thị kết quả dưới dạng bảng.
-
 ## 6. Công nghệ sử dụng
-
 - PHP
 - HTML
 - CSS
@@ -74,28 +69,21 @@
 - Git
 - GitHub
 ## 7. Các form chính của hệ thống - Buổi 3
-
 Các form chính của hệ thống gồm:
-
 - Form người dùng
 - Form danh mục sách
 - Form đầu sách
 - Form bản sao sách
 - Form phiếu mượn
-
 ### Form bản sao sách
-
 Các trường dữ liệu:
-
 - ID bản sao
 - ID đầu sách
 - Mã bản sao
 - Trạng thái
 - Ngày nhập
 ## 8. Quy tắc Validation
-
 ### Form bản sao sách
-
 - ID bản sao:
   - Không được để trống.
   - Phải bắt đầu bằng 1 chữ cái IN HOA và phía sau là số.
@@ -125,15 +113,47 @@ Các trường dữ liệu:
   - Phải có định dạng ngày hợp lệ.
 
 ### Xử lý khi dữ liệu không hợp lệ
-
 - Báo lỗi ngay bên dưới trường nhập sai.
 - Trường nhập sai được hiển thị viền đỏ và nền đỏ nhạt.
 - Giữ lại dữ liệu người dùng đã nhập để không phải nhập lại toàn bộ form.
 - Sử dụng trim() để loại bỏ khoảng trắng thừa.
+
+### Form phiếu mượn
+
+- Người mượn:
+  - Không được để trống.
+  - Loại bỏ khoảng trắng thừa bằng `trim()`.
+
+- Bản sao sách:
+  - Không được để trống.
+  - Loại bỏ khoảng trắng thừa bằng `trim()`.
+
+- Ngày mượn:
+  - Không được để trống.
+  - Phải có định dạng ngày hợp lệ.
+
+- Hạn trả:
+  - Không được để trống.
+  - Phải có định dạng ngày hợp lệ.
+  - Không được trước ngày mượn.
+
+- Ngày trả:
+  - Không bắt buộc.
+  - Nếu nhập thì phải có ngày hợp lệ.
+  - Không được trước ngày mượn.
+
+### Xử lý khi dữ liệu không hợp lệ
+
+- Kiểm tra dữ liệu phía server bằng PHP.
+- Hiển thị thông báo lỗi khi thiếu thông tin bắt buộc.
+- Hiển thị lỗi khi hạn trả trước ngày mượn.
+- Hiển thị lỗi khi ngày trả trước ngày mượn.
+- Chỉ thêm phiếu mượn vào danh sách khi dữ liệu hợp lệ.
+- Lưu phiếu mượn bằng `$_SESSION`.
+- Sử dụng `htmlspecialchars()` khi hiển thị dữ liệu để hạn chế mã HTML/JavaScript không an toàn.
+
 ## 9. Route dự kiến
-
 Các route chính của hệ thống:
-
 - Trang chủ:
   - /index.php
 
@@ -142,19 +162,3 @@ Các route chính của hệ thống:
 
 - Bản sao sách:
   - /banSaoSach/bansao.php
-## 10. Công việc thực hiện trong Buổi 3
-
-### Bản sao sách
-
-- Tiếp tục phát triển form bản sao sách từ Buổi 2.
-- Bổ sung kiểm tra dữ liệu phía server bằng PHP.
-- Kiểm tra định dạng ID bản sao, ID đầu sách và mã bản sao.
-- Hiển thị lỗi ngay tại trường nhập sai.
-- Giữ lại dữ liệu hợp lệ khi form có trường nhập sai.
-- Kiểm tra trạng thái mượn trả của bản sao sách.
-- Hiển thị trạng thái:
-  - Đã trả: màu xanh.
-  - Đang mượn: màu vàng.
-  - Chưa trả: màu đỏ.
-- Kiểm thử form với dữ liệu đúng, dữ liệu thiếu, dữ liệu sai định dạng và dữ liệu chứa ký tự không hợp lệ.
-
