@@ -42,13 +42,9 @@
 - Quản lý phiếu mượn
 - Tra cứu sách
 - Quản lý mượn và trả sách
-<<<<<<< HEAD
 
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
 
-=======
-## 5. Các chức năng đã thực hiện đến hết Buổi 3
->>>>>>> e45042c (Cap nhat README)
 1. Quản lý người dùng
 
 - Xây dựng form nhập thông tin người dùng.
