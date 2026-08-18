@@ -73,5 +73,88 @@
 - XAMPP
 - Git
 - GitHub
+## 7. Các form chính của hệ thống - Buổi 3
 
----
+Các form chính của hệ thống gồm:
+
+- Form người dùng
+- Form danh mục sách
+- Form đầu sách
+- Form bản sao sách
+- Form phiếu mượn
+
+### Form bản sao sách
+
+Các trường dữ liệu:
+
+- ID bản sao
+- ID đầu sách
+- Mã bản sao
+- Trạng thái
+- Ngày nhập
+## 8. Quy tắc Validation
+
+### Form bản sao sách
+
+- ID bản sao:
+  - Không được để trống.
+  - Phải bắt đầu bằng 1 chữ cái IN HOA và phía sau là số.
+  - Ví dụ hợp lệ: B01, B02, B123.
+  - Không chấp nhận ký tự đặc biệt.
+
+- ID đầu sách:
+  - Không được để trống.
+  - Phải bắt đầu bằng 1 chữ cái IN HOA và phía sau là số.
+  - Ví dụ hợp lệ: D01, D12.
+  - Không chấp nhận ký tự đặc biệt.
+
+- Mã bản sao:
+  - Không được để trống.
+  - Phải bắt đầu bằng 1 chữ cái IN HOA và phía sau là số.
+  - Ví dụ hợp lệ: M01, M11.
+  - Không chấp nhận ký tự đặc biệt.
+
+- Trạng thái:
+  - Chỉ chấp nhận một trong ba giá trị:
+    - Đã trả
+    - Đang mượn
+    - Chưa trả
+
+- Ngày nhập:
+  - Không được để trống.
+  - Phải có định dạng ngày hợp lệ.
+
+### Xử lý khi dữ liệu không hợp lệ
+
+- Báo lỗi ngay bên dưới trường nhập sai.
+- Trường nhập sai được hiển thị viền đỏ và nền đỏ nhạt.
+- Giữ lại dữ liệu người dùng đã nhập để không phải nhập lại toàn bộ form.
+- Sử dụng trim() để loại bỏ khoảng trắng thừa.
+## 9. Route dự kiến
+
+Các route chính của hệ thống:
+
+- Trang chủ:
+  - /index.php
+
+- Người dùng:
+  - /nguoiDung/User.php
+
+- Bản sao sách:
+  - /banSaoSach/bansao.php
+## 10. Công việc thực hiện trong Buổi 3
+
+### Bản sao sách
+
+- Tiếp tục phát triển form bản sao sách từ Buổi 2.
+- Bổ sung kiểm tra dữ liệu phía server bằng PHP.
+- Kiểm tra định dạng ID bản sao, ID đầu sách và mã bản sao.
+- Hiển thị lỗi ngay tại trường nhập sai.
+- Giữ lại dữ liệu hợp lệ khi form có trường nhập sai.
+- Kiểm tra trạng thái mượn trả của bản sao sách.
+- Hiển thị trạng thái:
+  - Đã trả: màu xanh.
+  - Đang mượn: màu vàng.
+  - Chưa trả: màu đỏ.
+- Kiểm thử form với dữ liệu đúng, dữ liệu thiếu, dữ liệu sai định dạng và dữ liệu chứa ký tự không hợp lệ.
+
