@@ -42,9 +42,13 @@
 - Quản lý phiếu mượn
 - Tra cứu sách
 - Quản lý mượn và trả sách
+<<<<<<< HEAD
 
 ## 5. Các chức năng đã thực hiện đến hết Buổi 2
 
+=======
+## 5. Các chức năng đã thực hiện đến hết Buổi 3
+>>>>>>> e45042c (Cap nhat README)
 1. Quản lý người dùng
 
 - Xây dựng form nhập thông tin người dùng.
@@ -64,6 +68,7 @@
 4. Quản lý đầu sách
 
 - Thêm đầu sách.
+- Xóa đầu sách
 - Kiểm tra thông tin đầu sách.
 - Hiển thị danh sách đầu sách.
 
@@ -126,10 +131,10 @@ Các trường dữ liệu:
   - Không chấp nhận ký tự đặc biệt.
 
 - ID đầu sách:
-  - Không được để trống.
-  - Phải bắt đầu bằng 1 chữ cái IN HOA và phía sau là số.
-  - Ví dụ hợp lệ: D01, D12.
-  - Không chấp nhận ký tự đặc biệt.
+  - Kiểm tra tên sách: không để trống, độ dài 2–100 ký tự, phải chứa chữ hoặc số.
+  - Kiểm tra tác giả: không để trống, độ dài 2–100 ký tự, chỉ chứa chữ cái và khoảng trắng.
+  - Kiểm tra danh mục: bắt buộc phải chọn.
+  - Hiển thị thông báo lỗi khi dữ liệu không hợp lệ.
 
 - Mã bản sao:
   - Không được để trống.
@@ -156,37 +161,25 @@ Các trường dữ liệu:
 
 ### Form phiếu mượn
 
-- Người mượn:
-  - Không được để trống.
-  - Loại bỏ khoảng trắng thừa bằng `trim()`.
+- Người mượn: bắt buộc, không được để trống.
+- Bản sao sách: bắt buộc, không được để trống.
+- Ngày mượn: bắt buộc, phải là ngày hợp lệ.
+- Hạn trả: bắt buộc, không được trước ngày mượn.
+- Ngày trả: không bắt buộc; nếu nhập thì phải là ngày hợp lệ và không được trước ngày mượn.
+- Tình trạng: tự động xác định dựa trên ngày trả và hạn trả: Đã trả, Đang mượn hoặc Quá hạn.
+- Dữ liệu được chuẩn hóa bằng trim().
+- Dữ liệu được escape bằng htmlspecialchars() trước khi hiển thị.
+- Phiếu mượn chỉ được thêm khi dữ liệu hợp lệ.
 
-- Bản sao sách:
-  - Không được để trống.
-  - Loại bỏ khoảng trắng thừa bằng `trim()`.
+### Form đầu sách
 
-- Ngày mượn:
-  - Không được để trống.
-  - Phải có định dạng ngày hợp lệ.
-
-- Hạn trả:
-  - Không được để trống.
-  - Phải có định dạng ngày hợp lệ.
-  - Không được trước ngày mượn.
-
-- Ngày trả:
-  - Không bắt buộc.
-  - Nếu nhập thì phải có ngày hợp lệ.
-  - Không được trước ngày mượn.
-
-### Xử lý khi dữ liệu không hợp lệ
-
-- Kiểm tra dữ liệu phía server bằng PHP.
-- Hiển thị thông báo lỗi khi thiếu thông tin bắt buộc.
-- Hiển thị lỗi khi hạn trả trước ngày mượn.
-- Hiển thị lỗi khi ngày trả trước ngày mượn.
-- Chỉ thêm phiếu mượn vào danh sách khi dữ liệu hợp lệ.
-- Lưu phiếu mượn bằng `$_SESSION`.
-- Sử dụng `htmlspecialchars()` khi hiển thị dữ liệu để hạn chế mã HTML/JavaScript không an toàn.
+- Tên sách: bắt buộc, dài từ 2–100 ký tự và phải chứa chữ hoặc số.
+- Tác giả: bắt buộc, dài từ 2–100 ký tự, chỉ chứa chữ cái và khoảng trắng.
+- Danh mục: bắt buộc phải chọn.
+- Dữ liệu được chuẩn hóa bằng trim().
+- Dữ liệu được escape bằng htmlspecialchars() trước khi hiển thị.
+- Hiển thị thông báo lỗi khi dữ liệu không hợp lệ.
+- Đầu sách chỉ được thêm khi dữ liệu hợp lệ.
 
 ## 9. Quy tắc nghiệp vụ
 
