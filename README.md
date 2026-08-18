@@ -167,6 +167,15 @@ Các trường dữ liệu:
 - Dữ liệu được escape bằng htmlspecialchars() trước khi hiển thị.
 - Phiếu mượn chỉ được thêm khi dữ liệu hợp lệ.
 
+### Form danh mục sách
+- Tên danh mục: bắt buộc, dài từ 2–100 ký tự và phải chứa chữ hoặc số.
+- Mô tả: không bắt buộc, tối đa 500 ký tự.
+- Trạng thái: bắt buộc phải chọn, chỉ chấp nhận Đang hoạt động hoặc Ngừng hoạt động.
+- Dữ liệu được chuẩn hóa bằng trim().
+- Dữ liệu được escape bằng htmlspecialchars() trước khi hiển thị.
+- Hiển thị thông báo lỗi khi dữ liệu không hợp lệ.
+- Giữ lại dữ liệu hợp lệ khi form có lỗi.
+- Danh mục chỉ được thêm khi dữ liệu hợp lệ.
 ### Form đầu sách
 
 - Tên sách: bắt buộc, dài từ 2–100 ký tự và phải chứa chữ hoặc số.
