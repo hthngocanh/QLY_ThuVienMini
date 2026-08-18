@@ -1,55 +1,71 @@
 <?php
 
-require_once "functionsNguoiDung.php";
+require_once "functions.php";
 
 session_start();
 
 if (!isset($_SESSION["danhSachNguoiDung"])) {
     $_SESSION["danhSachNguoiDung"] = [];
 }
-
+$errors = [];
 $thongBao = "";
 $loaiThongBao = "";
 
+$maNguoiDung = "";
+$hoTen = "";
+$email = "";
+$trangThai = "";
+$soSachDangMuon = "";
+$hanMucMuon = 5;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $maNguoiDung = trim($_POST["maNguoiDung"] ?? "");
     $hoTen = trim($_POST["hoTen"] ?? "");
     $email = trim($_POST["email"] ?? "");
-    $trangThai = $_POST["trangThai"] ?? "";
-    $soSachDangMuon = (int) ($_POST["soSachDangMuon"] ?? 0);
-    $hanMucMuon = (int) ($_POST["hanMucMuon"] ?? 0);
-
+    $trangThai = trim($_POST["trangThai"] ?? "");
+    $soSachDangMuon = trim($_POST["soSachDangMuon"] ?? "");
+    $hanMucMuon = 5;
 
     if ($maNguoiDung === "") {
+        $errors["maNguoiDung"] = "Vui lòng nhập mã người dùng.";
+    } elseif (strlen($maNguoiDung) < 3 || strlen($maNguoiDung) > 20) {
+        $errors["maNguoiDung"] = "Mã người dùng phải từ 3 đến 20 ký tự.";
+    }
 
-        $thongBao = "Vui lòng nhập mã người dùng.";
-        $loaiThongBao = "error";
-    } elseif ($hoTen === "") {
+    if ($hoTen === "") {
+        $errors["hoTen"] = "Vui lòng nhập họ tên.";
+    } elseif (strlen($hoTen) < 2 || strlen($hoTen) > 100) {
+        $errors["hoTen"] = "Họ tên phải từ 2 đến 100 ký tự.";
+    }
 
-        $thongBao = "Vui lòng nhập họ tên.";
-        $loaiThongBao = "error";
-    } elseif ($email === "") {
-
-        $thongBao = "Vui lòng nhập email.";
-        $loaiThongBao = "error";
+    if ($email === "") {
+        $errors["email"] = "Vui lòng nhập email.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors["email"] = "Email không hợp lệ.";
+    }
 
-        $thongBao = "Email không hợp lệ.";
-        $loaiThongBao = "error";
-    } elseif ($trangThai === "") {
+    if ($trangThai === "") {
+        $errors["trangThai"] = "Vui lòng chọn trạng thái.";
+    } elseif (
+        $trangThai !== "Hoạt động" &&
+        $trangThai !== "Bị khóa"
+    ) {
+        $errors["trangThai"] = "Trạng thái không hợp lệ.";
+    }
 
-        $thongBao = "Vui lòng chọn trạng thái.";
-        $loaiThongBao = "error";
-    } elseif ($soSachDangMuon < 0) {
+    if ($soSachDangMuon === "") {
+        $errors["soSachDangMuon"] = "Vui lòng nhập số sách đang mượn.";
+    } elseif (
+        filter_var($soSachDangMuon, FILTER_VALIDATE_INT) === false ||
+        (int)$soSachDangMuon < 0 ||
+        (int)$soSachDangMuon > 5
+    ) {
+        $errors["soSachDangMuon"] = "Số sách đang mượn phải là số nguyên từ 0 đến 5.";
+    }
 
-        $thongBao = "Số sách đang mượn không được nhỏ hơn 0.";
-        $loaiThongBao = "error";
-    } elseif ($hanMucMuon <= 0) {
+    if (empty($errors)) {
 
-        $thongBao = "Hạn mức mượn phải lớn hơn 0.";
-        $loaiThongBao = "error";
-    } else {
+        $soSachDangMuon = (int)$soSachDangMuon;
 
         $maDaTonTai = false;
 
@@ -61,11 +77,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-
         if ($maDaTonTai) {
 
-            $thongBao = "Mã người dùng đã tồn tại.";
-            $loaiThongBao = "error";
+            $errors["maNguoiDung"] = "Mã người dùng đã tồn tại.";
         } else {
 
             $nguoiDung = [
@@ -77,12 +91,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "hanMucMuon" => $hanMucMuon
             ];
 
-
             $_SESSION["danhSachNguoiDung"][] = $nguoiDung;
-
 
             $thongBao = "Thêm người dùng thành công.";
             $loaiThongBao = "success";
+
+            $maNguoiDung = "";
+            $hoTen = "";
+            $email = "";
+            $trangThai = "";
+            $soSachDangMuon = "";
+            $hanMucMuon = 5;
         }
     }
 }
@@ -93,6 +112,13 @@ if (isset($_POST["xoaTatCa"])) {
 
     $thongBao = "Đã xóa toàn bộ danh sách người dùng.";
     $loaiThongBao = "success";
+
+    $maNguoiDung = "";
+    $hoTen = "";
+    $email = "";
+    $trangThai = "";
+    $soSachDangMuon = "";
+    $hanMucMuon = 5;
 }
 
 ?>
@@ -109,7 +135,6 @@ if (isset($_POST["xoaTatCa"])) {
         content="width=device-width, initial-scale=1.0">
 
     <title>Quản lý người dùng</title>
-
 
     <style>
         * {
@@ -131,6 +156,7 @@ if (isset($_POST["xoaTatCa"])) {
         h1 {
             text-align: center;
             margin-bottom: 30px;
+            color: #1e3a8a;
         }
 
         .card {
@@ -157,6 +183,22 @@ if (isset($_POST["xoaTatCa"])) {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+
+        .input-error {
+            border-color: #dc2626;
+        }
+
+        .field-error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 5px;
         }
 
         button {
@@ -254,115 +296,154 @@ if (isset($_POST["xoaTatCa"])) {
                 padding: 15px;
             }
         }
-
-        .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -30px -30px 30px -30px;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .navbar a:hover {
-            background-color: #2563eb;
-        }
-
-        .navbar a.active {
-            background-color: #2563eb;
-        }
     </style>
+
 </head>
 
 <body>
-    <nav class="navbar">
-        <a href="../index.php">🏠 Trang chủ</a>
-        <a href="User.php" class="active">👤 Người dùng</a>
-        <a href="../banSaoSach/bansao.php">📖 Bản sao sách</a>
-    </nav>
+
     <div class="container">
+
         <h1>QUẢN LÝ NGƯỜI DÙNG</h1>
+
         <?php if ($thongBao !== ""): ?>
 
-            <div class="message <?= $loaiThongBao ?>">
+            <div class="message <?= htmlspecialchars($loaiThongBao) ?>">
                 <?= htmlspecialchars($thongBao) ?>
             </div>
 
         <?php endif; ?>
+
         <div class="card">
+
             <h2>Nhập thông tin người dùng</h2>
+
             <form method="POST">
+
                 <div class="form-row">
+
                     <div class="form-group">
+
                         <label for="maNguoiDung">
                             Mã người dùng
                         </label>
+
                         <input
                             type="text"
                             id="maNguoiDung"
                             name="maNguoiDung"
                             placeholder="VD: ND001"
+                            maxlength="20"
+                            value="<?= htmlspecialchars($maNguoiDung) ?>"
+                            class="<?= isset($errors["maNguoiDung"]) ? "input-error" : "" ?>"
                             required>
+
+                        <?php if (isset($errors["maNguoiDung"])): ?>
+
+                            <div class="field-error">
+                                <?= htmlspecialchars($errors["maNguoiDung"]) ?>
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
+
                     <div class="form-group">
 
                         <label for="hoTen">
                             Họ tên
                         </label>
+
                         <input
                             type="text"
                             id="hoTen"
                             name="hoTen"
                             placeholder="VD: Nguyễn Văn An"
+                            maxlength="100"
+                            value="<?= htmlspecialchars($hoTen) ?>"
+                            class="<?= isset($errors["hoTen"]) ? "input-error" : "" ?>"
                             required>
+
+                        <?php if (isset($errors["hoTen"])): ?>
+
+                            <div class="field-error">
+                                <?= htmlspecialchars($errors["hoTen"]) ?>
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
+
                 </div>
+
                 <div class="form-row">
+
                     <div class="form-group">
+
                         <label for="email">
                             Email
                         </label>
+
                         <input
                             type="email"
                             id="email"
                             name="email"
                             placeholder="VD: an@gmail.com"
+                            value="<?= htmlspecialchars($email) ?>"
+                            class="<?= isset($errors["email"]) ? "input-error" : "" ?>"
                             required>
+
+                        <?php if (isset($errors["email"])): ?>
+
+                            <div class="field-error">
+                                <?= htmlspecialchars($errors["email"]) ?>
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
+
                     <div class="form-group">
 
                         <label for="trangThai">
                             Trạng thái
                         </label>
+
                         <select
                             id="trangThai"
                             name="trangThai"
+                            class="<?= isset($errors["trangThai"]) ? "input-error" : "" ?>"
                             required>
 
                             <option value="">
                                 -- Chọn trạng thái --
                             </option>
 
-                            <option value="Hoạt động">
+                            <option
+                                value="Hoạt động"
+                                <?= $trangThai === "Hoạt động" ? "selected" : "" ?>>
                                 Hoạt động
                             </option>
 
-                            <option value="Bị khóa">
+                            <option
+                                value="Bị khóa"
+                                <?= $trangThai === "Bị khóa" ? "selected" : "" ?>>
                                 Bị khóa
                             </option>
 
                         </select>
 
+                        <?php if (isset($errors["trangThai"])): ?>
+
+                            <div class="field-error">
+                                <?= htmlspecialchars($errors["trangThai"]) ?>
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
 
                 </div>
-
 
                 <div class="form-row">
 
@@ -377,9 +458,21 @@ if (isset($_POST["xoaTatCa"])) {
                             id="soSachDangMuon"
                             name="soSachDangMuon"
                             min="0"
-                            value="0"
+                            max="5"
+                            value="<?= htmlspecialchars($soSachDangMuon) ?>"
+                            class="<?= isset($errors["soSachDangMuon"]) ? "input-error" : "" ?>"
                             required>
+
+                        <?php if (isset($errors["soSachDangMuon"])): ?>
+
+                            <div class="field-error">
+                                <?= htmlspecialchars($errors["soSachDangMuon"]) ?>
+                            </div>
+
+                        <?php endif; ?>
+
                     </div>
+
                     <div class="form-group">
 
                         <label for="hanMucMuon">
@@ -387,17 +480,14 @@ if (isset($_POST["xoaTatCa"])) {
                         </label>
 
                         <input
-                            type="number"
+                            type="text"
                             id="hanMucMuon"
-                            name="hanMucMuon"
-                            min="1"
-                            value="5"
-                            required>
+                            value="5 cuốn"
+                            readonly>
 
                     </div>
 
                 </div>
-
 
                 <button type="submit">
                     Thêm người dùng
@@ -406,10 +496,10 @@ if (isset($_POST["xoaTatCa"])) {
             </form>
 
         </div>
+
         <div class="card">
 
             <h2>Danh sách người dùng</h2>
-
 
             <?php if (count($_SESSION["danhSachNguoiDung"]) === 0): ?>
 
@@ -418,9 +508,13 @@ if (isset($_POST["xoaTatCa"])) {
                 </div>
 
             <?php else: ?>
+
                 <div class="table-wrapper">
+
                     <table>
+
                         <thead>
+
                             <tr>
                                 <th>STT</th>
                                 <th>Mã người dùng</th>
@@ -431,57 +525,61 @@ if (isset($_POST["xoaTatCa"])) {
                                 <th>Hạn mức</th>
                                 <th>Quyền mượn</th>
                             </tr>
+
                         </thead>
+
                         <tbody>
+
                             <?php
+
                             $stt = 1;
-                            foreach (
-                                $_SESSION["danhSachNguoiDung"]
-                                as $nguoiDung
-                            ):
+
+                            foreach ($_SESSION["danhSachNguoiDung"] as $nguoiDung):
+
                                 $duocMuon = kiemTraDuocMuon(
                                     $nguoiDung["trangThai"],
                                     $nguoiDung["soSachDangMuon"],
                                     $nguoiDung["hanMucMuon"]
                                 );
+
                                 $lyDo = layLyDoKhongDuocMuon(
                                     $nguoiDung["trangThai"],
                                     $nguoiDung["soSachDangMuon"],
                                     $nguoiDung["hanMucMuon"]
                                 );
+
                             ?>
+
                                 <tr>
+
                                     <td>
                                         <?= $stt ?>
                                     </td>
+
                                     <td>
-                                        <?= htmlspecialchars(
-                                            $nguoiDung["maNguoiDung"]
-                                        ) ?>
-                                    </td>
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            $nguoiDung["hoTen"]
-                                        ) ?>
-                                    </td>
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            $nguoiDung["email"]
-                                        ) ?>
-                                    </td>
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            $nguoiDung["trangThai"]
-                                        ) ?>
+                                        <?= htmlspecialchars($nguoiDung["maNguoiDung"]) ?>
                                     </td>
 
                                     <td>
-                                        <?= $nguoiDung["soSachDangMuon"] ?>
+                                        <?= htmlspecialchars($nguoiDung["hoTen"]) ?>
                                     </td>
 
                                     <td>
-                                        <?= $nguoiDung["hanMucMuon"] ?>
+                                        <?= htmlspecialchars($nguoiDung["email"]) ?>
                                     </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($nguoiDung["trangThai"]) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars((string)$nguoiDung["soSachDangMuon"]) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars((string)$nguoiDung["hanMucMuon"]) ?>
+                                    </td>
+
                                     <td>
 
                                         <?php if ($duocMuon): ?>
@@ -523,6 +621,7 @@ if (isset($_POST["xoaTatCa"])) {
                     </table>
 
                 </div>
+
                 <div class="actions">
 
                     <form method="POST">
@@ -531,13 +630,21 @@ if (isset($_POST["xoaTatCa"])) {
                             type="submit"
                             name="xoaTatCa"
                             class="btn-danger">
+
                             Xóa toàn bộ dữ liệu
+
                         </button>
+
                     </form>
+
                 </div>
+
             <?php endif; ?>
+
         </div>
+
     </div>
+
 </body>
 
 </html>
