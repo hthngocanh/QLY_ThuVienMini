@@ -296,11 +296,40 @@ if (isset($_POST["xoaTatCa"])) {
                 padding: 15px;
             }
         }
+
+        .navbar {
+            background-color: #1e3a8a;
+            padding: 15px 25px;
+            display: flex;
+            gap: 10px;
+            margin: -40px -40px 35px -40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .navbar a:hover {
+            background-color: #2563eb;
+        }
+
+        .navbar a.active {
+            background-color: #2563eb;
+        }
     </style>
 
 </head>
 
 <body>
+
+    <nav class="navbar">
+        <a href="../index.php">🏠 Trang chủ</a>
+        <a href="User.php" class="active">👤 Người dùng</a>
+        <a href="../banSaoSach/bansao.php">📖 Bản sao sách</a>
+    </nav>
 
     <div class="container">
 
@@ -308,342 +337,342 @@ if (isset($_POST["xoaTatCa"])) {
 
         <?php if ($thongBao !== ""): ?>
 
-            <div class="message <?= htmlspecialchars($loaiThongBao) ?>">
-                <?= htmlspecialchars($thongBao) ?>
-            </div>
-
-        <?php endif; ?>
-
-        <div class="card">
-
-            <h2>Nhập thông tin người dùng</h2>
-
-            <form method="POST">
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label for="maNguoiDung">
-                            Mã người dùng
-                        </label>
-
-                        <input
-                            type="text"
-                            id="maNguoiDung"
-                            name="maNguoiDung"
-                            placeholder="VD: ND001"
-                            maxlength="20"
-                            value="<?= htmlspecialchars($maNguoiDung) ?>"
-                            class="<?= isset($errors["maNguoiDung"]) ? "input-error" : "" ?>"
-                            required>
-
-                        <?php if (isset($errors["maNguoiDung"])): ?>
-
-                            <div class="field-error">
-                                <?= htmlspecialchars($errors["maNguoiDung"]) ?>
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="hoTen">
-                            Họ tên
-                        </label>
-
-                        <input
-                            type="text"
-                            id="hoTen"
-                            name="hoTen"
-                            placeholder="VD: Nguyễn Văn An"
-                            maxlength="100"
-                            value="<?= htmlspecialchars($hoTen) ?>"
-                            class="<?= isset($errors["hoTen"]) ? "input-error" : "" ?>"
-                            required>
-
-                        <?php if (isset($errors["hoTen"])): ?>
-
-                            <div class="field-error">
-                                <?= htmlspecialchars($errors["hoTen"]) ?>
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
+            <div class="message <?= $loaiThongBao ?>">
+                <div class="message <?= htmlspecialchars($loaiThongBao) ?>">
+                    <?= htmlspecialchars($thongBao) ?>
                 </div>
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label for="email">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="VD: an@gmail.com"
-                            value="<?= htmlspecialchars($email) ?>"
-                            class="<?= isset($errors["email"]) ? "input-error" : "" ?>"
-                            required>
-
-                        <?php if (isset($errors["email"])): ?>
-
-                            <div class="field-error">
-                                <?= htmlspecialchars($errors["email"]) ?>
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="trangThai">
-                            Trạng thái
-                        </label>
-
-                        <select
-                            id="trangThai"
-                            name="trangThai"
-                            class="<?= isset($errors["trangThai"]) ? "input-error" : "" ?>"
-                            required>
-
-                            <option value="">
-                                -- Chọn trạng thái --
-                            </option>
-
-                            <option
-                                value="Hoạt động"
-                                <?= $trangThai === "Hoạt động" ? "selected" : "" ?>>
-                                Hoạt động
-                            </option>
-
-                            <option
-                                value="Bị khóa"
-                                <?= $trangThai === "Bị khóa" ? "selected" : "" ?>>
-                                Bị khóa
-                            </option>
-
-                        </select>
-
-                        <?php if (isset($errors["trangThai"])): ?>
-
-                            <div class="field-error">
-                                <?= htmlspecialchars($errors["trangThai"]) ?>
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                </div>
-
-                <div class="form-row">
-
-                    <div class="form-group">
-
-                        <label for="soSachDangMuon">
-                            Số sách đang mượn
-                        </label>
-
-                        <input
-                            type="number"
-                            id="soSachDangMuon"
-                            name="soSachDangMuon"
-                            min="0"
-                            max="5"
-                            value="<?= htmlspecialchars($soSachDangMuon) ?>"
-                            class="<?= isset($errors["soSachDangMuon"]) ? "input-error" : "" ?>"
-                            required>
-
-                        <?php if (isset($errors["soSachDangMuon"])): ?>
-
-                            <div class="field-error">
-                                <?= htmlspecialchars($errors["soSachDangMuon"]) ?>
-                            </div>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label for="hanMucMuon">
-                            Hạn mức mượn
-                        </label>
-
-                        <input
-                            type="text"
-                            id="hanMucMuon"
-                            value="5 cuốn"
-                            readonly>
-
-                    </div>
-
-                </div>
-
-                <button type="submit">
-                    Thêm người dùng
-                </button>
-
-            </form>
-
-        </div>
-
-        <div class="card">
-
-            <h2>Danh sách người dùng</h2>
-
-            <?php if (count($_SESSION["danhSachNguoiDung"]) === 0): ?>
-
-                <div class="empty">
-                    Chưa có người dùng nào.
-                </div>
-
-            <?php else: ?>
-
-                <div class="table-wrapper">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-                                <th>STT</th>
-                                <th>Mã người dùng</th>
-                                <th>Họ tên</th>
-                                <th>Email</th>
-                                <th>Trạng thái</th>
-                                <th>Đang mượn</th>
-                                <th>Hạn mức</th>
-                                <th>Quyền mượn</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <?php
-
-                            $stt = 1;
-
-                            foreach ($_SESSION["danhSachNguoiDung"] as $nguoiDung):
-
-                                $duocMuon = kiemTraDuocMuon(
-                                    $nguoiDung["trangThai"],
-                                    $nguoiDung["soSachDangMuon"],
-                                    $nguoiDung["hanMucMuon"]
-                                );
-
-                                $lyDo = layLyDoKhongDuocMuon(
-                                    $nguoiDung["trangThai"],
-                                    $nguoiDung["soSachDangMuon"],
-                                    $nguoiDung["hanMucMuon"]
-                                );
-
-                            ?>
-
-                                <tr>
-
-                                    <td>
-                                        <?= $stt ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($nguoiDung["maNguoiDung"]) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($nguoiDung["hoTen"]) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($nguoiDung["email"]) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars($nguoiDung["trangThai"]) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars((string)$nguoiDung["soSachDangMuon"]) ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars((string)$nguoiDung["hanMucMuon"]) ?>
-                                    </td>
-
-                                    <td>
-
-                                        <?php if ($duocMuon): ?>
-
-                                            <span class="duoc-muon">
-                                                Được phép mượn
-                                            </span>
-
-                                        <?php else: ?>
-
-                                            <span class="khong-duoc-muon">
-
-                                                Không được mượn
-
-                                                <br>
-
-                                                <small>
-                                                    <?= htmlspecialchars($lyDo) ?>
-                                                </small>
-
-                                            </span>
-
-                                        <?php endif; ?>
-
-                                    </td>
-
-                                </tr>
-
-                            <?php
-
-                                $stt++;
-
-                            endforeach;
-
-                            ?>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                <div class="actions">
-
-                    <form method="POST">
-
-                        <button
-                            type="submit"
-                            name="xoaTatCa"
-                            class="btn-danger">
-
-                            Xóa toàn bộ dữ liệu
-
-                        </button>
-
-                    </form>
-
-                </div>
-
             <?php endif; ?>
 
-        </div>
+            <div class="card">
 
-    </div>
+                <h2>Nhập thông tin người dùng</h2>
+
+                <form method="POST">
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="maNguoiDung">
+                                Mã người dùng
+                            </label>
+
+                            <input
+                                type="text"
+                                id="maNguoiDung"
+                                name="maNguoiDung"
+                                placeholder="VD: ND001"
+                                maxlength="20"
+                                value="<?= htmlspecialchars($maNguoiDung) ?>"
+                                class="<?= isset($errors["maNguoiDung"]) ? "input-error" : "" ?>"
+                                required>
+
+                            <?php if (isset($errors["maNguoiDung"])): ?>
+
+                                <div class="field-error">
+                                    <?= htmlspecialchars($errors["maNguoiDung"]) ?>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="hoTen">
+                                Họ tên
+                            </label>
+
+                            <input
+                                type="text"
+                                id="hoTen"
+                                name="hoTen"
+                                placeholder="VD: Nguyễn Văn An"
+                                maxlength="100"
+                                value="<?= htmlspecialchars($hoTen) ?>"
+                                class="<?= isset($errors["hoTen"]) ? "input-error" : "" ?>"
+                                required>
+
+                            <?php if (isset($errors["hoTen"])): ?>
+
+                                <div class="field-error">
+                                    <?= htmlspecialchars($errors["hoTen"]) ?>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="VD: an@gmail.com"
+                                value="<?= htmlspecialchars($email) ?>"
+                                class="<?= isset($errors["email"]) ? "input-error" : "" ?>"
+                                required>
+
+                            <?php if (isset($errors["email"])): ?>
+
+                                <div class="field-error">
+                                    <?= htmlspecialchars($errors["email"]) ?>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="trangThai">
+                                Trạng thái
+                            </label>
+
+                            <select
+                                id="trangThai"
+                                name="trangThai"
+                                class="<?= isset($errors["trangThai"]) ? "input-error" : "" ?>"
+                                required>
+
+                                <option value="">
+                                    -- Chọn trạng thái --
+                                </option>
+
+                                <option
+                                    value="Hoạt động"
+                                    <?= $trangThai === "Hoạt động" ? "selected" : "" ?>>
+                                    Hoạt động
+                                </option>
+
+                                <option
+                                    value="Bị khóa"
+                                    <?= $trangThai === "Bị khóa" ? "selected" : "" ?>>
+                                    Bị khóa
+                                </option>
+
+                            </select>
+
+                            <?php if (isset($errors["trangThai"])): ?>
+
+                                <div class="field-error">
+                                    <?= htmlspecialchars($errors["trangThai"]) ?>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+
+                            <label for="soSachDangMuon">
+                                Số sách đang mượn
+                            </label>
+
+                            <input
+                                type="number"
+                                id="soSachDangMuon"
+                                name="soSachDangMuon"
+                                min="0"
+                                max="5"
+                                value="<?= htmlspecialchars($soSachDangMuon) ?>"
+                                class="<?= isset($errors["soSachDangMuon"]) ? "input-error" : "" ?>"
+                                required>
+
+                            <?php if (isset($errors["soSachDangMuon"])): ?>
+
+                                <div class="field-error">
+                                    <?= htmlspecialchars($errors["soSachDangMuon"]) ?>
+                                </div>
+
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="hanMucMuon">
+                                Hạn mức mượn
+                            </label>
+
+                            <input
+                                type="text"
+                                id="hanMucMuon"
+                                value="5 cuốn"
+                                readonly>
+
+                        </div>
+
+                    </div>
+
+                    <button type="submit">
+                        Thêm người dùng
+                    </button>
+
+                </form>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Danh sách người dùng</h2>
+
+                <?php if (count($_SESSION["danhSachNguoiDung"]) === 0): ?>
+
+                    <div class="empty">
+                        Chưa có người dùng nào.
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã người dùng</th>
+                                    <th>Họ tên</th>
+                                    <th>Email</th>
+                                    <th>Trạng thái</th>
+                                    <th>Đang mượn</th>
+                                    <th>Hạn mức</th>
+                                    <th>Quyền mượn</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <?php
+
+                                $stt = 1;
+
+                                foreach ($_SESSION["danhSachNguoiDung"] as $nguoiDung):
+
+                                    $duocMuon = kiemTraDuocMuon(
+                                        $nguoiDung["trangThai"],
+                                        $nguoiDung["soSachDangMuon"],
+                                        $nguoiDung["hanMucMuon"]
+                                    );
+
+                                    $lyDo = layLyDoKhongDuocMuon(
+                                        $nguoiDung["trangThai"],
+                                        $nguoiDung["soSachDangMuon"],
+                                        $nguoiDung["hanMucMuon"]
+                                    );
+
+                                ?>
+
+                                    <tr>
+
+                                        <td>
+                                            <?= $stt ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($nguoiDung["maNguoiDung"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($nguoiDung["hoTen"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($nguoiDung["email"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars($nguoiDung["trangThai"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars((string)$nguoiDung["soSachDangMuon"]) ?>
+                                        </td>
+
+                                        <td>
+                                            <?= htmlspecialchars((string)$nguoiDung["hanMucMuon"]) ?>
+                                        </td>
+
+                                        <td>
+
+                                            <?php if ($duocMuon): ?>
+
+                                                <span class="duoc-muon">
+                                                    Được phép mượn
+                                                </span>
+
+                                            <?php else: ?>
+
+                                                <span class="khong-duoc-muon">
+
+                                                    Không được mượn
+
+                                                    <br>
+
+                                                    <small>
+                                                        <?= htmlspecialchars($lyDo) ?>
+                                                    </small>
+
+                                                </span>
+
+                                            <?php endif; ?>
+
+                                        </td>
+
+                                    </tr>
+
+                                <?php
+
+                                    $stt++;
+
+                                endforeach;
+
+                                ?>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <form method="POST">
+
+                            <button
+                                type="submit"
+                                name="xoaTatCa"
+                                class="btn-danger">
+
+                                Xóa toàn bộ dữ liệu
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                <?php endif; ?>
+
+            </div>
+
+            </div>
 
 </body>
 
