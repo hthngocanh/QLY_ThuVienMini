@@ -581,16 +581,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             🏠 Trang chủ
         </a>
 
-        <a href="User.php" class="active">
-            👤 Người dùng
-        </a>
+        <a href="../nguoiDung/User.php">👤 Người dùng</a>
 
         <a href="../banSaoSach/bansao.php">
             📖 Bản sao sách
         </a>
-        <a href="../phieuMuon/phieuMuon.php">
-            📖 Phiếu mượn
-        </a>
+        <a href="phieumuon.php" class="active">📖 Phiếu mượn</a>
 
     </nav>
     <div class="container">

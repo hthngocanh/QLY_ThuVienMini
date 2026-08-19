@@ -280,6 +280,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <a href="../index.php">🏠 Trang chủ</a>
     <a href="../nguoiDung/User.php">👤 Người dùng</a>
     <a href="bansao.php" class="active">📖 Bản sao sách</a>
+    <a href="../phieuMuon/phieumuon.php">📖 Phiếu mượn</a>
 </nav>
 
 <h1>QUẢN LÝ BẢN SAO SÁCH</h1>
