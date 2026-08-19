@@ -545,28 +545,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             font-weight: bold;
         }
-         .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -40px -40px 35px -40px;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .navbar a:hover {
-            background-color: #2563eb;
-        }
-
-        .navbar a.active {
-            background-color: #2563eb;
-        }
 
         .navbar {
             background-color: #1e3a8a;
@@ -596,27 +574,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 <body>
- <nav class="navbar">
 
-<nav class="navbar">
-
-    <a href="../index.php">
-        🏠 Trang chủ
-    </a>
-
-    <a href="../nguoiDung/User.php">
-        👤 Người dùng
-    </a>
-
-    <a href="../banSaoSach/bansao.php">
-        📖 Bản sao sách
-    </a>
-
-    <a href="/QLY_ThuVienMini/phieuMuon/phieumuon.php" class="active">
-        📋 Phiếu mượn
-    </a>
-
-</nav>
+    <nav class="navbar">
 
         <a href="../index.php">
             🏠 Trang chủ
