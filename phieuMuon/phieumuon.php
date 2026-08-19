@@ -574,6 +574,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 <body>
+      <!-- CSS bổ sung (đặt trong thẻ <head>) -->
+<style>
+    .custom-navbar {
+        background-color: #1b3280 !important; /* Màu xanh nền menu */
+        padding: 10px 20px;
+    }
+    .custom-navbar .nav-link {
+        color: #ffffff !important;
+        font-weight: 500;
+        padding: 8px 16px !important;
+        border-radius: 6px;
+        margin-right: 8px;
+        transition: all 0.2s ease-in-out;
+    }
+    .custom-navbar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+    /* Style cho tab đang được chọn (Active) */
+    .custom-navbar .nav-link.active {
+        background-color: #2563eb !important; /* Màu xanh nút active */
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+
+<!-- Thanh Navigation Bar (Đặt ngay đầu thẻ <body>) -->
+<nav class="navbar navbar-expand-lg custom-navbar">
+    <div class="container-fluid">
+        <div class="navbar-nav flex-row">
+            <a class="nav-link" href="../index.php">🏠 Trang chủ</a>
+            <a class="nav-link" href="../nguoiDung/User.php">🥷 Người dùng</a>
+            <a class="nav-link" href="../dausach/dausach.php">📖 Quản lý đầu sách</a>
+        <a class="nav-link" href="../phieuMuon/phieumuon.php">📖 Phiếu mượn</a>
+            <a class="nav-link active" href="../danhmucsach/danhmuc.php">📖 Danh mục sách</a>
+            <a class="nav-link" href="../banSaoSach/bansao.php">📖 Bản sao sách</a>
+        </div>
+    </div>
+</nav>
 
     <nav class="navbar">
 
