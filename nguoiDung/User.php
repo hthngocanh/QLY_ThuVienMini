@@ -25,9 +25,7 @@ if (isset($_POST["xoaTatCa"])) {
 
     $thongBao = "Đã xóa toàn bộ danh sách người dùng.";
     $loaiThongBao = "success";
-}
-
-elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
+} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $maNguoiDung = trim($_POST["maNguoiDung"] ?? "");
     $hoTen = trim($_POST["hoTen"] ?? "");
@@ -41,7 +39,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($maNguoiDung === "") {
 
         $errors["maNguoiDung"] = "Vui lòng nhập mã người dùng.";
-
     } elseif (strlen($maNguoiDung) < 3 || strlen($maNguoiDung) > 20) {
 
         $errors["maNguoiDung"] =
@@ -52,7 +49,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($hoTen === "") {
 
         $errors["hoTen"] = "Vui lòng nhập họ tên.";
-
     } elseif (strlen($hoTen) < 2 || strlen($hoTen) > 100) {
 
         $errors["hoTen"] =
@@ -62,7 +58,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($email === "") {
 
         $errors["email"] = "Vui lòng nhập email.";
-
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
         $errors["email"] = "Email không hợp lệ.";
@@ -71,7 +66,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($trangThai === "") {
 
         $errors["trangThai"] = "Vui lòng chọn trạng thái.";
-
     } elseif (
         $trangThai !== "Hoạt động" &&
         $trangThai !== "Bị khóa"
@@ -85,7 +79,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $errors["soSachDangMuon"] =
             "Vui lòng nhập số sách đang mượn.";
-
     } elseif (
         filter_var($soSachDangMuon, FILTER_VALIDATE_INT) === false ||
         (int)$soSachDangMuon < 0 ||
@@ -116,7 +109,6 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $errors["maNguoiDung"] =
                 "Mã người dùng đã tồn tại.";
-
         } else {
 
             $nguoiDung = [
@@ -361,7 +353,9 @@ elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
         <a href="../banSaoSach/bansao.php">
             📖 Bản sao sách
         </a>
-
+        <a href="../phieuMuon/phieumuon.php">
+            📖 Phiếu mượn
+        </a>
     </nav>
 
     <div class="container">
