@@ -25,7 +25,9 @@ if (isset($_POST["xoaTatCa"])) {
 
     $thongBao = "Đã xóa toàn bộ danh sách người dùng.";
     $loaiThongBao = "success";
-} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
+}
+
+elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $maNguoiDung = trim($_POST["maNguoiDung"] ?? "");
     $hoTen = trim($_POST["hoTen"] ?? "");
@@ -39,6 +41,7 @@ if (isset($_POST["xoaTatCa"])) {
     if ($maNguoiDung === "") {
 
         $errors["maNguoiDung"] = "Vui lòng nhập mã người dùng.";
+
     } elseif (strlen($maNguoiDung) < 3 || strlen($maNguoiDung) > 20) {
 
         $errors["maNguoiDung"] =
@@ -49,6 +52,7 @@ if (isset($_POST["xoaTatCa"])) {
     if ($hoTen === "") {
 
         $errors["hoTen"] = "Vui lòng nhập họ tên.";
+
     } elseif (strlen($hoTen) < 2 || strlen($hoTen) > 100) {
 
         $errors["hoTen"] =
@@ -58,6 +62,7 @@ if (isset($_POST["xoaTatCa"])) {
     if ($email === "") {
 
         $errors["email"] = "Vui lòng nhập email.";
+
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
         $errors["email"] = "Email không hợp lệ.";
@@ -66,6 +71,7 @@ if (isset($_POST["xoaTatCa"])) {
     if ($trangThai === "") {
 
         $errors["trangThai"] = "Vui lòng chọn trạng thái.";
+
     } elseif (
         $trangThai !== "Hoạt động" &&
         $trangThai !== "Bị khóa"
@@ -79,6 +85,7 @@ if (isset($_POST["xoaTatCa"])) {
 
         $errors["soSachDangMuon"] =
             "Vui lòng nhập số sách đang mượn.";
+
     } elseif (
         filter_var($soSachDangMuon, FILTER_VALIDATE_INT) === false ||
         (int)$soSachDangMuon < 0 ||
@@ -109,6 +116,7 @@ if (isset($_POST["xoaTatCa"])) {
 
             $errors["maNguoiDung"] =
                 "Mã người dùng đã tồn tại.";
+
         } else {
 
             $nguoiDung = [

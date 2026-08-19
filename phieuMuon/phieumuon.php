@@ -48,7 +48,7 @@ function laNgayHopLe($date)
     );
 
     return $dateObject &&
-           $dateObject->format('Y-m-d') === $date;
+        $dateObject->format('Y-m-d') === $date;
 }
 
 
@@ -225,9 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors['ban_sao_sach'] =
                 'Mã bản sao sách phải từ 3 đến 20 ký tự.';
-        }
-
-        elseif (
+        } elseif (
             !preg_match(
                 '/^[A-Za-z0-9_-]+$/',
                 $banSaoSach
@@ -252,9 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors['ngay_muon'] =
                 'Ngày mượn không hợp lệ.';
-        }
-
-        elseif ($ngayMuon > date('Y-m-d')) {
+        } elseif ($ngayMuon > date('Y-m-d')) {
 
             $errors['ngay_muon'] =
                 'Ngày mượn không được lớn hơn ngày hiện tại.';
@@ -274,9 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors['han_tra'] =
                 'Hạn trả không hợp lệ.';
-        }
-
-        elseif (
+        } elseif (
             $ngayMuon !== '' &&
             laNgayHopLe($ngayMuon) &&
             $hanTra < $ngayMuon
@@ -300,9 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors['ngay_tra'] =
                 'Ngày trả không hợp lệ.';
-        }
-
-        elseif (
+        } elseif (
             $ngayMuon !== '' &&
             laNgayHopLe($ngayMuon) &&
             $ngayTra < $ngayMuon
@@ -310,9 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $errors['ngay_tra'] =
                 'Ngày trả không được trước ngày mượn.';
-        }
-
-        elseif ($ngayTra > date('Y-m-d')) {
+        } elseif ($ngayTra > date('Y-m-d')) {
 
             $errors['ngay_tra'] =
                 'Ngày trả không được lớn hơn ngày hiện tại.';
@@ -366,13 +356,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+        content="width=device-width, initial-scale=1.0">
 
     <title>Quản lý phiếu mượn</title>
 
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -557,6 +546,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
         }
 
+        .navbar {
+            background-color: #1e3a8a;
+            padding: 15px 25px;
+            display: flex;
+            gap: 10px;
+            margin: -40px -40px 35px -40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .navbar a:hover {
+            background-color: #2563eb;
+        }
+
+        .navbar a.active {
+            background-color: #2563eb;
+        }
     </style>
 
 </head>
@@ -564,360 +575,371 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
 
+    <nav class="navbar">
 
-<div class="container">
+        <a href="../index.php">
+            🏠 Trang chủ
+        </a>
 
+        <a href="User.php" class="active">
+            👤 Người dùng
+        </a>
 
-    <h1>QUẢN LÝ PHIẾU MƯỢN</h1>
+        <a href="../banSaoSach/bansao.php">
+            📖 Bản sao sách
+        </a>
+        <a href="../phieuMuon/phieuMuon.php">
+            📖 Phiếu mượn
+        </a>
 
-
-    <div class="form-box">
-
-
-        <?php if (!empty($thongBao)): ?>
-
-            <div class="thanh-cong">
-
-                <?= e($thongBao) ?>
-
-            </div>
-
-        <?php endif; ?>
-
-
-        <form method="POST" action="">
+    </nav>
+    <div class="container">
 
 
-            <!-- NGƯỜI MƯỢN -->
-
-            <div class="form-group">
-
-                <label for="nguoi_muon">
-
-                    Người mượn:
-
-                </label>
+        <h1>QUẢN LÝ PHIẾU MƯỢN</h1>
 
 
-                <input
-                    type="text"
-                    id="nguoi_muon"
-                    name="nguoi_muon"
-                    placeholder="Nhập tên người mượn"
-                    maxlength="50"
-                    value="<?= e($nguoiMuon) ?>"
-                    class="<?= isset($errors['nguoi_muon']) ? 'input-loi' : '' ?>"
-                    required
-                >
+        <div class="form-box">
 
 
-                <div class="mo-ta">
+            <?php if (!empty($thongBao)): ?>
 
-                    Từ 2 đến 50 ký tự.
+                <div class="thanh-cong">
+
+                    <?= e($thongBao) ?>
+
+                </div>
+
+            <?php endif; ?>
+
+
+            <form method="POST" action="">
+
+
+                <!-- NGƯỜI MƯỢN -->
+
+                <div class="form-group">
+
+                    <label for="nguoi_muon">
+
+                        Người mượn:
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="nguoi_muon"
+                        name="nguoi_muon"
+                        placeholder="Nhập tên người mượn"
+                        maxlength="50"
+                        value="<?= e($nguoiMuon) ?>"
+                        class="<?= isset($errors['nguoi_muon']) ? 'input-loi' : '' ?>"
+                        required>
+
+
+                    <div class="mo-ta">
+
+                        Từ 2 đến 50 ký tự.
+
+                    </div>
+
+
+                    <?php if (isset($errors['nguoi_muon'])): ?>
+
+                        <div class="loi-truong">
+
+                            <?= e($errors['nguoi_muon']) ?>
+
+                        </div>
+
+                    <?php endif; ?>
 
                 </div>
 
 
-                <?php if (isset($errors['nguoi_muon'])): ?>
+                <!-- BẢN SAO SÁCH -->
 
-                    <div class="loi-truong">
+                <div class="form-group">
 
-                        <?= e($errors['nguoi_muon']) ?>
+                    <label for="ban_sao_sach">
+
+                        Bản sao sách:
+
+                    </label>
+
+
+                    <input
+                        type="text"
+                        id="ban_sao_sach"
+                        name="ban_sao_sach"
+                        placeholder="Ví dụ: BS001"
+                        minlength="3"
+                        maxlength="20"
+                        value="<?= e($banSaoSach) ?>"
+                        class="<?= isset($errors['ban_sao_sach']) ? 'input-loi' : '' ?>"
+                        required>
+
+
+                    <div class="mo-ta">
+
+                        3-20 ký tự, chỉ gồm chữ, số, - hoặc _.
 
                     </div>
 
-                <?php endif; ?>
 
-            </div>
+                    <?php if (isset($errors['ban_sao_sach'])): ?>
 
+                        <div class="loi-truong">
 
-            <!-- BẢN SAO SÁCH -->
+                            <?= e($errors['ban_sao_sach']) ?>
 
-            <div class="form-group">
+                        </div>
 
-                <label for="ban_sao_sach">
-
-                    Bản sao sách:
-
-                </label>
-
-
-                <input
-                    type="text"
-                    id="ban_sao_sach"
-                    name="ban_sao_sach"
-                    placeholder="Ví dụ: BS001"
-                    minlength="3"
-                    maxlength="20"
-                    value="<?= e($banSaoSach) ?>"
-                    class="<?= isset($errors['ban_sao_sach']) ? 'input-loi' : '' ?>"
-                    required
-                >
-
-
-                <div class="mo-ta">
-
-                    3-20 ký tự, chỉ gồm chữ, số, - hoặc _.
+                    <?php endif; ?>
 
                 </div>
 
 
-                <?php if (isset($errors['ban_sao_sach'])): ?>
+                <!-- NGÀY MƯỢN -->
 
-                    <div class="loi-truong">
+                <div class="form-group">
 
-                        <?= e($errors['ban_sao_sach']) ?>
+                    <label for="ngay_muon">
 
-                    </div>
+                        Ngày mượn:
 
-                <?php endif; ?>
-
-            </div>
+                    </label>
 
 
-            <!-- NGÀY MƯỢN -->
-
-            <div class="form-group">
-
-                <label for="ngay_muon">
-
-                    Ngày mượn:
-
-                </label>
-
-
-                <input
-                    type="date"
-                    id="ngay_muon"
-                    name="ngay_muon"
-                    max="<?= date('Y-m-d') ?>"
-                    value="<?= e($ngayMuon) ?>"
-                    class="<?= isset($errors['ngay_muon']) ? 'input-loi' : '' ?>"
-                    required
-                >
+                    <input
+                        type="date"
+                        id="ngay_muon"
+                        name="ngay_muon"
+                        max="<?= date('Y-m-d') ?>"
+                        value="<?= e($ngayMuon) ?>"
+                        class="<?= isset($errors['ngay_muon']) ? 'input-loi' : '' ?>"
+                        required>
 
 
-                <?php if (isset($errors['ngay_muon'])): ?>
+                    <?php if (isset($errors['ngay_muon'])): ?>
 
-                    <div class="loi-truong">
+                        <div class="loi-truong">
 
-                        <?= e($errors['ngay_muon']) ?>
+                            <?= e($errors['ngay_muon']) ?>
 
-                    </div>
+                        </div>
 
-                <?php endif; ?>
-
-            </div>
-
-
-            <!-- HẠN TRẢ -->
-
-            <div class="form-group">
-
-                <label for="han_tra">
-
-                    Hạn trả:
-
-                </label>
-
-
-                <input
-                    type="date"
-                    id="han_tra"
-                    name="han_tra"
-                    value="<?= e($hanTra) ?>"
-                    class="<?= isset($errors['han_tra']) ? 'input-loi' : '' ?>"
-                    required
-                >
-
-
-                <?php if (isset($errors['han_tra'])): ?>
-
-                    <div class="loi-truong">
-
-                        <?= e($errors['han_tra']) ?>
-
-                    </div>
-
-                <?php endif; ?>
-
-            </div>
-
-
-            <!-- NGÀY TRẢ -->
-
-            <div class="form-group">
-
-                <label for="ngay_tra">
-
-                    Ngày trả:
-
-                </label>
-
-
-                <input
-                    type="date"
-                    id="ngay_tra"
-                    name="ngay_tra"
-                    max="<?= date('Y-m-d') ?>"
-                    value="<?= e($ngayTra) ?>"
-                    class="<?= isset($errors['ngay_tra']) ? 'input-loi' : '' ?>"
-                >
-
-
-                <div class="mo-ta">
-
-                    Có thể để trống nếu sách chưa được trả.
+                    <?php endif; ?>
 
                 </div>
 
 
-                <?php if (isset($errors['ngay_tra'])): ?>
+                <!-- HẠN TRẢ -->
 
-                    <div class="loi-truong">
+                <div class="form-group">
 
-                        <?= e($errors['ngay_tra']) ?>
+                    <label for="han_tra">
+
+                        Hạn trả:
+
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="han_tra"
+                        name="han_tra"
+                        value="<?= e($hanTra) ?>"
+                        class="<?= isset($errors['han_tra']) ? 'input-loi' : '' ?>"
+                        required>
+
+
+                    <?php if (isset($errors['han_tra'])): ?>
+
+                        <div class="loi-truong">
+
+                            <?= e($errors['han_tra']) ?>
+
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+
+                <!-- NGÀY TRẢ -->
+
+                <div class="form-group">
+
+                    <label for="ngay_tra">
+
+                        Ngày trả:
+
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="ngay_tra"
+                        name="ngay_tra"
+                        max="<?= date('Y-m-d') ?>"
+                        value="<?= e($ngayTra) ?>"
+                        class="<?= isset($errors['ngay_tra']) ? 'input-loi' : '' ?>">
+
+
+                    <div class="mo-ta">
+
+                        Có thể để trống nếu sách chưa được trả.
 
                     </div>
 
-                <?php endif; ?>
 
-            </div>
+                    <?php if (isset($errors['ngay_tra'])): ?>
 
+                        <div class="loi-truong">
 
-            <button type="submit">
+                            <?= e($errors['ngay_tra']) ?>
 
-                Thêm phiếu mượn
+                        </div>
 
-            </button>
+                    <?php endif; ?>
 
-
-        </form>
-
-    </div>
+                </div>
 
 
-    <?php if (!empty($_SESSION['phieu_muon'])): ?>
+                <button type="submit">
 
-        <h2>Danh sách phiếu mượn</h2>
+                    Thêm phiếu mượn
 
-
-        <table>
-
-            <tr>
-
-                <th>STT</th>
-
-                <th>Người mượn</th>
-
-                <th>Bản sao sách</th>
-
-                <th>Ngày mượn</th>
-
-                <th>Hạn trả</th>
-
-                <th>Ngày trả</th>
-
-                <th>Tình trạng</th>
-
-            </tr>
+                </button>
 
 
-            <?php
+            </form>
 
-            $stt = 1;
+        </div>
 
-            foreach (
-                $_SESSION['phieu_muon']
-                as $phieu
-            ):
 
-            ?>
+        <?php if (!empty($_SESSION['phieu_muon'])): ?>
 
+            <h2>Danh sách phiếu mượn</h2>
+
+
+            <table>
 
                 <tr>
 
-                    <td>
+                    <th>STT</th>
 
-                        <?= $stt++ ?>
+                    <th>Người mượn</th>
 
-                    </td>
+                    <th>Bản sao sách</th>
 
+                    <th>Ngày mượn</th>
 
-                    <td>
+                    <th>Hạn trả</th>
 
-                        <?= e($phieu['nguoi_muon']) ?>
+                    <th>Ngày trả</th>
 
-                    </td>
-
-
-                    <td>
-
-                        <?= e($phieu['ban_sao_sach']) ?>
-
-                    </td>
-
-
-                    <td>
-
-                        <?= hienThiNgay(
-                            $phieu['ngay_muon']
-                        ) ?>
-
-                    </td>
-
-
-                    <td>
-
-                        <?= hienThiNgay(
-                            $phieu['han_tra']
-                        ) ?>
-
-                    </td>
-
-
-                    <td>
-
-                        <?php
-
-                        if (!empty($phieu['ngay_tra'])) {
-
-                            echo hienThiNgay(
-                                $phieu['ngay_tra']
-                            );
-
-                        } else {
-
-                            echo "Chưa trả";
-                        }
-
-                        ?>
-
-                    </td>
-
-
-                    <td class="trang-thai">
-
-                        <?= e(
-                            xacDinhTinhTrang(
-                                $phieu['han_tra'],
-                                $phieu['ngay_tra']
-                            )
-                        ) ?>
-
-                    </td>
+                    <th>Tình trạng</th>
 
                 </tr>
 
 
-            <?php endforeach; ?>
+                <?php
 
-        </table>
+                $stt = 1;
 
-    <?php endif; ?>
+                foreach (
+                    $_SESSION['phieu_muon']
+                    as $phieu
+                ):
+
+                ?>
 
 
-</div>
+                    <tr>
+
+                        <td>
+
+                            <?= $stt++ ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= e($phieu['nguoi_muon']) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= e($phieu['ban_sao_sach']) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= hienThiNgay(
+                                $phieu['ngay_muon']
+                            ) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?= hienThiNgay(
+                                $phieu['han_tra']
+                            ) ?>
+
+                        </td>
+
+
+                        <td>
+
+                            <?php
+
+                            if (!empty($phieu['ngay_tra'])) {
+
+                                echo hienThiNgay(
+                                    $phieu['ngay_tra']
+                                );
+                            } else {
+
+                                echo "Chưa trả";
+                            }
+
+                            ?>
+
+                        </td>
+
+
+                        <td class="trang-thai">
+
+                            <?= e(
+                                xacDinhTinhTrang(
+                                    $phieu['han_tra'],
+                                    $phieu['ngay_tra']
+                                )
+                            ) ?>
+
+                        </td>
+
+                    </tr>
+
+
+                <?php endforeach; ?>
+
+            </table>
+
+        <?php endif; ?>
+
+
+    </div>
 
 
 </body>
