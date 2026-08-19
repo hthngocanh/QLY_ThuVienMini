@@ -124,6 +124,7 @@
 
                 <a href="banSaoSach/bansao.php"> 📖 Bản sao sách </a>
 
+                <a href="phieuMuon/phieumuon.php"> 📋 Phiếu mượn </a>
             </nav>
 
         </aside>
