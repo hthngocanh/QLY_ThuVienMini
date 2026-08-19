@@ -599,19 +599,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 </style>
 
-<!-- Thanh Navigation Bar (Đặt ngay đầu thẻ <body>) -->
-<nav class="navbar navbar-expand-lg custom-navbar">
-    <div class="container-fluid">
-        <div class="navbar-nav flex-row">
-            <a class="nav-link" href="../index.php">🏠 Trang chủ</a>
-            <a class="nav-link" href="../nguoiDung/User.php">🥷 Người dùng</a>
-            <a class="nav-link" href="../dausach/dausach.php">📖 Quản lý đầu sách</a>
-        <a class="nav-link" href="../phieuMuon/phieumuon.php">📖 Phiếu mượn</a>
-            <a class="nav-link active" href="../danhmucsach/danhmuc.php">📖 Danh mục sách</a>
-            <a class="nav-link" href="../banSaoSach/bansao.php">📖 Bản sao sách</a>
-        </div>
-    </div>
-</nav>
 
     <nav class="navbar">
 
