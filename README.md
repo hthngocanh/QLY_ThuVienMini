@@ -168,6 +168,7 @@ Các trường dữ liệu:
 - Phiếu mượn chỉ được thêm khi dữ liệu hợp lệ.
 
 ### Form danh mục sách
+
 - Tên danh mục: bắt buộc, dài từ 2–100 ký tự và phải chứa chữ hoặc số.
 - Mô tả: không bắt buộc, tối đa 500 ký tự.
 - Trạng thái: bắt buộc phải chọn, chỉ chấp nhận Đang hoạt động hoặc Ngừng hoạt động.
@@ -176,6 +177,7 @@ Các trường dữ liệu:
 - Hiển thị thông báo lỗi khi dữ liệu không hợp lệ.
 - Giữ lại dữ liệu hợp lệ khi form có lỗi.
 - Danh mục chỉ được thêm khi dữ liệu hợp lệ.
+
 ### Form đầu sách
 
 - Tên sách: bắt buộc, dài từ 2–100 ký tự và phải chứa chữ hoặc số.
@@ -206,3 +208,14 @@ Các route chính của hệ thống:
 
 - Bản sao sách:
   - /banSaoSach/bansao.php
+
+## Mô tả CSDL:
+
+1. Bảng `users`:
+
+- Thiết kế bảng `nguoi_dung`.
+- Xây dựng các trường thông tin người dùng, vai trò và trạng thái tài khoản.
+- Thiết lập ràng buộc `PRIMARY KEY`, `UNIQUE`, `CHECK`, `DEFAULT`.
+- Tạo dữ liệu mẫu cho người dùng gồm 3 vai trò: Thủ thư, Độc giả, Quản trị viên.
+- Thực hiện các câu truy vấn `SELECT` sử dụng `WHERE` để kiểm tra dữ liệu.
+

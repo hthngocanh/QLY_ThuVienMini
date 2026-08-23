@@ -22,4 +22,3 @@ CREATE TABLE borrow_slips (
         REFERENCES book_copies(id)
 );
 
-GO
