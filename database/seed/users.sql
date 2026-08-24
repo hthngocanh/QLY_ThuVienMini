@@ -11,7 +11,7 @@ VALUES
      N'Công nghệ thông tin - K67', N'Độc giả', N'Bị khóa'),
 
     ('TT001', N'Phạm Kim Oanh', 'oanh@gmail.com', '123456', '0945678901',
-     NULL, N'Thư viện', N'Thủ thư'),
+     NULL, N'Thủ thư ', N'Hoạt động '),
 
     ('AD001', N'Hoàng Văn Nam', 'nam@gmail.com', '123456', '0956789012',
      NULL, N'Quản trị viên', N'Hoạt động');
