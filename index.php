@@ -121,7 +121,7 @@
                 </a>
 
                 <a href="nguoiDung/User.php">👤 Người dùng</a>
-
+                 <a href="dausach/dausach.php">📖 Đầu sách</a>
                 <a href="banSaoSach/bansao.php"> 📖 Bản sao sách </a>
 
                 <a href="phieuMuon/phieumuon.php"> 📋 Phiếu mượn </a>

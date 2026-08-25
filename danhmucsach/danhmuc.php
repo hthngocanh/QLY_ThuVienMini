@@ -296,6 +296,9 @@ function escape($data)
   <a href="../nguoiDung/User.php" class="nav-item">
     <span>👤</span> Người dùng
   </a>
+  <a href="../dausach/dausach.php" class="nav-item">
+    <span>📖</span> Đầu sách
+  </a>
   <a href="../banSaoSach/bansao.php" class="nav-item">
     <span>📖</span> Bản sao sách
   </a>
