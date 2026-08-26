@@ -1,492 +1,1404 @@
 <?php
 
-$idBanSao = "";
-$idDauSach = "";
-$maBanSao = "";
-$trangThai = "Đã trả";
-$ngayNhap = "";
+// require_once __DIR__ . '/../database/config/database.php';
+<?php
 
-$loiIdBanSao = "";
-$loiIdDauSach = "";
-$loiMaBanSao = "";
-$loiTrangThai = "";
-$loiNgayNhap = "";
+$duongDan = __DIR__ . '/../database/config/database.php';
 
-$hopLe = false;
-$danhSachBanSao = [];
+echo "<h2>Kiểm tra đường dẫn</h2>";
+echo "<p>Thư mục bansao.php: " . __DIR__ . "</p>";
+echo "<p>Đường dẫn database.php: " . $duongDan . "</p>";
 
-function trangThaiMuonTra($trangThai)
-{
-    if ($trangThai == "Đã trả") {
-        return "Đã trả";
-    }
-
-    if ($trangThai == "Đang mượn") {
-        return "Đang mượn";
-    }
-
-    return "Chưa trả";
+if (file_exists($duongDan)) {
+    echo "<p style='color:green;font-size:20px;'>✅ TÌM THẤY database.php</p>";
+} else {
+    echo "<p style='color:red;font-size:20px;'>❌ KHÔNG TÌM THẤY database.php</p>";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+exit;
 
-    $idBanSao = trim($_POST["id_ban_sao"] ?? "");
-    $idDauSach = trim($_POST["id_dau_sach"] ?? "");
-    $maBanSao = trim($_POST["ma_ban_sao"] ?? "");
-    $trangThai = trim($_POST["trang_thai"] ?? "");
-    $ngayNhap = trim($_POST["ngay_nhap"] ?? "");
+$bookId = "";
+$maBanSao = "";
+$viTri = "";
+$trangThai = "Có sẵn";
+$editId = "";
 
-    // Kiểm tra ID bản sao
-    if ($idBanSao == "") {
-        $loiIdBanSao = "Vui lòng nhập ID bản sao.";
-    } elseif (!preg_match('/^[A-Z][0-9]+$/', $idBanSao)) {
-        $loiIdBanSao =
-            "ID bản sao phải gồm 1 chữ IN HOA ở đầu và số ở sau. Ví dụ: B01.";
+$loiBookId = "";
+$loiMaBanSao = "";
+$loiViTri = "";
+$loiTrangThai = "";
+
+$thongBao = "";
+$thongBaoLoi = "";
+
+
+/* =========================================
+   THÔNG BÁO SAU KHI CHUYỂN TRANG
+   ========================================= */
+
+if (isset($_GET["success"])) {
+
+    if ($_GET["success"] === "add") {
+        $thongBao = "Thêm bản sao sách thành công!";
     }
 
-    // Kiểm tra ID đầu sách
-    if ($idDauSach == "") {
-        $loiIdDauSach = "Vui lòng nhập ID đầu sách.";
-    } elseif (!preg_match('/^[A-Z][0-9]+$/', $idDauSach)) {
-        $loiIdDauSach =
-            "ID đầu sách phải gồm 1 chữ IN HOA ở đầu và số ở sau. Ví dụ: D01.";
+    if ($_GET["success"] === "update") {
+        $thongBao = "Cập nhật bản sao sách thành công!";
     }
 
-    // Kiểm tra mã bản sao
-    if ($maBanSao == "") {
-        $loiMaBanSao = "Vui lòng nhập mã bản sao.";
-    } elseif (!preg_match('/^[A-Z][0-9]+$/', $maBanSao)) {
-        $loiMaBanSao =
-            "Mã bản sao phải gồm 1 chữ IN HOA ở đầu và số ở sau. Ví dụ: M01.";
+    if ($_GET["success"] === "delete") {
+        $thongBao = "Xóa bản sao sách thành công!";
+    }
+}
+
+if (isset($_GET["error"])) {
+
+    if ($_GET["error"] === "borrowed") {
+        $thongBaoLoi =
+            "Không thể xóa vì bản sao đã có lịch sử mượn.";
     }
 
-    // Kiểm tra trạng thái
-    $trangThaiHopLe = [
-        "Đã trả",
-        "Đang mượn",
-        "Chưa trả"
-    ];
-
-    if (!in_array($trangThai, $trangThaiHopLe)) {
-        $loiTrangThai = "Trạng thái không hợp lệ.";
+    if ($_GET["error"] === "delete") {
+        $thongBaoLoi =
+            "Không thể xóa bản sao sách.";
     }
+}
 
-    // Kiểm tra ngày nhập
-    if ($ngayNhap == "") {
-        $loiNgayNhap = "Vui lòng chọn ngày nhập.";
-    } else {
-        $ngay = DateTime::createFromFormat("Y-m-d", $ngayNhap);
 
-        if (!$ngay || $ngay->format("Y-m-d") != $ngayNhap) {
-            $loiNgayNhap = "Ngày nhập không hợp lệ.";
+/* =========================================
+   LẤY DANH SÁCH ĐẦU SÁCH
+   ========================================= */
+
+try {
+
+    $stmtBooks = $pdo->query("
+        SELECT id, ma_sach, ten_sach
+        FROM books
+        ORDER BY ten_sach ASC
+    ");
+
+    $danhSachDauSach =
+        $stmtBooks->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+
+    $danhSachDauSach = [];
+}
+
+
+/* =========================================
+   XỬ LÝ XÓA
+   ========================================= */
+
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST"
+    && ($_POST["action"] ?? "") === "delete"
+) {
+
+    $deleteId = trim($_POST["delete_id"] ?? "");
+
+    if (ctype_digit($deleteId)) {
+
+        try {
+
+            // Kiểm tra bản sao đã có phiếu mượn chưa
+            $stmtCheck = $pdo->prepare("
+                SELECT COUNT(*)
+                FROM borrow_slips
+                WHERE ID_BanSao = :id
+            ");
+
+            $stmtCheck->execute([
+                ":id" => (int)$deleteId
+            ]);
+
+            $soPhieuMuon = (int)$stmtCheck->fetchColumn();
+
+
+            if ($soPhieuMuon > 0) {
+
+                header(
+                    "Location: bansao.php?error=borrowed"
+                );
+
+                exit;
+            }
+
+
+            $stmtDelete = $pdo->prepare("
+                DELETE FROM book_copies
+                WHERE id = :id
+            ");
+
+            $stmtDelete->execute([
+                ":id" => (int)$deleteId
+            ]);
+
+
+            header(
+                "Location: bansao.php?success=delete"
+            );
+
+            exit;
+
+
+        } catch (PDOException $e) {
+
+            header(
+                "Location: bansao.php?error=delete"
+            );
+
+            exit;
         }
     }
+}
 
-    // Nếu không có lỗi
-    if (
-        $loiIdBanSao == "" &&
-        $loiIdDauSach == "" &&
-        $loiMaBanSao == "" &&
-        $loiTrangThai == "" &&
-        $loiNgayNhap == ""
-    ) {
-        $hopLe = true;
 
-        $banSao = [
-            "id_ban_sao" => $idBanSao,
-            "id_dau_sach" => $idDauSach,
-            "ma_ban_sao" => $maBanSao,
-            "trang_thai" => $trangThai,
-            "ngay_nhap" => $ngayNhap
-        ];
+/* =========================================
+   LẤY DỮ LIỆU BẢN SAO CẦN SỬA
+   ========================================= */
 
-        $danhSachBanSao[] = $banSao;
+if (
+    $_SERVER["REQUEST_METHOD"] === "GET"
+    && isset($_GET["edit"])
+) {
+
+    $editId = trim($_GET["edit"]);
+
+    if (ctype_digit($editId)) {
+
+        try {
+
+            $stmtEdit = $pdo->prepare("
+                SELECT
+                    id,
+                    book_id,
+                    ma_ban_sao,
+                    vi_tri,
+                    trang_thai
+                FROM book_copies
+                WHERE id = :id
+            ");
+
+            $stmtEdit->execute([
+                ":id" => (int)$editId
+            ]);
+
+            $banSaoSua =
+                $stmtEdit->fetch(PDO::FETCH_ASSOC);
+
+
+            if ($banSaoSua) {
+
+                $bookId =
+                    $banSaoSua["book_id"];
+
+                $maBanSao =
+                    $banSaoSua["ma_ban_sao"];
+
+                $viTri =
+                    $banSaoSua["vi_tri"];
+
+                $trangThai =
+                    $banSaoSua["trang_thai"];
+
+            } else {
+
+                $editId = "";
+
+                $thongBaoLoi =
+                    "Không tìm thấy bản sao cần sửa.";
+            }
+
+        } catch (PDOException $e) {
+
+            $editId = "";
+
+            $thongBaoLoi =
+                "Không thể lấy thông tin bản sao.";
+        }
     }
+}
+
+
+/* =========================================
+   XỬ LÝ THÊM / CẬP NHẬT
+   ========================================= */
+
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST"
+    && in_array(
+        $_POST["action"] ?? "",
+        ["add", "update"],
+        true
+    )
+) {
+
+    $action =
+        $_POST["action"];
+
+    $editId =
+        trim($_POST["edit_id"] ?? "");
+
+    $bookId =
+        trim($_POST["book_id"] ?? "");
+
+    $maBanSao =
+        trim($_POST["ma_ban_sao"] ?? "");
+
+    $viTri =
+        trim($_POST["vi_tri"] ?? "");
+
+    $trangThai =
+        trim($_POST["trang_thai"] ?? "");
+
+
+    /* ===== KIỂM TRA ĐẦU SÁCH ===== */
+
+    if ($bookId === "") {
+
+        $loiBookId =
+            "Vui lòng chọn đầu sách.";
+
+    } elseif (!ctype_digit($bookId)) {
+
+        $loiBookId =
+            "Đầu sách không hợp lệ.";
+    }
+
+
+    /* ===== KIỂM TRA MÃ BẢN SAO ===== */
+
+    if ($maBanSao === "") {
+
+        $loiMaBanSao =
+            "Vui lòng nhập mã bản sao.";
+
+    } elseif (
+        !preg_match(
+            '/^[A-Za-z0-9_-]+$/',
+            $maBanSao
+        )
+    ) {
+
+        $loiMaBanSao =
+            "Mã bản sao chỉ được chứa chữ, số, dấu - hoặc _.";
+    }
+
+
+    /* ===== KIỂM TRA VỊ TRÍ ===== */
+
+    if ($viTri === "") {
+
+        $loiViTri =
+            "Vui lòng nhập vị trí bản sao.";
+    }
+
+
+    /* ===== KIỂM TRA TRẠNG THÁI ===== */
+
+    $trangThaiHopLe = [
+        "Có sẵn",
+        "Đang mượn",
+        "Hỏng"
+    ];
+
+    if (
+        !in_array(
+            $trangThai,
+            $trangThaiHopLe,
+            true
+        )
+    ) {
+
+        $loiTrangThai =
+            "Trạng thái không hợp lệ.";
+    }
+
+
+    /* =====================================
+       KHÔNG CÓ LỖI
+       ===================================== */
+
+    if (
+        $loiBookId === ""
+        && $loiMaBanSao === ""
+        && $loiViTri === ""
+        && $loiTrangThai === ""
+    ) {
+
+        try {
+
+            /* ===== THÊM ===== */
+
+            if ($action === "add") {
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO book_copies
+                        (
+                            book_id,
+                            ma_ban_sao,
+                            vi_tri,
+                            trang_thai
+                        )
+                    VALUES
+                        (
+                            :book_id,
+                            :ma_ban_sao,
+                            :vi_tri,
+                            :trang_thai
+                        )
+                ");
+
+                $stmt->execute([
+                    ":book_id" =>
+                        (int)$bookId,
+
+                    ":ma_ban_sao" =>
+                        $maBanSao,
+
+                    ":vi_tri" =>
+                        $viTri,
+
+                    ":trang_thai" =>
+                        $trangThai
+                ]);
+
+
+                header(
+                    "Location: bansao.php?success=add"
+                );
+
+                exit;
+            }
+
+
+            /* ===== CẬP NHẬT ===== */
+
+            if ($action === "update") {
+
+                if (!ctype_digit($editId)) {
+
+                    throw new Exception(
+                        "ID bản sao không hợp lệ."
+                    );
+                }
+
+
+                $stmt = $pdo->prepare("
+                    UPDATE book_copies
+
+                    SET
+                        book_id = :book_id,
+                        ma_ban_sao = :ma_ban_sao,
+                        vi_tri = :vi_tri,
+                        trang_thai = :trang_thai
+
+                    WHERE id = :id
+                ");
+
+                $stmt->execute([
+                    ":book_id" =>
+                        (int)$bookId,
+
+                    ":ma_ban_sao" =>
+                        $maBanSao,
+
+                    ":vi_tri" =>
+                        $viTri,
+
+                    ":trang_thai" =>
+                        $trangThai,
+
+                    ":id" =>
+                        (int)$editId
+                ]);
+
+
+                header(
+                    "Location: bansao.php?success=update"
+                );
+
+                exit;
+            }
+
+
+        } catch (PDOException $e) {
+
+            if (
+                isset($e->errorInfo[1])
+                && $e->errorInfo[1] == 1062
+            ) {
+
+                $loiMaBanSao =
+                    "Mã bản sao đã tồn tại.";
+
+            } else {
+
+                $thongBaoLoi =
+                    "Không thể lưu bản sao sách.";
+            }
+
+        } catch (Exception $e) {
+
+            $thongBaoLoi =
+                $e->getMessage();
+        }
+    }
+}
+
+
+/* =========================================
+   LẤY DANH SÁCH BẢN SAO
+   ========================================= */
+
+try {
+
+    $stmtDanhSach = $pdo->query("
+        SELECT
+            bc.id,
+            bc.book_id,
+            bc.ma_ban_sao,
+            bc.vi_tri,
+            bc.trang_thai,
+            b.ma_sach,
+            b.ten_sach
+
+        FROM book_copies bc
+
+        INNER JOIN books b
+            ON bc.book_id = b.id
+
+        ORDER BY bc.id DESC
+    ");
+
+    $danhSachBanSao =
+        $stmtDanhSach->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+
+    $danhSachBanSao = [];
 }
 
 ?>
 
 <!DOCTYPE html>
+
 <html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Quản lý bản sao sách</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 40px;
-            background-color: #f0f6ff;
-        }
+<meta charset="UTF-8">
 
-        h1 {
-            text-align: center;
-            color: #1e4f8a;
-            margin-bottom: 30px;
-        }
+<title>Quản lý bản sao sách</title>
 
-        form {
-            width: 500px;
-            margin: 0 auto;
-            padding: 25px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-        }
+<style>
 
-        label {
-            display: block;
-            margin-top: 12px;
-            margin-bottom: 6px;
-            color: #333;
-            font-weight: bold;
-        }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 40px;
+    background-color: #f0f6ff;
+}
 
-        input,
-        select {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-            border: 2px solid #bbb;
-            border-radius: 5px;
-            font-size: 14px;
-        }
+h1 {
+    text-align: center;
+    color: #1e4f8a;
+    margin-bottom: 30px;
+}
 
-        input:focus,
-        select:focus {
-            border-color: #3b82c4;
-            outline: none;
-        }
 
-        .input-loi {
-            border: 2px solid red !important;
-            background-color: #ffeaea !important;
-        }
+/* =========================
+   MENU
+   ========================= */
 
-        .loi-truong {
-            color: red;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
+.navbar {
+    background-color: #1e3a8a;
+    padding: 15px 25px;
+    display: flex;
+    gap: 10px;
+    margin: -40px -40px 35px -40px;
+}
 
-        button {
-            display: block;
-            margin: 25px auto 0;
-            padding: 11px 25px;
-            border: none;
-            border-radius: 6px;
-            background-color: #2f80c0;
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
 
-        button:hover {
-            background-color: #1e659d;
-        }
+.navbar a:hover,
+.navbar a.active {
+    background-color: #2563eb;
+}
 
-        .thanh-cong {
-            width: 500px;
-            margin: 20px auto;
-            padding: 12px;
-            text-align: center;
-            color: green;
-            background-color: #eafbea;
-            border: 1px solid green;
-            border-radius: 5px;
-            font-weight: bold;
-        }
 
-        .ket-qua {
-            width: 95%;
-            margin: 35px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-        }
+/* =========================
+   FORM
+   ========================= */
 
-        .ket-qua h2 {
-            text-align: center;
-            color: #1e4f8a;
-        }
+.form-ban-sao {
+    width: 550px;
+    margin: 0 auto;
+    padding: 25px;
+    background-color: white;
+    border-radius: 10px;
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,0.15);
+}
 
-        th {
-            background-color: #2f80c0;
-            color: white;
-            padding: 12px;
-        }
+label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
 
-        td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 2px solid #bbb;
+    border-radius: 5px;
+    font-size: 14px;
+}
 
-        .da-tra {
-            color: green;
-            font-weight: bold;
-        }
+input:focus,
+select:focus {
+    border-color: #3b82c4;
+    outline: none;
+}
 
-        .dang-muon {
-            color: #d89400;
-            font-weight: bold;
-        }
+.input-loi {
+    border: 2px solid red !important;
+    background-color: #ffeaea;
+}
 
-        .chua-tra {
-            color: red;
-            font-weight: bold;
-        }
+.loi-truong {
+    color: red;
+    font-size: 13px;
+    font-weight: bold;
+}
 
-        .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -40px -40px 35px -40px;
-        }
 
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
+/* =========================
+   THÔNG BÁO
+   ========================= */
 
-        .navbar a:hover {
-            background-color: #2563eb;
-        }
+.thanh-cong,
+.thanh-loi {
 
-        .navbar a.active {
-            background-color: #2563eb;
-        }
-    </style>
+    width: 550px;
+    margin: 20px auto;
+    padding: 12px;
+
+    text-align: center;
+    border-radius: 6px;
+
+    font-weight: bold;
+
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease;
+}
+
+.thanh-cong {
+
+    color: green;
+    background-color: #eafbea;
+    border: 1px solid green;
+}
+
+.thanh-loi {
+
+    color: #b91c1c;
+    background-color: #fee2e2;
+    border: 1px solid #dc2626;
+}
+
+.thong-bao-an {
+
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+
+/* =========================
+   BUTTON
+   ========================= */
+
+.btn-chinh {
+
+    display: block;
+    margin: 25px auto 0;
+
+    padding: 11px 25px;
+
+    border: none;
+    border-radius: 6px;
+
+    background-color: #2f80c0;
+    color: white;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.btn-chinh:hover {
+    background-color: #1e659d;
+}
+
+.huy-sua {
+
+    display: block;
+    width: fit-content;
+
+    margin: 12px auto 0;
+
+    text-decoration: none;
+    color: #555;
+}
+
+
+/* =========================
+   DANH SÁCH
+   ========================= */
+
+.ket-qua {
+
+    width: 95%;
+    margin: 35px auto;
+
+    background-color: white;
+
+    padding: 20px;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 3px 10px
+        rgba(0,0,0,0.12);
+}
+
+.ket-qua h2 {
+
+    text-align: center;
+    color: #1e4f8a;
+}
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    margin-top: 20px;
+}
+
+th {
+
+    background-color: #2f80c0;
+    color: white;
+
+    padding: 12px;
+}
+
+td {
+
+    border: 1px solid #ddd;
+
+    padding: 10px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   TRẠNG THÁI
+   ========================= */
+
+.co-san {
+
+    color: green;
+    font-weight: bold;
+}
+
+.dang-muon {
+
+    color: #d89400;
+    font-weight: bold;
+}
+
+.hong {
+
+    color: red;
+    font-weight: bold;
+}
+
+
+/* =========================
+   THAO TÁC
+   ========================= */
+
+.thao-tac {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 8px;
+}
+
+.btn-sua {
+
+    display: inline-block;
+
+    padding: 7px 12px;
+
+    background-color: #f59e0b;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+}
+
+.btn-xoa {
+
+    border: none;
+
+    padding: 7px 12px;
+
+    background-color: #dc2626;
+
+    color: white;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+}
+
+.form-xoa {
+
+    margin: 0;
+    padding: 0;
+
+    width: auto;
+
+    background: none;
+
+    box-shadow: none;
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <nav class="navbar">
-    <a href="../index.php">🏠 Trang chủ</a>
-    <a href="../nguoiDung/User.php">👤 Người dùng</a>
-    <a href="bansao.php" class="active">📖 Bản sao sách</a>
-    <a href="../phieuMuon/phieumuon.php">📖 Phiếu mượn</a>
+
+    <a href="../index.php">
+        🏠 Trang chủ
+    </a>
+
+    <a href="../nguoiDung/User.php">
+        👤 Người dùng
+    </a>
+
+    <a
+        href="bansao.php"
+        class="active"
+    >
+        📖 Bản sao sách
+    </a>
+
+    <a href="../phieuMuon/phieumuon.php">
+        📋 Phiếu mượn
+    </a>
+
 </nav>
 
-<h1>QUẢN LÝ BẢN SAO SÁCH</h1>
 
-<form method="post">
+<h1>
+    QUẢN LÝ BẢN SAO SÁCH
+</h1>
 
-    <label for="id_ban_sao">ID bản sao:</label>
+
+<?php if ($thongBao !== "") { ?>
+
+    <div class="thanh-cong thong-bao">
+
+        <?php
+        echo htmlspecialchars(
+            $thongBao
+        );
+        ?>
+
+    </div>
+
+<?php } ?>
+
+
+<?php if ($thongBaoLoi !== "") { ?>
+
+    <div class="thanh-loi thong-bao">
+
+        <?php
+        echo htmlspecialchars(
+            $thongBaoLoi
+        );
+        ?>
+
+    </div>
+
+<?php } ?>
+
+
+<form
+    method="post"
+    class="form-ban-sao"
+>
 
     <input
-        type="text"
-        id="id_ban_sao"
-        name="id_ban_sao"
-        placeholder="Ví dụ: B01"
-        value="<?php echo htmlspecialchars($idBanSao); ?>"
-        class="<?php echo $loiIdBanSao != "" ? "input-loi" : ""; ?>"
+        type="hidden"
+        name="action"
+        value="<?php
+            echo $editId !== ""
+                ? "update"
+                : "add";
+        ?>"
     >
 
-    <?php if ($loiIdBanSao != "") { ?>
+    <input
+        type="hidden"
+        name="edit_id"
+        value="<?php
+            echo htmlspecialchars(
+                $editId
+            );
+        ?>"
+    >
+
+
+    <label for="book_id">
+        Đầu sách:
+    </label>
+
+    <select
+        id="book_id"
+        name="book_id"
+        class="<?php
+            echo $loiBookId !== ""
+                ? "input-loi"
+                : "";
+        ?>"
+    >
+
+        <option value="">
+            -- Chọn đầu sách --
+        </option>
+
+
+        <?php
+        foreach (
+            $danhSachDauSach
+            as $dauSach
+        ) {
+        ?>
+
+            <option
+                value="<?php
+                    echo $dauSach["id"];
+                ?>"
+
+                <?php
+
+                if (
+                    (string)$bookId
+                    ===
+                    (string)$dauSach["id"]
+                ) {
+
+                    echo "selected";
+                }
+
+                ?>
+            >
+
+                <?php
+
+                echo htmlspecialchars(
+                    $dauSach["ma_sach"]
+                    . " - "
+                    . $dauSach["ten_sach"]
+                );
+
+                ?>
+
+            </option>
+
+        <?php } ?>
+
+    </select>
+
+
+    <?php
+    if ($loiBookId !== "") {
+    ?>
+
         <p class="loi-truong">
-            <?php echo htmlspecialchars($loiIdBanSao); ?>
+
+            <?php
+            echo htmlspecialchars(
+                $loiBookId
+            );
+            ?>
+
         </p>
+
     <?php } ?>
 
 
-    <label for="id_dau_sach">ID đầu sách:</label>
-
-    <input
-        type="text"
-        id="id_dau_sach"
-        name="id_dau_sach"
-        placeholder="Ví dụ: D01"
-        value="<?php echo htmlspecialchars($idDauSach); ?>"
-        class="<?php echo $loiIdDauSach != "" ? "input-loi" : ""; ?>"
-    >
-
-    <?php if ($loiIdDauSach != "") { ?>
-        <p class="loi-truong">
-            <?php echo htmlspecialchars($loiIdDauSach); ?>
-        </p>
-    <?php } ?>
-
-
-    <label for="ma_ban_sao">Mã bản sao:</label>
+    <label for="ma_ban_sao">
+        Mã bản sao:
+    </label>
 
     <input
         type="text"
         id="ma_ban_sao"
         name="ma_ban_sao"
-        placeholder="Ví dụ: M01"
-        value="<?php echo htmlspecialchars($maBanSao); ?>"
-        class="<?php echo $loiMaBanSao != "" ? "input-loi" : ""; ?>"
+
+        placeholder="Ví dụ: BS005"
+
+        value="<?php
+            echo htmlspecialchars(
+                $maBanSao
+            );
+        ?>"
+
+        class="<?php
+            echo $loiMaBanSao !== ""
+                ? "input-loi"
+                : "";
+        ?>"
     >
 
-    <?php if ($loiMaBanSao != "") { ?>
+
+    <?php
+    if ($loiMaBanSao !== "") {
+    ?>
+
         <p class="loi-truong">
-            <?php echo htmlspecialchars($loiMaBanSao); ?>
+
+            <?php
+            echo htmlspecialchars(
+                $loiMaBanSao
+            );
+            ?>
+
         </p>
+
     <?php } ?>
 
 
-    <label for="trang_thai">Trạng thái:</label>
+    <label for="vi_tri">
+        Vị trí:
+    </label>
+
+    <input
+        type="text"
+        id="vi_tri"
+        name="vi_tri"
+
+        placeholder="Ví dụ: Kệ A1"
+
+        value="<?php
+            echo htmlspecialchars(
+                $viTri
+            );
+        ?>"
+
+        class="<?php
+            echo $loiViTri !== ""
+                ? "input-loi"
+                : "";
+        ?>"
+    >
+
+
+    <?php
+    if ($loiViTri !== "") {
+    ?>
+
+        <p class="loi-truong">
+
+            <?php
+            echo htmlspecialchars(
+                $loiViTri
+            );
+            ?>
+
+        </p>
+
+    <?php } ?>
+
+
+    <label for="trang_thai">
+        Trạng thái:
+    </label>
 
     <select
         id="trang_thai"
         name="trang_thai"
-        class="<?php echo $loiTrangThai != "" ? "input-loi" : ""; ?>"
     >
 
         <option
-            value="Đã trả"
-            <?php if ($trangThai == "Đã trả") echo "selected"; ?>
+            value="Có sẵn"
+
+            <?php
+            if (
+                $trangThai
+                === "Có sẵn"
+            ) {
+
+                echo "selected";
+            }
+            ?>
         >
-            Đã trả
+            Có sẵn
         </option>
+
 
         <option
             value="Đang mượn"
-            <?php if ($trangThai == "Đang mượn") echo "selected"; ?>
+
+            <?php
+            if (
+                $trangThai
+                === "Đang mượn"
+            ) {
+
+                echo "selected";
+            }
+            ?>
         >
             Đang mượn
         </option>
 
+
         <option
-            value="Chưa trả"
-            <?php if ($trangThai == "Chưa trả") echo "selected"; ?>
+            value="Hỏng"
+
+            <?php
+            if (
+                $trangThai
+                === "Hỏng"
+            ) {
+
+                echo "selected";
+            }
+            ?>
         >
-            Chưa trả
+            Hỏng
         </option>
 
     </select>
 
-    <?php if ($loiTrangThai != "") { ?>
-        <p class="loi-truong">
-            <?php echo htmlspecialchars($loiTrangThai); ?>
-        </p>
-    <?php } ?>
 
-
-    <label for="ngay_nhap">Ngày nhập:</label>
-
-    <input
-        type="date"
-        id="ngay_nhap"
-        name="ngay_nhap"
-        value="<?php echo htmlspecialchars($ngayNhap); ?>"
-        class="<?php echo $loiNgayNhap != "" ? "input-loi" : ""; ?>"
+    <button
+        type="submit"
+        class="btn-chinh"
     >
 
-    <?php if ($loiNgayNhap != "") { ?>
-        <p class="loi-truong">
-            <?php echo htmlspecialchars($loiNgayNhap); ?>
-        </p>
-    <?php } ?>
+        <?php
 
+        echo $editId !== ""
+            ? "Cập nhật bản sao"
+            : "Thêm bản sao";
 
-    <button type="submit">
-        Xác nhận
+        ?>
+
     </button>
+
+
+    <?php
+    if ($editId !== "") {
+    ?>
+
+        <a
+            href="bansao.php"
+            class="huy-sua"
+        >
+            Hủy sửa
+        </a>
+
+    <?php } ?>
 
 </form>
 
 
-<?php if ($hopLe) { ?>
-
-<div class="thanh-cong">
-    Thêm bản sao thành công!
-</div>
 
 <div class="ket-qua">
 
-    <h2>DANH SÁCH BẢN SAO</h2>
+<h2>
+    DANH SÁCH BẢN SAO SÁCH
+</h2>
 
-    <table>
 
-        <tr>
-            <th>STT</th>
-            <th>ID bản sao</th>
-            <th>ID đầu sách</th>
-            <th>Mã bản sao</th>
-            <th>Trạng thái</th>
-            <th>Ngày nhập</th>
-            <th>Trạng thái mượn trả</th>
-        </tr>
+<table>
 
-        <?php
-        $stt = 1;
+<tr>
 
-        foreach ($danhSachBanSao as $banSao) {
+    <th>STT</th>
+    <th>ID</th>
+    <th>Mã bản sao</th>
+    <th>Mã sách</th>
+    <th>Tên sách</th>
+    <th>Vị trí</th>
+    <th>Trạng thái</th>
+    <th>Thao tác</th>
 
-            $classTrangThai = "";
+</tr>
 
-            if ($banSao["trang_thai"] == "Đã trả") {
-                $classTrangThai = "da-tra";
-            } elseif ($banSao["trang_thai"] == "Đang mượn") {
-                $classTrangThai = "dang-muon";
-            } else {
-                $classTrangThai = "chua-tra";
-            }
-        ?>
 
-        <tr>
+<?php
 
-            <td>
-                <?php echo $stt; ?>
-            </td>
+$stt = 1;
 
-            <td>
-                <?php echo htmlspecialchars($banSao["id_ban_sao"]); ?>
-            </td>
+foreach (
+    $danhSachBanSao
+    as $banSao
+) {
 
-            <td>
-                <?php echo htmlspecialchars($banSao["id_dau_sach"]); ?>
-            </td>
 
-            <td>
-                <?php echo htmlspecialchars($banSao["ma_ban_sao"]); ?>
-            </td>
+    if (
+        $banSao["trang_thai"]
+        === "Có sẵn"
+    ) {
 
-            <td>
-                <?php echo htmlspecialchars($banSao["trang_thai"]); ?>
-            </td>
+        $classTrangThai =
+            "co-san";
 
-            <td>
-                <?php echo htmlspecialchars($banSao["ngay_nhap"]); ?>
-            </td>
+    } elseif (
+        $banSao["trang_thai"]
+        === "Đang mượn"
+    ) {
 
-            <td class="<?php echo $classTrangThai; ?>">
-                <?php
-                echo htmlspecialchars(
-                    trangThaiMuonTra($banSao["trang_thai"])
-                );
-                ?>
-            </td>
+        $classTrangThai =
+            "dang-muon";
 
-        </tr>
+    } else {
 
-        <?php
-            $stt++;
-        }
-        ?>
+        $classTrangThai =
+            "hong";
+    }
 
-    </table>
+?>
+
+
+<tr>
+
+<td>
+    <?php echo $stt; ?>
+</td>
+
+
+<td>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["id"]
+    );
+    ?>
+
+</td>
+
+
+<td>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["ma_ban_sao"]
+    );
+    ?>
+
+</td>
+
+
+<td>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["ma_sach"]
+    );
+    ?>
+
+</td>
+
+
+<td>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["ten_sach"]
+    );
+    ?>
+
+</td>
+
+
+<td>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["vi_tri"]
+    );
+    ?>
+
+</td>
+
+
+<td
+    class="<?php
+        echo $classTrangThai;
+    ?>"
+>
+
+    <?php
+    echo htmlspecialchars(
+        $banSao["trang_thai"]
+    );
+    ?>
+
+</td>
+
+
+<td>
+
+<div class="thao-tac">
+
+
+<a
+    class="btn-sua"
+
+    href="bansao.php?edit=<?php
+        echo $banSao["id"];
+    ?>"
+>
+    Sửa
+</a>
+
+
+<form
+    method="post"
+
+    class="form-xoa"
+
+    onsubmit="
+        return confirm(
+            'Bạn có chắc muốn xóa bản sao này không?'
+        );
+    "
+>
+
+<input
+    type="hidden"
+    name="action"
+    value="delete"
+>
+
+<input
+    type="hidden"
+    name="delete_id"
+
+    value="<?php
+        echo $banSao["id"];
+    ?>"
+>
+
+<button
+    type="submit"
+    class="btn-xoa"
+>
+    Xóa
+</button>
+
+</form>
+
 
 </div>
 
-<?php } ?>
+</td>
+
+
+</tr>
+
+
+<?php
+
+$stt++;
+
+}
+
+?>
+
+</table>
+
+</div>
+
+
+<script>
+
+/* =========================================
+   TỰ ẨN THÔNG BÁO SAU 3 GIÂY
+   ========================================= */
+
+setTimeout(function () {
+
+    const thongBao =
+        document.querySelectorAll(
+            ".thong-bao"
+        );
+
+
+    thongBao.forEach(
+        function (item) {
+
+            item.classList.add(
+                "thong-bao-an"
+            );
+
+
+            setTimeout(
+                function () {
+
+                    item.remove();
+
+                },
+                500
+            );
+
+        }
+    );
+
+}, 3000);
+
+</script>
+
 
 </body>
+
 </html>

@@ -608,11 +608,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <a href="../nguoiDung/User.php">👤 Người dùng</a>
 
-        <a href="../banSaoSach/bansao.php">
+          <a href="../banSaoSach/bansao.php">
             📖 Bản sao sách
         </a>
         <a href="phieumuon.php" class="active">📖 Phiếu mượn</a>
-
+        <a href="../danhmucsach/danhmuc.php">
+            📖 Danh mục
+        </a>
     </nav>
     <div class="container">
 

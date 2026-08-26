@@ -356,6 +356,12 @@ if (isset($_POST["xoaTatCa"])) {
         <a href="../phieuMuon/phieumuon.php">
             📖 Phiếu mượn
         </a>
+          <a href="../danhmucsach/danhmuc.php">
+            📖 Danh mục
+        </a><a href="../danhmucsach/danhmuc.php">
+            📖 Danh mục
+        </a>
+    </nav>
     </nav>
 
     <div class="container">
