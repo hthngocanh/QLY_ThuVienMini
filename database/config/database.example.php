@@ -1,13 +1,8 @@
 <?php
 
-$host = 'localhost';
-$dbname = 'QLThuVien';
+$host = '127.0.0.1';
+$dbname = 'qly_thuvienmini';
 $username = 'root';
-
-/*
- * Mỗi thành viên tự nhập mật khẩu
- * MySQL trên máy của mình.
- */
 $password = '';
 
 try {
@@ -22,11 +17,8 @@ try {
         PDO::ATTR_ERRMODE,
         PDO::ERRMODE_EXCEPTION
     );
-
 } catch (PDOException $e) {
 
-    die(
-        "Kết nối MySQL thất bại: "
-        . $e->getMessage()
-    );
+    die("Kết nối MySQL thất bại: "
+        . $e->getMessage());
 }
