@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../database/config/database.php';
+$pdo = getDB();
 
 $bookId = "";
 $maBanSao = "";
@@ -793,11 +794,11 @@ try {
             📖 Bản sao sách
         </a>
 
-    <a href="../phieuMuon/phieumuon.php">
-        📋 Phiếu mượn
-    </a>
+        <a href="../phieuMuon/phieumuon.php">
+            📋 Phiếu mượn
+        </a>
 
-</nav>
+    </nav>
 
 
     <h1>

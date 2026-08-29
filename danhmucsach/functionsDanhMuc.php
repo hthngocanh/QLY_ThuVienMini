@@ -1,48 +1,12 @@
 <?php
-
-// ======================================================
-// KẾT NỐI DATABASE
-// ======================================================
-
-function getDBDanhMuc()
-{
-    $host = '127.0.0.1';
-    $dbname = 'qly_thuvienmini';
-    $username = 'root';
-    $password = '';
-
-    try {
-        $pdo = new PDO(
-            "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
-            $username,
-            $password
-        );
-
-        $pdo->setAttribute(
-            PDO::ATTR_ERRMODE,
-            PDO::ERRMODE_EXCEPTION
-        );
-
-        $pdo->setAttribute(
-            PDO::ATTR_DEFAULT_FETCH_MODE,
-            PDO::FETCH_ASSOC
-        );
-
-        return $pdo;
-
-    } catch (PDOException $e) {
-        die("Lỗi kết nối CSDL: " . $e->getMessage());
-    }
-}
-
-
+require_once __DIR__ . '/../database/config/database.php';
 // ======================================================
 // LẤY TẤT CẢ DANH MỤC
 // ======================================================
 
 function layDanhSachDanhMuc()
 {
-    $pdo = getDBDanhMuc();
+    $pdo = getDB();
 
     $sql = "SELECT
                 category_id,
@@ -64,7 +28,7 @@ function layDanhSachDanhMuc()
 
 function layDanhMucTheoId($categoryId)
 {
-    $pdo = getDBDanhMuc();
+    $pdo = getDB();
 
     $sql = "SELECT
                 category_id,
@@ -90,7 +54,7 @@ function layDanhMucTheoId($categoryId)
 
 function themDanhMuc($tenDanhMuc, $moTa, $trangThai)
 {
-    $pdo = getDBDanhMuc();
+    $pdo = getDB();
 
     $sql = "INSERT INTO Categories
                 (ten_danh_muc, mo_ta, trang_thai)
@@ -117,7 +81,7 @@ function suaDanhMuc(
     $moTa,
     $trangThai
 ) {
-    $pdo = getDBDanhMuc();
+    $pdo = getDB();
 
     $sql = "UPDATE Categories
             SET
@@ -143,7 +107,7 @@ function suaDanhMuc(
 
 function xoaDanhMuc($categoryId)
 {
-    $pdo = getDBDanhMuc();
+    $pdo = getDB();
 
     $sql = "DELETE FROM Categories
             WHERE category_id = :category_id";
