@@ -3,7 +3,7 @@
 -- MYSQL VERSION
 -- =========================================
 
-USE QLThuVien;
+USE qly_thuvienmini;
 
 
 -- =========================================
@@ -16,7 +16,7 @@ USE QLThuVien;
 -- để phù hợp với yêu cầu bảo mật của bài.
 
 
-INSERT INTO nguoi_dung
+INSERT INTO users
 (
     ma_nguoi_dung,
     ho_ten,

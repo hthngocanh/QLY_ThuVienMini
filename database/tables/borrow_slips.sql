@@ -16,7 +16,7 @@ CREATE TABLE borrow_slips (
         )),
 
     FOREIGN KEY (ID_NguoiDung)
-        REFERENCES nguoi_dung(id),
+       REFERENCES users(id),
 
     FOREIGN KEY (ID_BanSao)
         REFERENCES book_copies(id)

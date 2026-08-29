@@ -9,7 +9,7 @@ USE QLThuVien;
 -- 1. NGUOI_DUNG
 -- =========================================
 
-CREATE TABLE nguoi_dung (
+CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     ma_nguoi_dung VARCHAR(20) NOT NULL UNIQUE,
@@ -145,13 +145,10 @@ CREATE TABLE borrow_slips (
     ID_PhieuMuon INT AUTO_INCREMENT PRIMARY KEY,
 
     ID_NguoiDung INT NOT NULL,
-
     ID_BanSao INT NOT NULL,
 
     NgayMuon DATE NOT NULL,
-
     NgayTra DATE NULL,
-
     TrangThai VARCHAR(20) NOT NULL,
 
     CONSTRAINT CK_BorrowSlips_TrangThai
@@ -166,7 +163,7 @@ CREATE TABLE borrow_slips (
 
     CONSTRAINT FK_BorrowSlips_Users
         FOREIGN KEY (ID_NguoiDung)
-        REFERENCES nguoi_dung(id),
+        REFERENCES users(id),
 
     CONSTRAINT FK_BorrowSlips_BookCopies
         FOREIGN KEY (ID_BanSao)
