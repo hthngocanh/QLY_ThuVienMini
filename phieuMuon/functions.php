@@ -7,7 +7,7 @@
 */
 
 $host = "localhost";
-$dbname = "qlthuvien";
+$dbname = "qly_thuvienmini";
 $username = "root";
 $password = "";
 

@@ -148,7 +148,6 @@ if (isset($_GET['msg'])) {
 
 ?>
 
-
 <!DOCTYPE html>
 
 <html lang="vi">
@@ -164,299 +163,159 @@ if (isset($_GET['msg'])) {
 
     <title>Quản lý phiếu mượn</title>
 
-
     <style>
 
         * {
             box-sizing: border-box;
         }
 
-
         body {
-
-            font-family: Arial, sans-serif;
-
-            background: #f5f5f5;
-
             margin: 0;
-
-            padding: 30px;
+            padding: 0;
+            background: #f8fafc;
         }
-
-
-        /* ==============================
-           MENU
-        ============================== */
-
-        .navbar {
-
-            background-color: #1b3280;
-
-            padding: 12px 20px;
-
-            display: flex;
-
-            gap: 8px;
-
-            margin: -30px -30px 30px -30px;
-        }
-
-
-        .navbar a {
-
-            color: white;
-
-            text-decoration: none;
-
-            padding: 9px 14px;
-
-            border-radius: 6px;
-        }
-
-
-        .navbar a:hover,
-        .navbar a.active {
-
-            background-color: #2563eb;
-        }
-
-
-        /* ==============================
-           CONTAINER
-        ============================== */
 
         .container {
-
-            width: 1100px;
-
-            max-width: 100%;
-
-            margin: auto;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-
         h1 {
-
             text-align: center;
-
             margin-bottom: 25px;
         }
 
-
-        /* ==============================
-           FORM
-        ============================== */
+        /* FORM */
 
         .form-box {
-
             background: white;
-
             padding: 25px;
-
             border-radius: 8px;
-
             box-shadow: 0 2px 8px #ccc;
         }
 
-
         .form-group {
-
             margin-bottom: 18px;
         }
 
-
         label {
-
             display: block;
-
             font-weight: bold;
-
             margin-bottom: 6px;
         }
 
-
         input,
         select {
-
             width: 100%;
-
             padding: 10px;
-
             border: 1px solid #ccc;
-
             border-radius: 5px;
         }
-
 
         input:focus,
         select:focus {
-
             outline: none;
-
             border-color: #2563eb;
         }
 
-
         .loi-truong {
-
             color: #c62828;
-
             font-size: 14px;
-
             margin-top: 6px;
-
             font-weight: bold;
         }
 
-
         .input-loi {
-
             border: 1px solid #c62828;
         }
 
-
         .mo-ta {
-
             color: #777;
-
             font-size: 13px;
-
             margin-top: 5px;
         }
 
-
-        /* ==============================
-           BUTTON
-        ============================== */
+        /* BUTTON */
 
         button {
-
             padding: 10px 20px;
-
             border: none;
-
             border-radius: 5px;
-
             background: #333;
-
             color: white;
-
             cursor: pointer;
         }
 
-
         button:hover {
-
             background: #555;
         }
 
-
         .btn-sua {
-
             background: #2563eb;
         }
 
-
         .btn-xoa {
-
             background: #c62828;
         }
 
-
         .btn-huy {
-
             background: #777;
         }
 
-
-        /* ==============================
-           THÔNG BÁO
-        ============================== */
+        /* THÔNG BÁO */
 
         .thanh-cong {
-
             background: #d4edda;
-
             color: #155724;
-
             padding: 12px;
-
             border-radius: 5px;
-
             margin-bottom: 15px;
         }
 
-
-        /* ==============================
-           TABLE
-        ============================== */
+        /* TABLE */
 
         h2 {
-
             margin-top: 30px;
         }
 
-
         .table-wrapper {
-
             overflow-x: auto;
         }
 
-
         table {
-
             width: 100%;
-
             border-collapse: collapse;
-
             background: white;
         }
 
-
         th,
         td {
-
             border: 1px solid #ccc;
-
             padding: 10px;
-
             text-align: center;
         }
 
-
         th {
-
             background: #eee;
         }
 
-
         .trang-thai {
-
             font-weight: bold;
         }
 
-
         .actions {
-
             display: flex;
-
             gap: 6px;
-
             justify-content: center;
         }
 
-
         .actions a,
         .actions button {
-
             padding: 7px 10px;
-
             color: white;
-
             text-decoration: none;
-
             border-radius: 5px;
-
             border: none;
         }
 
@@ -464,53 +323,20 @@ if (isset($_GET['msg'])) {
 
 </head>
 
-
 <body>
 
+<div class="layout">
 
-<!-- =====================================================
-     MENU
-===================================================== -->
+    <?php require_once "../layout/sidebar.php"; ?>
 
-<nav class="navbar">
+    <main class="main-content">
 
-    <a href="../index.php">
-        🏠 Trang chủ
-    </a>
+        <div class="container">
 
+            <h1>
+                QUẢN LÝ PHIẾU MƯỢN
+            </h1>
 
-    <a href="../nguoiDung/User.php">
-        👤 Người dùng
-    </a>
-
-
-    <a href="../banSaoSach/bansao.php">
-        📖 Bản sao sách
-    </a>
-
-
-    <a
-        href="phieumuon.php"
-        class="active"
-    >
-        📖 Phiếu mượn
-    </a>
-
-
-    <a href="../danhmucsach/danhmuc.php">
-        📖 Danh mục
-    </a>
-
-</nav>
-
-
-
-<div class="container">
-
-
-    <h1>
-        QUẢN LÝ PHIẾU MƯỢN
-    </h1>
 
 
     <!-- =================================================
@@ -1140,8 +966,11 @@ if (isset($_GET['msg'])) {
     </div>
 
 
-</div>
+        </div>
 
+    </main>
+
+</div>
 
 </body>
 
