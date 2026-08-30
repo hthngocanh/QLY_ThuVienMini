@@ -162,7 +162,7 @@ function getPhieuMuonById($pdo, $id)
 
         FROM borrow_slips bs
 
-        INNER JOIN nguoi_dung nd
+        INNER JOIN users nd
             ON bs.ID_NguoiDung = nd.id
 
         INNER JOIN book_copies bc
