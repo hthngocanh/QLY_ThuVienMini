@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 require_once __DIR__ . '/../database/config/database.php';
 $pdo = getDB();
 
@@ -468,41 +468,16 @@ try {
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', Arial, sans-serif;
             margin: 0;
-            padding: 40px;
-            background-color: #f0f6ff;
+            padding: 0;
+            background-color: #f8fafc;
         }
 
         h1 {
             text-align: center;
             color: #1e4f8a;
             margin-bottom: 30px;
-        }
-
-
-        /* =========================
-   MENU
-   ========================= */
-
-        .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -40px -40px 35px -40px;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .navbar a:hover,
-        .navbar a.active {
-            background-color: #2563eb;
         }
 
 
@@ -777,31 +752,14 @@ try {
 
 <body>
 
+<div class="layout" style="display: flex; min-height: 100vh;">
+    <?php
+    $activePage = 'bansao';
+    require_once __DIR__ . '/../layout/sidebar.php';
+    ?>
+    <main class="main-content" style="flex: 1; padding: 35px 40px; overflow-y: auto; background: #f8fafc;">
 
-    <nav class="navbar">
-
-        <a href="../index.php">
-            🏠 Trang chủ
-        </a>
-
-        <a href="../nguoiDung/User.php">
-            👤 Người dùng
-        </a>
-
-        <a
-            href="bansao.php"
-            class="active">
-            📖 Bản sao sách
-        </a>
-
-        <a href="../phieuMuon/phieumuon.php">
-            📋 Phiếu mượn
-        </a>
-
-    </nav>
-
-
-    <h1>
+    <h1 style="margin-top: 0;">
         QUẢN LÝ BẢN SAO SÁCH
     </h1>
 
@@ -1344,6 +1302,8 @@ try {
     </script>
 
 
+    </main>
+</div>
 </body>
 
 </html>

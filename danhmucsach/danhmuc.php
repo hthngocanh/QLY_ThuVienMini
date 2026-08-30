@@ -1,11 +1,11 @@
-```php
+
 <?php
 // ======================================================
 // app/views/danhmuc.php
 // Quản lý danh mục sách
 // Sử dụng các hàm trong funsi.php
 // ======================================================
-
+session_start();
 require_once __DIR__ . '/../danhmucsach/functionsDanhMuc.php';
 
 
@@ -260,38 +260,17 @@ if (
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f8fafc;
             margin: 0;
-            padding: 40px;
+            padding: 0;
             color: #333;
         }
 
-        .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -40px -40px 35px -40px;
-            flex-wrap: wrap;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .navbar a:hover,
-        .navbar a.active {
-            background-color: #2563eb;
-        }
-
         .container {
-            width: 1000px;
-            max-width: 100%;
-            margin: auto;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
             background-color: white;
             padding: 30px;
             border-radius: 12px;
@@ -515,35 +494,16 @@ if (
 
 <body>
 
+<div class="layout" style="display: flex; min-height: 100vh;">
+    <?php
+    $activePage = 'danhmuc';
+    require_once __DIR__ . '/../layout/sidebar.php';
+    ?>
+    <main class="main-content" style="flex: 1; padding: 35px 40px; overflow-y: auto; background: #f8fafc;">
 
-<nav class="navbar">
+<div class="container" style="max-width: 1200px; margin: 0 auto;">
 
-    <a href="../index.php">
-        🏠 Trang chủ
-    </a>
-
-    <a href="../nguoiDung/User.php">
-        👤 Người dùng
-    </a>
-
-    <a href="../banSaoSach/bansao.php">
-        📖 Bản sao sách
-    </a>
-
-    <a href="../phieuMuon/phieumuon.php">
-        📋 Phiếu mượn
-    </a>
-
-    <a href="danhmuc.php" class="active">
-        📚 Danh mục
-    </a>
-
-</nav>
-
-
-<div class="container">
-
-    <h1>
+    <h1 style="margin-top: 0; margin-bottom: 25px; color: #1e3a8a;">
         📚 Quản lý danh mục sách
     </h1>
 
@@ -974,8 +934,9 @@ if (
 
 
 </div>
+</main>
+</div>
 
 </body>
 
 </html>
-```

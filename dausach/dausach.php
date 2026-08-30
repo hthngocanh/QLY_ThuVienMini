@@ -535,7 +535,8 @@ textarea.o-nhap {
 }
 
 .danh-sach {
-    width: 1400px;
+    width: 100%;
+    max-width: 1300px;
     margin: 40px auto;
     background-color: white;
     padding: 25px;
@@ -613,64 +614,15 @@ td:last-child button {
 
 
 <body>
-    <!-- CSS bổ sung (đặt trong thẻ <head>) -->
-<style>
-  /* Style cho thanh Menu */
-  .navbar {
-    background-color: #1e3a8a; /* Màu nền xanh đậm */
-    display: flex;
-    align-items: center;
-    padding: 10px 40px;
-    gap: 15px;
-  }
 
-  .nav-item {
-    color: #ffffff;
-    text-decoration: none;
-    padding: 10px 18px;
-    font-size: 16px;
-    font-weight: 500;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background-color 0.2s ease;
-  }
+<div class="layout" style="display: flex; min-height: 100vh;">
+    <?php
+    $activePage = 'dausach';
+    require_once __DIR__ . '/../layout/sidebar.php';
+    ?>
+    <main class="main-content" style="flex: 1; padding: 35px 40px; overflow-y: auto; background: #f8fafc;">
 
-  .nav-item:hover {
-    background-color: #2563eb;
-  }
-
-  /* Mục đang chọn */
-  .nav-item.active {
-    background-color: #2563eb;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-</style>
-
-<!-- Thanh Navigation Bar (Đặt ngay đầu thẻ <body>) -->
-  <nav class="navbar">
-  <a href="../index.php" class="nav-item">
-    <span>🏠</span> Trang chủ
-  </a>
-  <a href="../nguoiDung/User.php" class="nav-item">
-    <span>👤</span> Người dùng
-  </a>
-  <a href="../dausach/dausach.php" class="nav-item active">
-    <span>📖</span> Đầu sách
-  </a>
-  <a href="../banSaoSach/bansao.php" class="nav-item">
-    <span>📖</span> Bản sao sách
-  </a>
-  <a href="phieuMuon/phieumuon.php" class="nav-item ">
-    <span>📖</span> Phiếu mượn
-  </a>
-   <a href="../danhmucsach/danhmuc.php" class="nav-item  ">
-    <span>📖</span> Danh mục
-  </a>
-</nav>
-
-<h1 class="tieu-de">
+<h1 class="tieu-de" style="margin-top: 0;">
     HỆ THỐNG QUẢN LÝ THƯ VIỆN MINI
 </h1>
 
@@ -1168,6 +1120,9 @@ foreach ($danh_sach_sach as $vi_tri => $sach) {
 
 </div>
 
+
+    </main>
+</div>
 
 </body>
 

@@ -98,7 +98,8 @@ elseif (isset($_POST["btnLuu"])) {
             if ($kiemTraTonTai) {
                 $errors["maNguoiDung"] = "Mã người dùng đã tồn tại trong hệ thống.";
             } else {
-                themNguoiDung($maNguoiDung, $hoTen, $email, $matKhau, $sdt, $khoaLop, $vaiTro, $trangThai);
+                $matKhauHash = password_hash($matKhau, PASSWORD_DEFAULT);
+                themNguoiDung($maNguoiDung, $hoTen, $email, $matKhauHash, $sdt, $khoaLop, $vaiTro, $trangThai);
                 $thongBao = "Thêm người dùng thành công.";
                 $loaiThongBao = "success";
 
@@ -129,36 +130,57 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng</title>
+    <title>Quản lý người dùng - Thư viện Mini</title>
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6fa;
-            margin: 0;
-            padding: 30px;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 35px 40px;
+            overflow-y: auto;
         }
 
         .container {
             max-width: 1200px;
-            margin: auto;
+            margin: 0 auto;
         }
 
         h1 {
-            text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             color: #1e3a8a;
+            font-size: 26px;
+            font-weight: 800;
         }
 
         .card {
             background: white;
             padding: 25px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: #1e293b;
+            margin-bottom: 18px;
         }
 
         .form-row {
@@ -174,22 +196,26 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
 
         label {
             display: block;
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 6px;
+            font-size: 14px;
+            color: #334155;
         }
 
         input,
         select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
+            font-size: 14px;
         }
 
         input:focus,
         select:focus {
             border-color: #2563eb;
             outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .input-error {
@@ -209,7 +235,8 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
             cursor: pointer;
             background: #2563eb;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 14px;
         }
 
         button:hover {
@@ -221,19 +248,22 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
         }
 
         .message {
-            padding: 12px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            font-size: 14px;
         }
 
         .success {
             background: #dcfce7;
             color: #166534;
+            border: 1px solid #bbf7d0;
         }
 
         .error {
             background: #fee2e2;
             color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         .table-wrapper {
@@ -248,14 +278,16 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
 
         th,
         td {
-            padding: 12px;
-            border: 1px solid #ddd;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
             text-align: center;
+            font-size: 14px;
         }
 
         th {
             background: #2563eb;
             color: white;
+            font-weight: 600;
         }
 
         tr:nth-child(even) {
@@ -278,32 +310,11 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
             color: #777;
         }
 
-        .navbar {
-            background-color: #1e3a8a;
-            padding: 15px 25px;
-            display: flex;
-            gap: 10px;
-            margin: -40px -40px 35px -40px;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-        }
-
-        .navbar a:hover,
-        .navbar a.active {
-            background-color: #2563eb;
-        }
-
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
             }
-
-            body {
+            .main-content {
                 padding: 15px;
             }
         }
@@ -312,22 +323,21 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
 
 <body>
 
-    <nav class="navbar">
-        <a href="../index.php">🏠 Trang chủ</a>
-        <a href="User.php" class="active">👤 Người dùng</a>
-        <a href="../banSaoSach/bansao.php">📖 Bản sao sách</a>
-        <a href="../phieuMuon/phieumuon.php">📖 Phiếu mượn</a>
-        <a href="../danhmucsach/danhmuc.php">📖 Danh mục</a>
-    </nav>
+    <div class="layout">
+        <?php 
+        $activePage = 'nguoidung';
+        require_once __DIR__ . '/../layout/sidebar.php'; 
+        ?>
 
-    <div class="container">
-        <h1>QUẢN LÝ NGƯỜI DÙNG</h1>
+        <main class="main-content">
+            <div class="container">
+                <h1>QUẢN LÝ NGƯỜI DÙNG</h1>
 
-        <?php if ($thongBao !== ""): ?>
-            <div class="message <?= htmlspecialchars($loaiThongBao) ?>">
-                <?= htmlspecialchars($thongBao) ?>
-            </div>
-        <?php endif; ?>
+                <?php if ($thongBao !== ""): ?>
+                    <div class="message <?= htmlspecialchars($loaiThongBao) ?>">
+                        <?= htmlspecialchars($thongBao) ?>
+                    </div>
+                <?php endif; ?>
 
         <!-- FORM THÊM / SỬA -->
         <div class="card">
@@ -489,6 +499,8 @@ $danhSachNguoiDung = layDanhSachNguoiDung($tuKhoa);
         </div>
 
     </div>
+    </main>
+</div>
 </body>
 
 </html>

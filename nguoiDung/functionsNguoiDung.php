@@ -25,6 +25,16 @@ function layNguoiDungTheoMa($maNguoiDung)
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function layNguoiDungDangNhap($taiKhoan)
+{
+    $pdo = getDB();
+    $sql = "SELECT * FROM users WHERE ma_nguoi_dung = :tk OR email = :tk LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['tk' => $taiKhoan]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+
 function themNguoiDung($ma, $hoTen, $email, $matKhau, $sdt, $khoaLop, $vaiTro, $trangThai)
 {
     $pdo = getDB();
@@ -60,6 +70,17 @@ function suaNguoiDung($maCu, $maMoi, $hoTen, $email, $sdt, $khoaLop, $vaiTro, $t
         'vaitro' => $vaiTro,
         'trangthai' => $trangThai,
         'maCu' => $maCu
+    ]);
+}
+
+function doiMatKhauTheoMa($maNguoiDung, $matKhauMoiHash)
+{
+    $pdo = getDB();
+    $sql = "UPDATE users SET mat_khau = :matkhau WHERE ma_nguoi_dung = :ma";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([
+        'matkhau' => $matKhauMoiHash,
+        'ma' => $maNguoiDung
     ]);
 }
 
