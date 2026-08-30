@@ -120,7 +120,7 @@ function getAllPhieuMuon($pdo)
 
         FROM borrow_slips bs
 
-        INNER JOIN nguoi_dung nd
+        INNER JOIN users nd
             ON bs.ID_NguoiDung = nd.id
 
         INNER JOIN book_copies bc
@@ -188,7 +188,7 @@ function getIdNguoiDungTheoMa($pdo, $maNguoiDung)
 {
     $sql = "
         SELECT id
-        FROM nguoi_dung
+        FROM users
         WHERE ma_nguoi_dung = ?
           AND trang_thai = 'Hoạt động'
         LIMIT 1

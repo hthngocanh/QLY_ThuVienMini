@@ -421,9 +421,23 @@ if ($vaiTro === "Quản trị viên") {
                     <span>Trang chủ</span>
                 </a>
 
+                <?php
+                $userMenuLabel = "Người dùng";
+                $userMenuIcon = "👥";
+                if ($vaiTro === "Độc giả") {
+                    $userMenuLabel = "Thông tin cá nhân";
+                    $userMenuIcon = "👤";
+                } elseif ($vaiTro === "Thủ thư") {
+                    $userMenuLabel = "Tra cứu độc giả";
+                    $userMenuIcon = "🔍";
+                } elseif ($vaiTro === "Quản trị viên") {
+                    $userMenuLabel = "Người dùng";
+                    $userMenuIcon = "👥";
+                }
+                ?>
                 <a href="<?= $appRoot ?>nguoiDung/User.php" class="menu-link <?= $activePage === 'nguoidung' ? 'active' : '' ?>">
-                    <span class="icon">👥</span>
-                    <span>Người dùng</span>
+                    <span class="icon"><?= $userMenuIcon ?></span>
+                    <span><?= $userMenuLabel ?></span>
                 </a>
 
                 <a href="<?= $appRoot ?>dausach/dausach.php" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">

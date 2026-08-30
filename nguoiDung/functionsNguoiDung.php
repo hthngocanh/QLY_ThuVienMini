@@ -73,6 +73,37 @@ function suaNguoiDung($maCu, $maMoi, $hoTen, $email, $sdt, $khoaLop, $vaiTro, $t
     ]);
 }
 
+function capNhatThongTinDocGia($maNguoiDung, $hoTen, $email, $sdt, $khoaLop)
+{
+    $pdo = getDB();
+    $sql = "UPDATE users
+            SET ho_ten = :hoten, email = :email, sdt = :sdt, khoa_lop = :khoalop
+            WHERE ma_nguoi_dung = :ma";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([
+        'hoten' => $hoTen,
+        'email' => $email,
+        'sdt' => $sdt,
+        'khoalop' => $khoaLop,
+        'ma' => $maNguoiDung
+    ]);
+}
+
+function kiemTraEmailTonTai($email, $maNguoiDungHienTai = null)
+{
+    $pdo = getDB();
+    if ($maNguoiDungHienTai !== null) {
+        $sql = "SELECT id FROM users WHERE email = :email AND ma_nguoi_dung != :ma LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['email' => $email, 'ma' => $maNguoiDungHienTai]);
+    } else {
+        $sql = "SELECT id FROM users WHERE email = :email LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['email' => $email]);
+    }
+    return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
+}
+
 function doiMatKhauTheoMa($maNguoiDung, $matKhauMoiHash)
 {
     $pdo = getDB();
