@@ -616,7 +616,10 @@ elseif (isset($_POST["xoa_sach"])) {
         }
     }
 }
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 
+$danh_sach_sach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
