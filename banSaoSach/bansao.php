@@ -486,7 +486,8 @@ try {
    ========================= */
 
         .form-ban-sao {
-            width: 550px;
+            width: min(550px, 100%);
+            box-sizing: border-box;
             margin: 0 auto;
             padding: 25px;
             background-color: white;
@@ -538,7 +539,8 @@ try {
         .thanh-cong,
         .thanh-loi {
 
-            width: 550px;
+            width: min(550px, 100%);
+            box-sizing: border-box;
             margin: 20px auto;
             padding: 12px;
 
@@ -618,7 +620,9 @@ try {
 
         .ket-qua {
 
-            width: 95%;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
             margin: 35px auto;
 
             background-color: white;
@@ -745,6 +749,324 @@ try {
 
             box-shadow: none;
         }
+
+        /* =========================
+           POPUP XÁC NHẬN SỬA / XÓA
+           ========================= */
+
+        .xac-nhan-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+
+            transition:
+                opacity 0.22s ease,
+                visibility 0.22s ease;
+        }
+
+        .xac-nhan-overlay.hien {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .xac-nhan-hop {
+            width: 420px;
+            max-width: 100%;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 26px;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+            text-align: center;
+
+            font-family: inherit;
+            transform: scale(0.82);
+            transform-origin: center;
+            opacity: 0;
+
+            transition:
+                transform 0.22s ease,
+                opacity 0.22s ease;
+        }
+
+        .xac-nhan-overlay.hien .xac-nhan-hop {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .xac-nhan-bieu-tuong {
+            width: 54px;
+            height: 54px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            font-size: 26px;
+        }
+
+        .xac-nhan-tieu-de {
+            margin: 0 0 10px;
+            color: #1e4f8a;
+            font-size: clamp(18px, 2vw, 21px);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .xac-nhan-noi-dung {
+            margin: 0;
+            color: #475569;
+            line-height: 1.6;
+            font-size: clamp(14px, 1.5vw, 15px);
+            word-break: break-word;
+        }
+
+        .xac-nhan-ma {
+            color: #1e4f8a;
+            font-weight: bold;
+        }
+
+        .xac-nhan-nut {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .xac-nhan-nut button {
+            border: none;
+            border-radius: 7px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .nut-huy-xac-nhan {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .nut-huy-xac-nhan:hover {
+            background: #d1d5db;
+        }
+
+        .nut-dong-y {
+            background: #2f80c0;
+            color: white;
+        }
+
+        .nut-dong-y:hover {
+            background: #1e659d;
+        }
+
+        .nut-dong-y.xoa {
+            background: #dc2626;
+        }
+
+        .nut-dong-y.xoa:hover {
+            background: #b91c1c;
+        }
+
+
+        /* =========================
+           RESPONSIVE - CO GIÃN THEO MÀN HÌNH
+           ========================= */
+
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .layout,
+        .main-content {
+            min-width: 0;
+        }
+
+        .form-ban-sao,
+        .thanh-cong,
+        .thanh-loi,
+        .ket-qua {
+            max-width: 100%;
+        }
+
+        .ket-qua {
+            overflow: hidden;
+        }
+
+        table {
+            table-layout: auto;
+        }
+
+        th,
+        td {
+            overflow-wrap: anywhere;
+            word-break: normal;
+        }
+
+        @media (max-width: 1180px) {
+            h1 {
+                font-size: clamp(22px, 3vw, 30px);
+                margin-bottom: 20px;
+            }
+
+            .ket-qua {
+                padding: 14px;
+            }
+
+            th,
+            td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+
+            .btn-sua,
+            .btn-xoa {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .thao-tac {
+                gap: 5px;
+                flex-wrap: wrap;
+            }
+        }
+
+        /*
+           Khi cửa sổ hẹp / chia đôi màn hình:
+           bảng tự chuyển thành từng thẻ dọc.
+           Nhờ vậy không bị cắt mất cột.
+        */
+        @media (max-width: 820px) {
+            .main-content {
+                padding: 14px 10px !important;
+            }
+
+            .form-ban-sao {
+                padding: 18px;
+            }
+
+            .ket-qua {
+                margin: 24px auto;
+                padding: 12px;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .ket-qua h2 {
+                font-size: 19px;
+            }
+
+            table,
+            tbody,
+            tr,
+            td {
+                display: block;
+                width: 100%;
+            }
+
+            table {
+                margin-top: 14px;
+            }
+
+            table tr:first-child {
+                display: none;
+            }
+
+            table tr:not(:first-child) {
+                margin-bottom: 14px;
+                padding: 10px 12px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+            }
+
+            table tr:not(:first-child) td {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px;
+                padding: 9px 0;
+                border: none;
+                border-bottom: 1px solid #edf1f5;
+                text-align: right;
+                font-size: 13px;
+            }
+
+            table tr:not(:first-child) td:last-child {
+                border-bottom: none;
+            }
+
+            table tr:not(:first-child) td::before {
+                content: attr(data-label);
+                flex: 0 0 42%;
+                text-align: left;
+                font-weight: 700;
+                color: #475569;
+            }
+
+            .thao-tac {
+                justify-content: flex-end;
+                width: 100%;
+            }
+
+            .btn-sua,
+            .btn-xoa {
+                padding: 7px 12px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            h1 {
+                font-size: 21px;
+            }
+
+            .form-ban-sao {
+                padding: 15px;
+            }
+
+            input,
+            select {
+                font-size: 13px;
+                padding: 9px;
+            }
+
+            table tr:not(:first-child) td {
+                gap: 10px;
+                font-size: 12px;
+            }
+
+            table tr:not(:first-child) td::before {
+                flex-basis: 40%;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .xac-nhan-hop {
+                width: 92vw;
+                padding: 20px;
+            }
+
+            .xac-nhan-nut {
+                flex-direction: column-reverse;
+            }
+
+            .xac-nhan-nut button {
+                width: 100%;
+            }
+        }
+
     </style>
 
 </head>
@@ -757,7 +1079,7 @@ try {
     $activePage = 'bansao';
     require_once __DIR__ . '/../layout/sidebar.php';
     ?>
-    <main class="main-content" style="flex: 1; padding: 35px 40px; overflow-y: auto; background: #f8fafc;">
+    <main class="main-content" style="flex: 1; min-width: 0; padding: clamp(14px, 3vw, 35px) clamp(12px, 3vw, 40px); overflow-y: auto; background: #f8fafc;">
 
     <h1 style="margin-top: 0;">
         QUẢN LÝ BẢN SAO SÁCH
@@ -1123,12 +1445,12 @@ try {
 
                 <tr>
 
-                    <td>
+                    <td data-label="STT">
                         <?php echo $stt; ?>
                     </td>
 
 
-                    <td>
+                    <td data-label="ID">
 
                         <?php
                         echo htmlspecialchars(
@@ -1139,7 +1461,7 @@ try {
                     </td>
 
 
-                    <td>
+                    <td data-label="Mã bản sao">
 
                         <?php
                         echo htmlspecialchars(
@@ -1150,7 +1472,7 @@ try {
                     </td>
 
 
-                    <td>
+                    <td data-label="Mã sách">
 
                         <?php
                         echo htmlspecialchars(
@@ -1161,7 +1483,7 @@ try {
                     </td>
 
 
-                    <td>
+                    <td data-label="Tên sách">
 
                         <?php
                         echo htmlspecialchars(
@@ -1172,7 +1494,7 @@ try {
                     </td>
 
 
-                    <td>
+                    <td data-label="Vị trí">
 
                         <?php
                         echo htmlspecialchars(
@@ -1184,6 +1506,7 @@ try {
 
 
                     <td
+                        data-label="Trạng thái"
                         class="<?php
                                 echo $classTrangThai;
                                 ?>">
@@ -1197,31 +1520,37 @@ try {
                     </td>
 
 
-                    <td>
+                    <td data-label="Thao tác">
 
                         <div class="thao-tac">
 
 
                             <a
-                                class="btn-sua"
-
+                                class="btn-sua btn-sua-xac-nhan"
                                 href="bansao.php?edit=<?php
                                                         echo $banSao["id"];
-                                                        ?>">
+                                                        ?>"
+                                data-ma="<?php
+                                    echo htmlspecialchars(
+                                        $banSao["ma_ban_sao"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    );
+                                ?>">
                                 Sửa
                             </a>
 
 
                             <form
                                 method="post"
-
                                 class="form-xoa"
-
-                                onsubmit="
-        return confirm(
-            'Bạn có chắc muốn xóa bản sao này không?'
-        );
-    ">
+                                data-ma="<?php
+                                    echo htmlspecialchars(
+                                        $banSao["ma_ban_sao"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    );
+                                ?>">
 
                                 <input
                                     type="hidden"
@@ -1237,8 +1566,8 @@ try {
                                             ?>">
 
                                 <button
-                                    type="submit"
-                                    class="btn-xoa">
+                                    type="button"
+                                    class="btn-xoa btn-xoa-xac-nhan">
                                     Xóa
                                 </button>
 
@@ -1265,7 +1594,270 @@ try {
     </div>
 
 
+
+    <!-- =========================
+         POPUP XÁC NHẬN
+         ========================= -->
+    <div
+        class="xac-nhan-overlay"
+        id="popupXacNhan">
+
+        <div class="xac-nhan-hop">
+
+            <div
+                class="xac-nhan-bieu-tuong"
+                id="popupBieuTuong">
+                ⚠️
+            </div>
+
+            <h3
+                class="xac-nhan-tieu-de"
+                id="popupTieuDe">
+                Xác nhận thao tác
+            </h3>
+
+            <p
+                class="xac-nhan-noi-dung"
+                id="popupNoiDung">
+            </p>
+
+            <div class="xac-nhan-nut">
+
+                <button
+                    type="button"
+                    class="nut-huy-xac-nhan"
+                    id="nutHuyXacNhan">
+                    Hủy
+                </button>
+
+                <button
+                    type="button"
+                    class="nut-dong-y"
+                    id="nutDongYXacNhan">
+                    Có, xác nhận
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
     <script>
+
+        /* =========================================
+           POPUP XÁC NHẬN SỬA / XÓA
+           ========================================= */
+
+        const popupXacNhan =
+            document.getElementById("popupXacNhan");
+
+        const popupTieuDe =
+            document.getElementById("popupTieuDe");
+
+        const popupNoiDung =
+            document.getElementById("popupNoiDung");
+
+        const popupBieuTuong =
+            document.getElementById("popupBieuTuong");
+
+        const nutHuyXacNhan =
+            document.getElementById("nutHuyXacNhan");
+
+        const nutDongYXacNhan =
+            document.getElementById("nutDongYXacNhan");
+
+        let hanhDongSauXacNhan = null;
+
+
+        function moPopupXacNhan(
+            loai,
+            maBanSao,
+            hanhDong
+        ) {
+
+            hanhDongSauXacNhan = hanhDong;
+
+            if (loai === "sua") {
+
+                popupBieuTuong.textContent = "✏️";
+
+                popupTieuDe.textContent =
+                    "XÁC NHẬN SỬA";
+
+                popupNoiDung.innerHTML =
+                    'Bạn có chắc chắn muốn sửa bản sao '
+                    + '<span class="xac-nhan-ma">'
+                    + maBanSao
+                    + '</span> không?';
+
+                nutDongYXacNhan.textContent =
+                    "Có, sửa";
+
+                nutDongYXacNhan.classList.remove(
+                    "xoa"
+                );
+
+            } else {
+
+                popupBieuTuong.textContent = "🗑️";
+
+                popupTieuDe.textContent =
+                    "XÁC NHẬN XÓA";
+
+                popupNoiDung.innerHTML =
+                    'Bạn có chắc chắn muốn xóa bản sao '
+                    + '<span class="xac-nhan-ma">'
+                    + maBanSao
+                    + '</span> không?';
+
+                nutDongYXacNhan.textContent =
+                    "Có, xóa";
+
+                nutDongYXacNhan.classList.add(
+                    "xoa"
+                );
+            }
+
+            popupXacNhan.classList.add("hien");
+        }
+
+
+        function dongPopupXacNhan() {
+
+            popupXacNhan.classList.remove("hien");
+
+            hanhDongSauXacNhan = null;
+        }
+
+
+        nutHuyXacNhan.addEventListener(
+            "click",
+            dongPopupXacNhan
+        );
+
+
+        popupXacNhan.addEventListener(
+            "click",
+            function(event) {
+
+                if (event.target === popupXacNhan) {
+
+                    dongPopupXacNhan();
+                }
+            }
+        );
+
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Escape"
+                    && popupXacNhan.classList.contains(
+                        "hien"
+                    )
+                ) {
+
+                    dongPopupXacNhan();
+                }
+            }
+        );
+
+
+        nutDongYXacNhan.addEventListener(
+            "click",
+            function() {
+
+                if (
+                    typeof hanhDongSauXacNhan
+                    === "function"
+                ) {
+
+                    const hanhDong =
+                        hanhDongSauXacNhan;
+
+                    dongPopupXacNhan();
+
+                    hanhDong();
+                }
+            }
+        );
+
+
+        /* ===== BẤM SỬA ===== */
+
+        document
+            .querySelectorAll(
+                ".btn-sua-xac-nhan"
+            )
+            .forEach(
+                function(nutSua) {
+
+                    nutSua.addEventListener(
+                        "click",
+                        function(event) {
+
+                            event.preventDefault();
+
+                            const duongDan =
+                                nutSua.getAttribute(
+                                    "href"
+                                );
+
+                            const maBanSao =
+                                nutSua.dataset.ma;
+
+                            moPopupXacNhan(
+                                "sua",
+                                maBanSao,
+                                function() {
+
+                                    window.location.href =
+                                        duongDan;
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+
+
+        /* ===== BẤM XÓA ===== */
+
+        document
+            .querySelectorAll(
+                ".btn-xoa-xac-nhan"
+            )
+            .forEach(
+                function(nutXoa) {
+
+                    nutXoa.addEventListener(
+                        "click",
+                        function() {
+
+                            const formXoa =
+                                nutXoa.closest(
+                                    ".form-xoa"
+                                );
+
+                            const maBanSao =
+                                formXoa.dataset.ma;
+
+                            moPopupXacNhan(
+                                "xoa",
+                                maBanSao,
+                                function() {
+
+                                    formXoa.submit();
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+
+
         /* =========================================
    TỰ ẨN THÔNG BÁO SAU 3 GIÂY
    ========================================= */
