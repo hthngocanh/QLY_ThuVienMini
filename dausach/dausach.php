@@ -76,10 +76,10 @@ if ($loc_nam !== "") {
     $params["loc_nam"] = $loc_nam;
 }
 
-$dieu_kien = "";
+$dieu_kien = "WHERE b.trang_thai = 'Hoạt động'";
 
 if (!empty($where)) {
-    $dieu_kien = "WHERE " . implode(" AND ", $where);
+    $dieu_kien .= " AND " . implode(" AND ", $where);
 }
 
 $sql_dem = "
@@ -318,7 +318,8 @@ elseif (isset($_POST["xoa_sach"])) {
     $id = (int)$_POST["xoa_sach"];
 
     $stmt = $pdo->prepare(
-        "DELETE FROM books
+        "UPDATE books
+         SET trang_thai = 'Không hoạt động'
          WHERE id = :id"
     );
 
