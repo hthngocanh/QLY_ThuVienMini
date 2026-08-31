@@ -1,4 +1,3 @@
-```php
 <?php
 
 $ma_sach = "";
@@ -22,6 +21,7 @@ require_once __DIR__ . '/../database/config/database.php';
 
 $pdo = getDB();
 
+
 $stmt = $pdo->query("
     SELECT category_id, ten_danh_muc
     FROM Categories
@@ -30,17 +30,21 @@ $stmt = $pdo->query("
 
 $danh_sach_danh_muc = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
 $tu_khoa = trim($_GET["tu_khoa"] ?? "");
 $loc_tac_gia = trim($_GET["loc_tac_gia"] ?? "");
 $loc_danh_muc = trim($_GET["loc_danh_muc"] ?? "");
 $loc_nam = trim($_GET["loc_nam"] ?? "");
 
 $trang = max(1, (int)($_GET["trang"] ?? 1));
+
 $so_sach_moi_trang = 5;
+
 $offset = ($trang - 1) * $so_sach_moi_trang;
 
 $where = [];
 $params = [];
+
 
 if ($tu_khoa !== "") {
 
@@ -69,6 +73,7 @@ if ($loc_danh_muc !== "") {
     $params["loc_danh_muc"] = $loc_danh_muc;
 }
 
+
 if ($loc_nam !== "") {
 
     $where[] = "b.nam_xuat_ban = :loc_nam";
@@ -76,55 +81,14 @@ if ($loc_nam !== "") {
     $params["loc_nam"] = $loc_nam;
 }
 
+
 $dieu_kien = "WHERE b.trang_thai = 'Hoạt động'";
 
 if (!empty($where)) {
+
     $dieu_kien .= " AND " . implode(" AND ", $where);
 }
 
-$sql_dem = "
-    SELECT COUNT(*)
-    FROM books b
-    INNER JOIN Categories c
-        ON b.category_id = c.category_id
-    $dieu_kien
-";
-
-$stmt = $pdo->prepare($sql_dem);
-$stmt->execute($params);
-
-$tong_so_sach = (int)$stmt->fetchColumn();
-
-$tong_so_trang = max(
-    1,
-    (int)ceil($tong_so_sach / $so_sach_moi_trang)
-);
-
-$sql = "
-    SELECT
-        b.id,
-        b.ma_sach,
-        b.ten_sach,
-        b.ma_tac_gia,
-        b.tac_gia,
-        c.ten_danh_muc AS danh_muc,
-        b.nha_xuat_ban,
-        b.nam_xuat_ban,
-        b.isbn,
-        b.gia_sach,
-        b.mo_ta
-    FROM books b
-    INNER JOIN Categories c
-        ON b.category_id = c.category_id
-    $dieu_kien
-    ORDER BY b.id ASC
-    LIMIT $so_sach_moi_trang OFFSET $offset
-";
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-
-$danh_sach_sach = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 function kiemTraDauSach(
     $ma_sach,
@@ -140,6 +104,7 @@ function kiemTraDauSach(
 ) {
 
     $loi = [];
+
 
     if ($ma_sach == "") {
 
@@ -221,7 +186,10 @@ function kiemTraDauSach(
 
         $loi["nam_xuat_ban"] = "Năm xuất bản phải là số.";
 
-    } elseif ((int)$nam_xuat_ban < 1000 || (int)$nam_xuat_ban > date("Y")) {
+    } elseif (
+        (int)$nam_xuat_ban < 1000 ||
+        (int)$nam_xuat_ban > date("Y")
+    ) {
 
         $loi["nam_xuat_ban"] = "Năm xuất bản không hợp lệ.";
     }
@@ -264,7 +232,6 @@ function kiemTraDauSach(
     return $loi;
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_POST["sua_sach"])) {
@@ -278,6 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 b.ten_sach,
                 b.ma_tac_gia,
                 b.tac_gia,
+                b.category_id,
                 c.ten_danh_muc AS danh_muc,
                 b.nha_xuat_ban,
                 b.nam_xuat_ban,
@@ -313,23 +281,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-elseif (isset($_POST["xoa_sach"])) {
 
-    $id = (int)$_POST["xoa_sach"];
+    elseif (isset($_POST["xoa_sach"])) {
 
-    $stmt = $pdo->prepare(
-        "UPDATE books
-         SET trang_thai = 'Không hoạt động'
-         WHERE id = :id"
-    );
+        $id = (int)$_POST["xoa_sach"];
 
-    $stmt->execute([
-        "id" => $id
-    ]);
+        $stmt = $pdo->prepare("
+            UPDATE books
+            SET trang_thai = 'Không hoạt động'
+            WHERE id = :id
+        ");
 
-    $thong_bao = "Xóa sách thành công.";
-    $loai_thong_bao = "thanh-cong";
-}
+        $stmt->execute([
+            "id" => $id
+        ]);
+
+        $thong_bao = "Xóa sách thành công.";
+        $loai_thong_bao = "thanh-cong";
+    }
 
 
     elseif (isset($_POST["cap_nhat_sach"])) {
@@ -346,6 +315,7 @@ elseif (isset($_POST["xoa_sach"])) {
         $isbn = trim($_POST["isbn"] ?? "");
         $gia_sach = trim($_POST["gia_sach"] ?? "");
         $mo_ta = trim($_POST["mo_ta"] ?? "");
+
 
         $loi = kiemTraDauSach(
             $ma_sach,
@@ -368,6 +338,7 @@ elseif (isset($_POST["xoa_sach"])) {
                 FROM books
                 WHERE ma_sach = :ma_sach
                 AND id != :id
+                AND trang_thai = 'Hoạt động'
             ");
 
             $stmt->execute([
@@ -376,30 +347,51 @@ elseif (isset($_POST["xoa_sach"])) {
             ]);
 
             if ($stmt->fetchColumn() > 0) {
+
                 $loi["ma_sach"] = "Mã sách đã tồn tại.";
             }
         }
 
 
-        if (empty($loi)) {
+if (empty($loi)) {
 
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM books
-                WHERE isbn = :isbn
-                AND id != :id
-            ");
+    // Kiểm tra mã sách đã tồn tại
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM books
+        WHERE ma_sach = :ma_sach
+    ");
 
-            $stmt->execute([
-                "isbn" => $isbn,
-                "id" => $vi_tri_sua
-            ]);
+    $stmt->execute([
+        "ma_sach" => $ma_sach
+    ]);
 
-            if ($stmt->fetchColumn() > 0) {
-                $loi["isbn"] = "ISBN đã tồn tại.";
-            }
-        }
+    if ($stmt->fetchColumn() > 0) {
 
+        $loi["ma_sach"] = "Mã sách đã tồn tại. Vui lòng nhập mã sách mới.";
+    }
+}
+
+
+if (empty($loi)) {
+
+    // Kiểm tra ISBN đã tồn tại
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*)
+        FROM books
+        WHERE isbn = :isbn
+        AND trang_thai = 'Hoạt động'
+    ");
+
+    $stmt->execute([
+        "isbn" => $isbn
+    ]);
+
+    if ($stmt->fetchColumn() > 0) {
+
+        $loi["isbn"] = "ISBN đã tồn tại.";
+    }
+}
 
         $categoryId = null;
 
@@ -418,6 +410,7 @@ elseif (isset($_POST["xoa_sach"])) {
             $categoryId = $stmt->fetchColumn();
 
             if (!$categoryId) {
+
                 $loi["danh_muc"] = "Danh mục không tồn tại.";
             }
         }
@@ -485,6 +478,7 @@ elseif (isset($_POST["xoa_sach"])) {
         $gia_sach = trim($_POST["gia_sach"] ?? "");
         $mo_ta = trim($_POST["mo_ta"] ?? "");
 
+
         $loi = kiemTraDauSach(
             $ma_sach,
             $ten_sach,
@@ -504,25 +498,8 @@ elseif (isset($_POST["xoa_sach"])) {
             $stmt = $pdo->prepare("
                 SELECT COUNT(*)
                 FROM books
-                WHERE ma_sach = :ma_sach
-            ");
-
-            $stmt->execute([
-                "ma_sach" => $ma_sach
-            ]);
-
-            if ($stmt->fetchColumn() > 0) {
-                $loi["ma_sach"] = "Mã sách đã tồn tại.";
-            }
-        }
-
-
-        if (empty($loi)) {
-
-            $stmt = $pdo->prepare("
-                SELECT COUNT(*)
-                FROM books
                 WHERE isbn = :isbn
+                AND trang_thai = 'Hoạt động'
             ");
 
             $stmt->execute([
@@ -530,10 +507,10 @@ elseif (isset($_POST["xoa_sach"])) {
             ]);
 
             if ($stmt->fetchColumn() > 0) {
+
                 $loi["isbn"] = "ISBN đã tồn tại.";
             }
         }
-
 
         $categoryId = null;
 
@@ -552,6 +529,7 @@ elseif (isset($_POST["xoa_sach"])) {
             $categoryId = $stmt->fetchColumn();
 
             if (!$categoryId) {
+
                 $loi["danh_muc"] = "Danh mục không tồn tại.";
             }
         }
@@ -559,69 +537,126 @@ elseif (isset($_POST["xoa_sach"])) {
 
         if (empty($loi)) {
 
-            $stmt = $pdo->prepare("
-                INSERT INTO books
-                (
-                    ma_sach,
-                    ten_sach,
-                    ma_tac_gia,
-                    tac_gia,
-                    category_id,
-                    nha_xuat_ban,
-                    nam_xuat_ban,
-                    isbn,
-                    gia_sach,
-                    mo_ta
-                )
-                VALUES
-                (
-                    :ma_sach,
-                    :ten_sach,
-                    :ma_tac_gia,
-                    :tac_gia,
-                    :category_id,
-                    :nha_xuat_ban,
-                    :nam_xuat_ban,
-                    :isbn,
-                    :gia_sach,
-                    :mo_ta
-                )
-            ");
+    try {
 
-            $stmt->execute([
-                "ma_sach" => $ma_sach,
-                "ten_sach" => $ten_sach,
-                "ma_tac_gia" => $ma_tac_gia,
-                "tac_gia" => $tac_gia,
-                "category_id" => $categoryId,
-                "nha_xuat_ban" => $nha_xuat_ban,
-                "nam_xuat_ban" => $nam_xuat_ban,
-                "isbn" => $isbn,
-                "gia_sach" => $gia_sach,
-                "mo_ta" => $mo_ta
-            ]);
+        $stmt = $pdo->prepare("
+            INSERT INTO books
+            (
+                ma_sach,
+                ten_sach,
+                ma_tac_gia,
+                tac_gia,
+                category_id,
+                nha_xuat_ban,
+                nam_xuat_ban,
+                isbn,
+                gia_sach,
+                mo_ta
+            )
+            VALUES
+            (
+                :ma_sach,
+                :ten_sach,
+                :ma_tac_gia,
+                :tac_gia,
+                :category_id,
+                :nha_xuat_ban,
+                :nam_xuat_ban,
+                :isbn,
+                :gia_sach,
+                :mo_ta
+            )
+        ");
 
-            $thong_bao = "Thêm sách thành công.";
-            $loai_thong_bao = "thanh-cong";
+        $stmt->execute([
+            "ma_sach" => $ma_sach,
+            "ten_sach" => $ten_sach,
+            "ma_tac_gia" => $ma_tac_gia,
+            "tac_gia" => $tac_gia,
+            "category_id" => $categoryId,
+            "nha_xuat_ban" => $nha_xuat_ban,
+            "nam_xuat_ban" => $nam_xuat_ban,
+            "isbn" => $isbn,
+            "gia_sach" => $gia_sach,
+            "mo_ta" => $mo_ta
+        ]);
 
-            $ma_sach = "";
-            $ten_sach = "";
-            $ma_tac_gia = "";
-            $tac_gia = "";
-            $danh_muc = "";
-            $nha_xuat_ban = "";
-            $nam_xuat_ban = "";
-            $isbn = "";
-            $gia_sach = "";
-            $mo_ta = "";
+        $thong_bao = "Thêm sách thành công.";
+        $loai_thong_bao = "thanh-cong";
+
+        $ma_sach = "";
+        $ten_sach = "";
+        $ma_tac_gia = "";
+        $tac_gia = "";
+        $danh_muc = "";
+        $nha_xuat_ban = "";
+        $nam_xuat_ban = "";
+        $isbn = "";
+        $gia_sach = "";
+        $mo_ta = "";
+
+    } catch (PDOException $e) {
+
+        if ($e->errorInfo[1] == 1062) {
+            $loi["ma_sach"] = "Mã sách đã tồn tại. Vui lòng nhập mã sách mới.";
+        } else {
+            throw $e;
         }
     }
 }
+    }
+}
+
+
+$sql_dem = "
+    SELECT COUNT(*)
+    FROM books b
+    INNER JOIN Categories c
+        ON b.category_id = c.category_id
+    $dieu_kien
+";
+
+$stmt = $pdo->prepare($sql_dem);
+$stmt->execute($params);
+
+$tong_so_sach = (int)$stmt->fetchColumn();
+
+$tong_so_trang = max(
+    1,
+    (int)ceil($tong_so_sach / $so_sach_moi_trang)
+);
+
+
+$sql = "
+    SELECT
+        b.id,
+        b.ma_sach,
+        b.ten_sach,
+        b.ma_tac_gia,
+        b.tac_gia,
+        b.trang_thai,
+        c.ten_danh_muc AS danh_muc,
+        b.nha_xuat_ban,
+        b.nam_xuat_ban,
+        b.isbn,
+        b.gia_sach,
+        b.mo_ta
+    FROM books b
+    INNER JOIN Categories c
+        ON b.category_id = c.category_id
+    $dieu_kien
+    ORDER BY b.id ASC
+    LIMIT $so_sach_moi_trang OFFSET $offset
+";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 
 $danh_sach_sach = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -1341,6 +1376,8 @@ require_once __DIR__ . '/../layout/sidebar.php';
 
 <th>Mô tả</th>
 
+<th>Trạng thái</th>
+
 <th>Thao tác</th>
 
 </tr>
@@ -1352,7 +1389,7 @@ if (empty($danh_sach_sach)) {
 
     echo "<tr>";
 
-    echo "<td colspan='12' style='text-align:center;'>";
+    echo "<td colspan='13' style='text-align:center;'>";
 
     echo "Không tìm thấy sách.";
 
@@ -1415,8 +1452,12 @@ if (empty($danh_sach_sach)) {
             . "</td>";
 
         echo "<td>"
-            . htmlspecialchars($sach["mo_ta"])
-            . "</td>";
+    . htmlspecialchars($sach["mo_ta"])
+    . "</td>";
+
+        echo "<td>"
+    . htmlspecialchars($sach["trang_thai"])
+    . "</td>";
 
         echo "<td>";
 
