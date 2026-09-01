@@ -59,6 +59,7 @@ class BorrowSlipModel
             INNER JOIN book_copies bc
                 ON bs.ID_BanSao = bc.id
             WHERE bs.ID_PhieuMuon = ?
+            AND bs.DaXoa = 0
         ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([(int)$id]);
@@ -140,16 +141,16 @@ class BorrowSlipModel
         ]);
     }
 
-    public function deletePhieuMuon($id) 
-    { 
-        $sql = "UPDATE borrow_slips 
-                SET DaXoa = 1 
-                WHERE ID_PhieuMuon = ?"; 
+public function deletePhieuMuon($id)
+{
+    $sql = "UPDATE borrow_slips
+            SET DaXoa = 1
+            WHERE ID_PhieuMuon = ?";
 
-        $stmt = $this->pdo->prepare($sql); 
+    $stmt = $this->pdo->prepare($sql);
 
-        return $stmt->execute([ 
-            (int)$id 
-        ]); 
+    return $stmt->execute([
+        (int)$id
+    ]);
     }
 }
