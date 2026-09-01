@@ -1,5 +1,4 @@
 <?php
-// src/Model/BookModel.php
 
 require_once __DIR__ . '/../../database/config/database.php';
 
@@ -61,7 +60,7 @@ class BookModel
 
     public function demDauSach($tuKhoa = "", $locTacGia = "", $locDanhMuc = "", $locNam = "")
     {
-        $where = ["1=1"];
+        $where = ["b.trang_thai = 'Hoạt động'"];
         $params = [];
 
         if ($tuKhoa !== "") {
@@ -106,7 +105,7 @@ class BookModel
 
     public function layDanhSachDauSach($tuKhoa = "", $locTacGia = "", $locDanhMuc = "", $locNam = "", $limit = 5, $offset = 0)
     {
-        $where = ["1=1"];
+        $where = ["b.trang_thai = 'Hoạt động'"];
         $params = [];
 
         if ($tuKhoa !== "") {
@@ -293,8 +292,15 @@ class BookModel
     }
 
     public function xoaDauSach($id)
-    {
-        $stmt = $this->pdo->prepare("DELETE FROM books WHERE id = :id");
-        return $stmt->execute(["id" => (int)$id]);
-    }
+{
+    $stmt = $this->pdo->prepare("
+        UPDATE books
+        SET trang_thai = 'Không hoạt động'
+        WHERE id = :id
+    ");
+
+    return $stmt->execute([
+        "id" => (int)$id
+    ]);
+}
 }
