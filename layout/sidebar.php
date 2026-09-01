@@ -8,16 +8,18 @@ $appRoot = '/QLY_ThuVienMini/';
 
 // Tự động nhận diện trang hiện tại nếu chưa đặt biến $activePage
 $currentScript = $_SERVER['SCRIPT_NAME'] ?? '';
+$getController = strtolower($_GET['controller'] ?? '');
+
 if (!isset($activePage)) {
-    if (strpos($currentScript, 'nguoiDung') !== false || strpos($currentScript, 'User.php') !== false) {
+    if ($getController === 'user' || $getController === 'nguoidung' || strpos($currentScript, 'nguoiDung') !== false || strpos($currentScript, 'User.php') !== false) {
         $activePage = 'nguoidung';
-    } elseif (strpos($currentScript, 'dausach') !== false) {
+    } elseif ($getController === 'dausach' || $getController === 'book' || strpos($currentScript, 'dausach') !== false) {
         $activePage = 'dausach';
-    } elseif (strpos($currentScript, 'banSaoSach') !== false || strpos($currentScript, 'bansao.php') !== false) {
+    } elseif ($getController === 'bansao' || $getController === 'book_copy' || strpos($currentScript, 'banSaoSach') !== false || strpos($currentScript, 'bansao.php') !== false) {
         $activePage = 'bansao';
-    } elseif (strpos($currentScript, 'phieuMuon') !== false || strpos($currentScript, 'phieumuon.php') !== false) {
+    } elseif ($getController === 'phieumuon' || $getController === 'borrow_slip' || strpos($currentScript, 'phieuMuon') !== false || strpos($currentScript, 'phieumuon.php') !== false) {
         $activePage = 'phieumuon';
-    } elseif (strpos($currentScript, 'danhmucsach') !== false || strpos($currentScript, 'danhmuc.php') !== false) {
+    } elseif ($getController === 'danhmuc' || $getController === 'category' || strpos($currentScript, 'danhmucsach') !== false || strpos($currentScript, 'danhmuc.php') !== false) {
         $activePage = 'danhmuc';
     } else {
         $activePage = 'trangchu';
@@ -47,22 +49,29 @@ if ($vaiTro === "Quản trị viên") {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= $appRoot ?>assets/css/design-system.css">
 
 <style>
     :root {
-        --sb-primary: #2563eb;
-        --sb-primary-hover: #1d4ed8;
-        --sb-bg: #0f172a;
-        --sb-hover: #1e293b;
-        --sb-active: #2563eb;
-        --sb-border: rgba(255, 255, 255, 0.08);
+        --sb-primary: var(--primary);
+        --sb-primary-hover: var(--primary-dark);
+        --sb-primary-light: var(--primary-light);
+        --sb-bg: var(--white);
+        --sb-text: var(--text-body);
+        --sb-text-muted: var(--text-secondary);
+        --sb-text-heading: var(--text-primary);
+        --sb-border: var(--border);
+        --sb-active-bg: var(--primary-light);
+        --sb-active-text: var(--primary);
+        --sb-hover-bg: var(--primary-light);
+        --sb-hover-text: var(--primary);
     }
 
     html, body {
         margin: 0 !important;
         padding: 0 !important;
         min-height: 100vh !important;
-        background-color: #f8fafc !important;
+        background-color: #F8FAFC !important;
     }
 
     .layout {
@@ -71,26 +80,27 @@ if ($vaiTro === "Quản trị viên") {
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background-color: #f8fafc !important;
+        background-color: #F8FAFC !important;
     }
 
     .sidebar {
-        width: 270px !important;
-        min-width: 270px !important;
-        max-width: 270px !important;
-        flex: 0 0 270px !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+        flex: 0 0 260px !important;
         background: var(--sb-bg) !important;
-        color: #f8fafc !important;
+        color: var(--sb-text) !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05) !important;
+        border-right: 1px solid var(--sb-border) !important;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02) !important;
         position: sticky !important;
         top: 0 !important;
         left: 0 !important;
         height: 100vh !important;
         z-index: 999 !important;
-        font-family: 'Inter', Arial, sans-serif !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
         box-sizing: border-box !important;
     }
 
@@ -100,11 +110,11 @@ if ($vaiTro === "Quản trị viên") {
         padding: 35px 40px !important;
         overflow-y: auto !important;
         box-sizing: border-box !important;
-        background-color: #f8fafc !important;
+        background-color: #F8FAFC !important;
     }
 
     .sidebar-top {
-        padding: 24px 18px 12px;
+        padding: 24px 16px 12px;
         overflow-y: auto;
     }
 
@@ -112,37 +122,39 @@ if ($vaiTro === "Quản trị viên") {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 0 8px 24px;
+        padding: 0 6px 20px;
         border-bottom: 1px solid var(--sb-border);
     }
 
     .logo-icon {
         width: 40px;
         height: 40px;
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        background: var(--sb-primary-light);
+        color: var(--sb-primary);
+        border: 1px solid #BFDBFE;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 20px;
-        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
         flex-shrink: 0;
     }
 
     .logo-text h2 {
         font-size: 17px;
-        font-weight: 700;
+        font-weight: 800;
         letter-spacing: -0.3px;
-        color: #ffffff;
+        color: #1E3A8A;
         margin: 0;
         line-height: 1.2;
     }
 
     .logo-text span {
-        font-size: 11px;
-        color: #94a3b8;
+        font-size: 11.5px;
+        color: var(--sb-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        font-weight: 500;
     }
 
     .nav-section {
@@ -152,10 +164,10 @@ if ($vaiTro === "Quản trị viên") {
     .nav-label {
         font-size: 11px;
         font-weight: 700;
-        color: #64748b;
+        color: var(--sb-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.8px;
-        padding: 0 12px 10px;
+        padding: 0 10px 10px;
     }
 
     .menu {
@@ -168,62 +180,68 @@ if ($vaiTro === "Quản trị viên") {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 12px 14px;
-        color: #94a3b8;
+        padding: 11px 14px;
+        color: var(--sb-text);
         text-decoration: none;
         font-size: 14px;
         font-weight: 500;
         border-radius: 8px;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
     }
 
     .menu-link .icon {
         font-size: 18px;
         width: 22px;
         text-align: center;
-        transition: transform 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.15s ease;
     }
 
     .menu-link:hover {
-        color: #ffffff;
-        background: var(--sb-hover);
+        color: var(--sb-hover-text);
+        background: var(--sb-hover-bg);
+        font-weight: 600;
     }
 
     .menu-link:hover .icon {
-        transform: scale(1.1);
+        transform: scale(1.08);
     }
 
     .menu-link.active {
-        color: #ffffff;
-        background: var(--sb-active);
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        color: var(--sb-active-text);
+        background: var(--sb-active-bg);
         font-weight: 600;
+        border-left: 3px solid var(--sb-primary);
+        border-radius: 0 8px 8px 0;
+        padding-left: 11px;
     }
 
     /* ================= USER PROFILE WIDGET ================= */
     .sidebar-bottom {
-        padding: 16px 18px 24px;
+        padding: 14px 16px 20px;
         border-top: 1px solid var(--sb-border);
         position: relative;
         background: var(--sb-bg);
     }
 
     .user-card {
-        background: rgba(255, 255, 255, 0.04);
+        background: #F8FAFC;
         border: 1px solid var(--sb-border);
-        border-radius: 12px;
-        padding: 12px 14px;
+        border-radius: 10px;
+        padding: 10px 12px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.15s ease;
         user-select: none;
     }
 
     .user-card:hover, .user-card.active {
-        background: rgba(255, 255, 255, 0.09);
-        border-color: rgba(255, 255, 255, 0.16);
+        background: #EFF6FF;
+        border-color: #BFDBFE;
     }
 
     .user-info-left {
@@ -234,18 +252,17 @@ if ($vaiTro === "Quản trị viên") {
     }
 
     .user-avatar {
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #6366f1, #a855f7);
-        color: white;
+        background: var(--sb-primary);
+        color: #FFFFFF;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 15px;
+        font-size: 14px;
         flex-shrink: 0;
-        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     }
 
     .user-details {
@@ -258,51 +275,50 @@ if ($vaiTro === "Quản trị viên") {
     .user-name {
         font-size: 13.5px;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--sb-text-heading);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 130px;
+        max-width: 125px;
     }
 
     /* Role Badges */
     .role-badge {
         display: inline-block;
-        font-size: 10.5px;
+        font-size: 11px;
         font-weight: 600;
         padding: 2px 7px;
         border-radius: 20px;
-        text-transform: capitalize;
         width: fit-content;
     }
 
     .badge-admin {
-        background: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: #FEE2E2;
+        color: #B91C1C;
+        border: 1px solid #FECACA;
     }
 
     .badge-librarian {
-        background: rgba(14, 165, 233, 0.2);
-        color: #38bdf8;
-        border: 1px solid rgba(14, 165, 233, 0.3);
+        background: #EFF6FF;
+        color: #1D4ED8;
+        border: 1px solid #BFDBFE;
     }
 
     .badge-reader {
-        background: rgba(16, 185, 129, 0.2);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
+        background: #DCFCE7;
+        color: #15803D;
+        border: 1px solid #BBF7D0;
     }
 
     .badge-guest {
-        background: rgba(148, 163, 184, 0.2);
-        color: #cbd5e1;
-        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
     }
 
     .user-dropdown-arrow {
-        color: #94a3b8;
-        font-size: 11px;
+        color: var(--sb-text-muted);
+        font-size: 10px;
         transition: transform 0.2s ease;
     }
 
@@ -313,18 +329,18 @@ if ($vaiTro === "Quản trị viên") {
     /* Dropdown Menu */
     .user-dropdown-menu {
         position: absolute;
-        bottom: 85px;
-        left: 18px;
-        right: 18px;
-        background: #1e293b;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        bottom: 78px;
+        left: 16px;
+        right: 16px;
+        background: #FFFFFF;
+        border: 1px solid var(--sb-border);
         border-radius: 12px;
         padding: 8px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         display: none;
         flex-direction: column;
         gap: 4px;
-        animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: dropdownFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 1000;
     }
 
@@ -335,7 +351,7 @@ if ($vaiTro === "Quản trị viên") {
     @keyframes dropdownFadeIn {
         from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(6px);
         }
         to {
             opacity: 1;
@@ -347,8 +363,8 @@ if ($vaiTro === "Quản trị viên") {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 10px 12px;
-        color: #cbd5e1;
+        padding: 9px 12px;
+        color: var(--sb-text);
         text-decoration: none;
         font-size: 13.5px;
         font-weight: 500;
@@ -357,22 +373,22 @@ if ($vaiTro === "Quản trị viên") {
     }
 
     .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #ffffff;
+        background: #EFF6FF;
+        color: var(--sb-primary);
     }
 
     .dropdown-item.logout {
-        color: #f87171;
+        color: #DC2626;
     }
 
     .dropdown-item.logout:hover {
-        background: rgba(239, 68, 68, 0.15);
-        color: #fca5a5;
+        background: #FEF2F2;
+        color: #991B1B;
     }
 
     .dropdown-divider {
         height: 1px;
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--sb-border);
         margin: 4px 0;
     }
 
@@ -389,7 +405,8 @@ if ($vaiTro === "Quản trị viên") {
         border-radius: 8px;
         font-size: 14px;
         font-weight: 600;
-        transition: background 0.2s;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        transition: background 0.15s ease;
     }
 
     .btn-login-now:hover {
@@ -404,7 +421,12 @@ if ($vaiTro === "Quản trị viên") {
 
         <!-- Logo -->
         <div class="logo-box">
-            <div class="logo-icon">📚</div>
+            <div class="logo-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+            </div>
             <div class="logo-text">
                 <h2>Thư viện Mini</h2>
                 <span>Library System</span>
@@ -417,46 +439,88 @@ if ($vaiTro === "Quản trị viên") {
 
             <nav class="menu">
                 <a href="<?= $appRoot ?>index.php" class="menu-link <?= $activePage === 'trangchu' ? 'active' : '' ?>">
-                    <span class="icon">🏠</span>
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg>
+                    </span>
                     <span>Trang chủ</span>
                 </a>
 
                 <?php
                 $userMenuLabel = "Người dùng";
-                $userMenuIcon = "👥";
                 if ($vaiTro === "Độc giả") {
                     $userMenuLabel = "Thông tin cá nhân";
-                    $userMenuIcon = "👤";
                 } elseif ($vaiTro === "Thủ thư") {
                     $userMenuLabel = "Tra cứu độc giả";
-                    $userMenuIcon = "🔍";
                 } elseif ($vaiTro === "Quản trị viên") {
                     $userMenuLabel = "Người dùng";
-                    $userMenuIcon = "👥";
                 }
                 ?>
-                <a href="<?= $appRoot ?>nguoiDung/User.php" class="menu-link <?= $activePage === 'nguoidung' ? 'active' : '' ?>">
-                    <span class="icon"><?= $userMenuIcon ?></span>
+                <a href="<?= $appRoot ?>index.php?controller=user&action=profile" class="menu-link <?= $activePage === 'nguoidung' ? 'active' : '' ?>">
+                    <span class="icon">
+                        <?php if ($vaiTro === "Độc giả"): ?>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        <?php elseif ($vaiTro === "Thủ thư"): ?>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        <?php else: ?>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        <?php endif; ?>
+                    </span>
                     <span><?= $userMenuLabel ?></span>
                 </a>
 
-                <a href="<?= $appRoot ?>dausach/dausach.php" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">
-                    <span class="icon">📖</span>
+                <a href="<?= $appRoot ?>index.php?controller=dausach" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </span>
                     <span>Đầu sách</span>
                 </a>
 
-                <a href="<?= $appRoot ?>banSaoSach/bansao.php" class="menu-link <?= $activePage === 'bansao' ? 'active' : '' ?>">
-                    <span class="icon">📑</span>
+                <a href="<?= $appRoot ?>index.php?controller=bansao" class="menu-link <?= $activePage === 'bansao' ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </span>
                     <span>Bản sao sách</span>
                 </a>
 
-                <a href="<?= $appRoot ?>phieuMuon/phieumuon.php" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
-                    <span class="icon">📋</span>
+                <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                            <line x1="9" y1="12" x2="15" y2="12"></line>
+                            <line x1="9" y1="16" x2="13" y2="16"></line>
+                        </svg>
+                    </span>
                     <span>Phiếu mượn</span>
                 </a>
 
                 <a href="<?= $appRoot ?>index.php?controller=danhmuc" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
-                    <span class="icon">🏷️</span>
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                    </span>
                     <span>Danh mục</span>
                 </a>
             </nav>
@@ -470,16 +534,25 @@ if ($vaiTro === "Quản trị viên") {
         <?php if ($isLoggedIn): ?>
             <!-- Dropdown Menu -->
             <div class="user-dropdown-menu" id="userDropdownMenu">
-                <div style="padding: 6px 12px; font-size: 11.5px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 4px;">
+                <div style="padding: 6px 12px; font-size: 11.5px; color: var(--sb-text-muted); border-bottom: 1px solid var(--sb-border); margin-bottom: 4px;">
                     Mã: <strong><?= htmlspecialchars($maNguoiDung) ?></strong>
                 </div>
-                <a href="<?= $appRoot ?>doimatkhau.php" class="dropdown-item">
-                    <span>🔑</span>
-                    <span>Đổi mật khẩu</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="<?= $appRoot ?>dangxuat.php" class="dropdown-item logout">
-                    <span>🚪</span>
+                <?php if ($vaiTro === "Độc giả"): ?>
+                    <a href="<?= $appRoot ?>index.php?controller=auth&action=change_password" class="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span>Đổi mật khẩu</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                <?php endif; ?>
+                <a href="<?= $appRoot ?>index.php?controller=auth&action=logout" class="dropdown-item logout">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
                     <span>Đăng xuất</span>
                 </a>
             </div>
@@ -499,13 +572,19 @@ if ($vaiTro === "Quản trị viên") {
                         </span>
                     </div>
                 </div>
-                <div class="user-dropdown-arrow">▲</div>
+                <div class="user-dropdown-arrow">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
             </div>
 
         <?php else: ?>
             <a href="<?= $appRoot ?>dangnhap.php" class="btn-login-now">
-                <span>🔐</span>
-                <span>Đăng nhập</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
             </a>
         <?php endif; ?>
 

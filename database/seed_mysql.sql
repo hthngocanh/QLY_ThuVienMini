@@ -10,10 +10,10 @@ USE qly_thuvienmini;
 -- 1. NGUOI_DUNG
 -- =========================================
 -- Mật khẩu mẫu của tất cả tài khoản:
--- 123456
+-- Thuvien12345!
 --
 -- Mật khẩu đã được mã hóa bằng password_hash()
--- để phù hợp với yêu cầu bảo mật của bài.
+-- để phù hợp với chính sách bảo mật của hệ thống.
 
 
 INSERT INTO users

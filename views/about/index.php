@@ -4,21 +4,45 @@
 <head>
     <meta charset="UTF-8">
     <title>Giới thiệu Nhóm 02 - Lập Trình Web</title>
+    <link rel="stylesheet" href="assets/css/design-system.css">
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 30px;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         h1 {
-            color: pink;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: var(--font-size-page-title);
         }
 
         h2 {
-            color: #0056b3;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 6px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-size: var(--font-size-card-title);
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: var(--text-body);
+            font-size: var(--font-size-body);
+        }
+
+        p {
+            color: var(--text-body);
+            font-size: var(--font-size-body);
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -33,7 +57,6 @@
         <li><strong>Nguyễn Khánh Linh</strong> Mã SV: 224001807</li>
         <li><strong>Phạm Khánh Linh</strong> Mã SV: 224001810</li>
         <li><strong>Trần Thuỳ Trang</strong> Mã SV: 2240018037</li>
-
     </ul>
 
     <h2>Đề tài dự kiến</h2>

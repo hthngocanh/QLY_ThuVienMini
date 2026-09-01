@@ -1,15 +1,19 @@
 <?php
-// src/Controller/Controllerdanhmuc.php
+// src/Controller/CategoryController.php
 
-require_once __DIR__ . '/../Repository/Repositorydanhmuc.php';
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Model/CategoryModel.php';
 
-class Controllerdanhmuc
+class CategoryController extends BaseController
 {
-    private $categoryRepo;
+    private $categoryModel;
 
     public function __construct()
     {
-        $this->categoryRepo = new Repositorydanhmuc();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $this->categoryModel = new CategoryModel();
     }
 
     public function index()
@@ -19,9 +23,8 @@ class Controllerdanhmuc
         $tenDanhMuc = '';
         $moTa = '';
         $trangThai = 'Hoạt động';
-        
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $action = $_POST['action'] ?? '';
 
             if ($action === 'them') {
@@ -34,9 +37,8 @@ class Controllerdanhmuc
                 }
 
                 if (empty($errors)) {
-                    if ($this->categoryRepo->themDanhMuc($tenDanhMuc, $moTa, $trangThai)) {
-                        header('Location: index.php?controller=danhmuc&success=created');
-                        exit;
+                    if ($this->categoryModel->themDanhMuc($tenDanhMuc, $moTa, $trangThai)) {
+                        $this->redirect('index.php?controller=danhmuc&success=created');
                     }
                 }
             }
@@ -52,27 +54,25 @@ class Controllerdanhmuc
                 }
 
                 if (empty($errors)) {
-                    if ($this->categoryRepo->suaDanhMuc($categoryId, $tenDanhMuc, $moTa, $trangThai)) {
-                        header('Location: index.php?controller=danhmuc&success=updated');
-                        exit;
+                    if ($this->categoryModel->suaDanhMuc($categoryId, $tenDanhMuc, $moTa, $trangThai)) {
+                        $this->redirect('index.php?controller=danhmuc&success=updated');
                     }
                 }
-                $danhMucDangSua = $this->categoryRepo->layDanhMucTheoId($categoryId);
+                $danhMucDangSua = $this->categoryModel->layDanhMucTheoId($categoryId);
             }
 
             if ($action === 'xoa') {
                 $categoryId = (int)($_POST['category_id'] ?? 0);
                 if ($categoryId > 0) {
-                    if ($this->categoryRepo->xoaDanhMuc($categoryId)) {
-                        header('Location: index.php?controller=danhmuc&success=deleted');
-                        exit;
+                    if ($this->categoryModel->xoaDanhMuc($categoryId)) {
+                        $this->redirect('index.php?controller=danhmuc&success=deleted');
                     }
                 }
             }
         }
 
         if (isset($_GET['edit_id']) && is_numeric($_GET['edit_id'])) {
-            $danhMucDangSua = $this->categoryRepo->layDanhMucTheoId((int)$_GET['edit_id']);
+            $danhMucDangSua = $this->categoryModel->layDanhMucTheoId((int)$_GET['edit_id']);
         }
 
         $success = $_GET['success'] ?? '';
@@ -81,9 +81,17 @@ class Controllerdanhmuc
         if ($success === 'updated') $thongBaoThanhCong = 'Cập nhật danh mục sách thành công!';
         if ($success === 'deleted') $thongBaoThanhCong = 'Xóa danh mục sách thành công!';
 
-        $danhSachDanhMuc = $this->categoryRepo->layDanhSachDanhMuc();
+        $danhSachDanhMuc = $this->categoryModel->layDanhSachDanhMuc();
 
-        // Trỏ thẳng trực tiếp đến file View ở đường dẫn /danhmucsach/danhmuc.php
-        require_once __DIR__ . '/../../danhmucsach/danhmuc.php';
+        $this->renderView('danhmuc/index.php', [
+            'tenDanhMuc' => $tenDanhMuc,
+            'moTa' => $moTa,
+            'trangThai' => $trangThai,
+            'errors' => $errors,
+            'danhMucDangSua' => $danhMucDangSua,
+            'thongBaoThanhCong' => $thongBaoThanhCong,
+            'danhSachDanhMuc' => $danhSachDanhMuc,
+            'activePage' => 'danhmuc'
+        ]);
     }
 }

@@ -1,0 +1,504 @@
+/* ==========================================================================
+   DESIGN SYSTEM — HỆ THỐNG QUẢN LÝ THƯ VIỆN MINI
+   Single Source of Truth cho toàn bộ giao diện dự án
+   ========================================================================== */
+
+:root {
+    /* ==========================================================================
+       1. COLOR SYSTEM (12 MÀU QUY CHUẨN DUY NHẤT)
+       ========================================================================== */
+    --primary: #2563EB;        /* Primary Blue: nút chính, icon, link, highlight, active */
+    --primary-dark: #1E3A8A;   /* Dark Blue: hover nút chính, footer, brand, header nổi bật */
+    --primary-light: #EFF6FF;  /* Light Blue: active/hover sidebar, table header, hero, badge thủ thư */
+    --border-blue: #BFDBFE;    /* Blue Border: input focus, card/logo border */
+    --white: #FFFFFF;          /* White: card, sidebar, table, nút phụ, text/icon trên primary */
+    --bg-page: #F8FAFC;        /* Background: nền toàn trang */
+    --text-primary: #0F172A;   /* Text Primary: H1, H2, H3, tiêu đề chính */
+    --text-body: #334155;      /* Text Body: label, table, input, sidebar text */
+    --text-secondary: #64748B; /* Text Secondary: mô tả, placeholder, subtitle, caption, icon inactive */
+    --border: #E2E8F0;         /* Border: input, card, table, sidebar divider */
+    --success: #16A34A;        /* Success: trạng thái thành công/đã trả/hoạt động */
+    --warning: #F59E0B;        /* Warning: cảnh báo/đang mượn/chờ duyệt */
+    --danger: #DC2626;         /* Danger: lỗi/quá hạn/bị khóa/xóa/validation */
+
+    /* ==========================================================================
+       2. FONT & TYPOGRAPHY SCALE
+       ========================================================================== */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    --font-size-hero: 46px;         /* Hero H1 */
+    --font-size-page-heading: 28px; /* Page Heading (H1) */
+    --font-size-section: 26px;      /* Section Heading (H2) */
+    --font-size-card-title: 18px;   /* Card Title (H3) */
+    --font-size-small-title: 16px;  /* Small Title */
+    --font-size-body: 15px;         /* Body */
+    --font-size-button: 15px;       /* Button */
+    --font-size-label: 14px;        /* Label */
+    --font-size-nav: 14px;          /* Navigation */
+    --font-size-caption: 13px;      /* Footer / Caption */
+    --font-size-badge: 13px;        /* Badge */
+    --font-size-error: 13px;        /* Field Error */
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+
+    /* ==========================================================================
+       3. BORDER RADIUS
+       ========================================================================== */
+    --radius-card: 16px;            /* Card / Form / Table */
+    --radius-form: 16px;
+    --radius-table: 16px;
+    --radius-button: 8px;           /* Button / Input */
+    --radius-input: 8px;
+    --radius-badge: 20px;           /* Badge */
+    --radius-action: 6px;           /* Small table action */
+    --radius-full: 9999px;
+
+    /* ==========================================================================
+       4. SHADOWS
+       ========================================================================== */
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.04);
+    --shadow-btn: 0 2px 6px rgba(37, 99, 235, 0.2);
+    --shadow-dropdown: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+    /* ==========================================================================
+       5. SPACING (ICON - TEXT GAPS)
+       ========================================================================== */
+    --gap-sidebar: 12px;
+    --gap-brand: 12px;
+    --gap-dropdown: 10px;
+    --gap-button: 8px;
+    --gap-title: 8px;
+    --gap-alert: 8px;
+    --gap-hero: 8px;
+    --gap-table-action: 6px;
+
+    /* ==========================================================================
+       6. COMPONENT SIZES
+       ========================================================================== */
+    --input-height: 40px;
+    --button-height: 42px;
+}
+
+/* ==========================================================================
+   GLOBAL RESET & DEFAULTS
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-base);
+    background-color: var(--bg-page);
+    color: var(--text-body);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-regular);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings */
+h1 {
+    font-size: var(--font-size-page-heading);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--text-primary);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+h2 {
+    font-size: var(--font-size-section);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--text-primary);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+}
+
+h3 {
+    font-size: var(--font-size-card-title);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    line-height: 1.35;
+}
+
+/* Links */
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+/* Icon Quy chuẩn SVG Outline */
+svg {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   REUSABLE UI COMPONENTS
+   ========================================================================== */
+
+/* 1. BUTTONS */
+.btn,
+button[type="submit"],
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-button);
+    height: var(--button-height);
+    padding: 0 18px;
+    background-color: var(--primary);
+    color: var(--white);
+    font-family: inherit;
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    text-decoration: none;
+    transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover,
+button[type="submit"]:hover,
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-button);
+    height: var(--button-height);
+    padding: 0 18px;
+    background-color: var(--white);
+    color: var(--text-body);
+    font-family: inherit;
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    box-shadow: none;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary-light);
+    border-color: var(--border-blue);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-button);
+    height: var(--button-height);
+    padding: 0 18px;
+    background-color: var(--danger);
+    color: var(--white);
+    font-family: inherit;
+    font-size: var(--font-size-button);
+    font-weight: var(--font-weight-semibold);
+    border: none;
+    border-radius: var(--radius-button);
+    cursor: pointer;
+    box-shadow: none;
+    text-decoration: none;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-danger:hover {
+    background-color: #B91C1C;
+    transform: translateY(-1px);
+}
+
+/* 2. FORMS & INPUTS */
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-body);
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    height: var(--input-height);
+    padding: 8px 13px;
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    color: var(--text-body);
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-input);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+textarea {
+    height: auto;
+    min-height: 90px;
+    resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--border-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+input.input-error,
+select.input-error,
+textarea.input-error {
+    border-color: var(--danger);
+}
+
+input.input-error:focus,
+select.input-error:focus,
+textarea.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.field-error,
+.error-message {
+    color: var(--danger);
+    font-size: var(--font-size-error);
+    font-weight: var(--font-weight-medium);
+    margin-top: 5px;
+    line-height: 1.35;
+}
+
+/* 3. PASSWORD HINT BOX */
+.password-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gap-alert);
+    background-color: var(--primary-light);
+    border: 1px solid var(--border-blue);
+    color: var(--primary-dark);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: var(--font-size-caption);
+    line-height: 1.4;
+}
+
+.password-hint svg {
+    margin-top: 2px;
+    stroke: var(--primary-dark);
+}
+
+/* 4. CARDS & CONTAINERS */
+.card {
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: 32px;
+}
+
+/* 5. ALERTS */
+.alert-error {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-alert);
+    background-color: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FEE2E2;
+    border-left: 4px solid var(--danger);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: var(--font-size-label);
+}
+
+.alert-success {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-alert);
+    background-color: #F0FDF4;
+    color: #166534;
+    border: 1px solid #DCFCE7;
+    border-left: 4px solid var(--success);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: var(--font-size-label);
+}
+
+/* 6. BADGES */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-badge);
+    font-size: var(--font-size-badge);
+    font-weight: var(--font-weight-medium);
+}
+
+.badge-admin {
+    background-color: #F5F3FF;
+    color: #6D28D9;
+    border: 1px solid #DDD6FE;
+}
+
+.badge-librarian {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid var(--border-blue);
+}
+
+.badge-reader {
+    background-color: #F0FDFA;
+    color: #0F766E;
+    border: 1px solid #CCFBF1;
+}
+
+.badge-active,
+.badge-available {
+    background-color: #F0FDF4;
+    color: var(--success);
+    border: 1px solid #DCFCE7;
+}
+
+.badge-warning,
+.badge-borrowed {
+    background-color: #FFFBEB;
+    color: #B45309;
+    border: 1px solid #FEF3C7;
+}
+
+.badge-danger,
+.badge-damaged {
+    background-color: #FEF2F2;
+    color: var(--danger);
+    border: 1px solid #FEE2E2;
+}
+
+/* 7. DATA TABLES */
+.table-container {
+    background-color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-table);
+    box-shadow: var(--shadow-card);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-body);
+}
+
+th {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-bold);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-body);
+    vertical-align: middle;
+}
+
+tr:hover {
+    background-color: var(--bg-page);
+}
+
+/* Action buttons in tables */
+.btn-action-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-table-action);
+    padding: 6px 12px;
+    background-color: #FFFBEB;
+    color: #92400E;
+    border: 1px solid #FEF3C7;
+    border-radius: var(--radius-action);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-action-edit:hover {
+    background-color: var(--warning);
+    color: var(--white);
+}
+
+.btn-action-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-table-action);
+    padding: 6px 12px;
+    background-color: #FEF2F2;
+    color: var(--danger);
+    border: 1px solid #FEE2E2;
+    border-radius: var(--radius-action);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-action-delete:hover {
+    background-color: var(--danger);
+    color: var(--white);
+}
+
+/* 8. AUTH PAGE FOOTER */
+.auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: var(--font-size-caption);
+    color: var(--text-secondary);
+}
+
+.auth-footer a {
+    color: var(--primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.auth-footer a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
