@@ -140,15 +140,16 @@ class BorrowSlipModel
         ]);
     }
 
-    public function deletePhieuMuon($id)
-{
-    $sql = "UPDATE borrow_slips
-            SET DaXoa = 1
-            WHERE ID_PhieuMuon = ?";
+    public function deletePhieuMuon($id) 
+    { 
+        $sql = "UPDATE borrow_slips 
+                SET DaXoa = 1 
+                WHERE ID_PhieuMuon = ?"; 
 
-    $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare($sql); 
 
-    return $stmt->execute([
-        (int)$id
-    ]);
+        return $stmt->execute([ 
+            (int)$id 
+        ]); 
+    }
 }
