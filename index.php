@@ -1,5 +1,17 @@
 <?php
 session_start();
+// 🟢 BỔ SUNG ĐOẠN NÀY:
+$controller = $_GET['controller'] ?? 'trangchu';
+
+if ($controller === 'danhmuc') {
+    require_once __DIR__ . '/src/Controller/Controllerdanhmuc.php';
+    $controllerObj = new Controllerdanhmuc();
+    $controllerObj->index();
+    exit(); // Dừng lại để chuyển sang hiển thị giao diện danh mục
+}
+
+$activePage = 'trangchu';
+// ... (Giữ nguyên toàn bộ code HTML bên dưới của bạn)
 
 $activePage = 'trangchu';
 $currentUser = $_SESSION["user"] ?? null;

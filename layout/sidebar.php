@@ -455,7 +455,7 @@ if ($vaiTro === "Quản trị viên") {
                     <span>Phiếu mượn</span>
                 </a>
 
-                <a href="<?= $appRoot ?>danhmucsach/danhmuc.php" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
+                <a href="<?= $appRoot ?>index.php?controller=danhmuc" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
                     <span class="icon">🏷️</span>
                     <span>Danh mục</span>
                 </a>
