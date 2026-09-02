@@ -19,11 +19,22 @@ function getDB()
             PDO::ERRMODE_EXCEPTION
         );
 
-        // Tự động nâng cấp mật khẩu các tài khoản mẫu đang dùng 123456 sang Thuvien12345!
+        // Tự động khởi tạo bảng password_reset_requests và cập nhật mật khẩu mẫu
         static $passUpdated = false;
         if (!$passUpdated) {
             $passUpdated = true;
             try {
+                // Tạo bảng password_reset_requests nếu chưa có
+                $pdo->exec("CREATE TABLE IF NOT EXISTS password_reset_requests (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    ma_nguoi_dung VARCHAR(20) NOT NULL,
+                    ho_ten VARCHAR(100) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    mat_khau_moi VARCHAR(255) NOT NULL,
+                    trang_thai VARCHAR(20) NOT NULL DEFAULT 'Chờ duyệt',
+                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
                 $stmt = $pdo->query("SELECT id, mat_khau FROM users");
                 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $newHash = null;

@@ -273,6 +273,7 @@
         <!-- Nhúng Sidebar dùng chung -->
         <?php
         $activePage = 'nguoidung';
+        $activeAction = 'profile';
         require_once __DIR__ . '/../../layout/sidebar.php';
         ?>
 
@@ -299,6 +300,10 @@
                     </div>
                 <?php endif; ?>
 
+                <?php 
+                $isDocGia = (($currentUser["vai_tro"] ?? '') === 'Độc giả'); 
+                ?>
+
                 <!-- KHUNG 1: THÔNG TIN TỔNG QUAN -->
                 <div class="user-profile-card">
                     <div class="user-profile-avatar">
@@ -307,8 +312,11 @@
                     <div class="user-profile-info">
                         <h2><?= htmlspecialchars($currentUser["ho_ten"] ?? '') ?></h2>
                         <div class="user-profile-meta">
-                            <span>Mã sinh viên: <strong><?= htmlspecialchars($currentUser["ma_nguoi_dung"] ?? '') ?></strong></span>
-                            <span>Khoa/Lớp: <strong><?= htmlspecialchars($currentUser["khoa_lop"] ?: "Chưa cập nhật") ?></strong></span>
+                            <span><?= $isDocGia ? 'Mã sinh viên' : 'Mã người dùng' ?>: <strong><?= htmlspecialchars($currentUser["ma_nguoi_dung"] ?? '') ?></strong></span>
+                            <span>Vai trò: <strong><?= htmlspecialchars($currentUser["vai_tro"] ?? '') ?></strong></span>
+                            <?php if ($isDocGia): ?>
+                                <span>Khoa/Lớp: <strong><?= htmlspecialchars($currentUser["khoa_lop"] ?: "Chưa cập nhật") ?></strong></span>
+                            <?php endif; ?>
                             <span>Trạng thái:
                                 <span class="user-status-tag <?= ($currentUser["trang_thai"] ?? '') === 'Hoạt động' ? 'active' : 'locked' ?>">
                                     <?= htmlspecialchars($currentUser["trang_thai"] ?? '') ?>
@@ -333,13 +341,13 @@
                         <div class="user-form-grid">
                             <!-- Hàng 1 -->
                             <div class="user-form-group">
-                                <label for="maNguoiDung">Mã sinh viên</label>
+                                <label for="maNguoiDung"><?= $isDocGia ? 'Mã sinh viên' : 'Mã người dùng' ?></label>
                                 <input
                                     type="text"
                                     id="maNguoiDung"
                                     value="<?= htmlspecialchars($currentUser["ma_nguoi_dung"] ?? '') ?>"
                                     readonly
-                                    title="Mã sinh viên không thể thay đổi">
+                                    title="Mã tài khoản không thể thay đổi">
                             </div>
 
                             <div class="user-form-group">
@@ -384,15 +392,17 @@
                             </div>
 
                             <!-- Hàng 3 -->
-                            <div class="user-form-group">
-                                <label for="khoaLop">Khoa / Lớp</label>
-                                <input
-                                    type="text"
-                                    id="khoaLop"
-                                    name="khoaLop"
-                                    value="<?= htmlspecialchars($currentUser["khoa_lop"] ?? "") ?>"
-                                    placeholder="VD: Công nghệ thông tin - K68">
-                            </div>
+                            <?php if ($isDocGia): ?>
+                                <div class="user-form-group">
+                                    <label for="khoaLop">Khoa / Lớp</label>
+                                    <input
+                                        type="text"
+                                        id="khoaLop"
+                                        name="khoaLop"
+                                        value="<?= htmlspecialchars($currentUser["khoa_lop"] ?? "") ?>"
+                                        placeholder="VD: Công nghệ thông tin - K68">
+                                </div>
+                            <?php endif; ?>
 
                             <div class="user-form-group">
                                 <label for="vaiTro">Vai trò</label>

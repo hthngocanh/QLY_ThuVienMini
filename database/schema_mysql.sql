@@ -169,3 +169,27 @@ CREATE TABLE borrow_slips (
         FOREIGN KEY (ID_BanSao)
         REFERENCES book_copies(id)
 );
+
+
+-- =========================================
+-- 6. PASSWORD_RESET_REQUESTS
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS password_reset_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ma_nguoi_dung VARCHAR(20) NOT NULL,
+    ho_ten VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    mat_khau_moi VARCHAR(255) NOT NULL,
+    trang_thai VARCHAR(20) NOT NULL DEFAULT 'Chờ duyệt',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT CK_ResetRequests_TrangThai
+        CHECK (
+            trang_thai IN (
+                'Chờ duyệt',
+                'Đã duyệt',
+                'Đã từ chối'
+            )
+        )
+);
