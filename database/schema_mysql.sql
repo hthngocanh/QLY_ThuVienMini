@@ -131,6 +131,8 @@ CREATE TABLE book_copies (
     trang_thai VARCHAR(30) NOT NULL
         DEFAULT 'Có sẵn',
 
+    deleted_at DATETIME NULL DEFAULT NULL,
+
     CONSTRAINT FK_BookCopies_Books
         FOREIGN KEY (book_id)
         REFERENCES books(id)
