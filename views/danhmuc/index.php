@@ -1,349 +1,1229 @@
 <?php
-// views/danhmuc/index.php
+// ======================================================
+// VIEWS - QUẢN LÝ DANH MỤC SÁCH
+// ======================================================
 
 $tenDanhMuc = $tenDanhMuc ?? '';
 $moTa = $moTa ?? '';
-$trangThai = $trangThai ?? 'Hoạt động';
 $errors = $errors ?? [];
 $thongBaoThanhCong = $thongBaoThanhCong ?? '';
 $danhSachDanhMuc = $danhSachDanhMuc ?? [];
 $danhMucDangSua = $danhMucDangSua ?? null;
+$vaiTro = $vaiTro ?? ($_SESSION['user']['vai_tro'] ?? '');
+$tuKhoa = $tuKhoa ?? '';
+$tieuDe = $tieuDe ?? (
+    $vaiTro === 'Thủ thư'
+        ? 'Danh mục sách'
+        : 'Quản lý danh mục'
+);
 
-if (!function_exists('escape')) {
-    function escape($data): string
-    {
-        return htmlspecialchars(
-            (string)($data ?? ''),
-            ENT_QUOTES,
-            'UTF-8'
-        );
-    }
+function escape($value)
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
+
+$laThuThu = ($vaiTro === 'Thủ thư');
+$laAdmin = ($vaiTro === 'Quản trị viên');
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quản lý danh mục sách</title>
+
+<?php
+$activePage = 'danhmuc';
+?>
+
+<div class="layout">
+    <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
+
+    <div class="main-content">
 
 <style>
-    * {
+    /* ==================================================
+       PAGE
+    ================================================== */
+
+    .category-page {
+        width: 100%;
+        min-height: 100vh;
+        padding: 28px 32px 40px;
+        background: #F8FAFC;
         box-sizing: border-box;
     }
 
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background-color: #f8fafc;
-    }
-
-    .layout {
-        display: flex;
-        min-height: 100vh;
+    .category-container {
         width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
     }
 
-    .main-content {
-        flex: 1;
-        min-width: 0;
-        padding: 30px;
-        background-color: #f8fafc;
+    /* ==================================================
+       HEADER
+    ================================================== */
+
+    .category-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 24px;
     }
 
-    .page-title {
-        margin-top: 0;
-        margin-bottom: 25px;
-        color: #1e3a8a;
+    .category-title {
+        margin: 0;
+        color: #0F172A;
+        font-size: 28px;
+        line-height: 1.25;
+        font-weight: 800;
+        letter-spacing: -0.4px;
     }
 
-    .form-card {
-        background: #ffffff;
-        padding: 20px;
+    .category-description {
+        margin: 7px 0 0;
+        color: #64748B;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    /* ==================================================
+       ALERT
+    ================================================== */
+
+    .category-alert {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
         border-radius: 8px;
-        margin-bottom: 30px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        font-weight: 500;
+        box-sizing: border-box;
     }
+
+    .category-alert.success {
+        color: #166534;
+        background: #F0FDF4;
+        border: 1px solid #DCFCE7;
+    }
+
+    .category-alert.error {
+        color: #DC2626;
+        background: #FEF2F2;
+        border: 1px solid #FEE2E2;
+    }
+
+    /* ==================================================
+       MAIN GRID
+    ================================================== */
+
+    .category-layout {
+        display: grid;
+        grid-template-columns: 330px minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .category-layout.admin-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* ==================================================
+       CARD
+    ================================================== */
+
+    .category-card {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    .category-card-header {
+        padding: 20px 22px 16px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    .category-card-title {
+        margin: 0;
+        color: #0F172A;
+        font-size: 18px;
+        line-height: 1.35;
+        font-weight: 700;
+    }
+
+    .category-card-subtitle {
+        margin: 5px 0 0;
+        color: #64748B;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .category-card-body {
+        padding: 22px;
+    }
+
+    /* ==================================================
+       FORM
+    ================================================== */
 
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 17px;
     }
 
-    .form-group label {
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 7px;
+        color: #334155;
+        font-size: 14px;
+        line-height: 1.4;
         font-weight: 600;
     }
 
-    .form-control {
+    .required {
+        color: #DC2626;
+    }
+
+    .form-input,
+    .form-textarea {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #cbd5e1;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    .form-control:focus {
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        background: #FFFFFF;
+        color: #0F172A;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 15px;
         outline: none;
-        border-color: #2563eb;
+        box-sizing: border-box;
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
     }
 
-    textarea.form-control {
+    .form-input {
+        height: 40px;
+        padding: 8px 13px;
+    }
+
+    .form-textarea {
         min-height: 90px;
+        padding: 10px 13px;
+        line-height: 1.5;
         resize: vertical;
     }
 
-    .error-message {
-        color: red;
-        font-size: 14px;
-        display: block;
-        margin-top: 5px;
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+        color: #94A3B8;
     }
 
-    .success-message {
-        background: #dcfce7;
-        color: #166534;
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 20px;
+    .form-input:focus,
+    .form-textarea:focus {
+        border-color: #BFDBFE;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .form-input.error,
+    .form-textarea.error {
+        border-color: #DC2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+
+    .error-message {
+        margin-top: 5px;
+        color: #DC2626;
+        font-size: 13px;
+        line-height: 1.35;
+        font-weight: 500;
+    }
+
+    /* ==================================================
+       BUTTON
+    ================================================== */
+
+    .form-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 20px;
     }
 
     .btn {
-        display: inline-block;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        color: white;
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
         text-decoration: none;
-        font-size: 14px;
+        cursor: pointer;
+        transition:
+            background 0.15s ease,
+            border-color 0.15s ease,
+            box-shadow 0.15s ease,
+            transform 0.15s ease;
+        box-sizing: border-box;
     }
 
     .btn-primary {
-        background: #2563eb;
+        color: #FFFFFF;
+        background: #2563EB;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
     }
 
-    .btn-warning {
-        background: #f59e0b;
-    }
-
-    .btn-danger {
-        background: #ef4444;
+    .btn-primary:hover {
+        background: #1E3A8A;
+        transform: translateY(-1px);
     }
 
     .btn-secondary {
-        background: #64748b;
+        color: #334155;
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
     }
 
-    .btn:hover {
-        opacity: 0.9;
+    .btn-secondary:hover {
+        background: #F8FAFC;
+        transform: translateY(-1px);
     }
+
+    .btn svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+    /* ==================================================
+       SEARCH
+    ================================================== */
+
+    .search-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .search-input-wrap {
+        position: relative;
+        flex: 1;
+    }
+
+    .search-input-wrap svg {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        width: 18px;
+        height: 18px;
+        color: #64748B;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 40px;
+        padding: 8px 13px 8px 40px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        background: #FFFFFF;
+        color: #0F172A;
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .search-input:focus {
+        border-color: #BFDBFE;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .search-btn {
+        height: 40px;
+        padding: 0 18px;
+        color: #FFFFFF;
+        background: #2563EB;
+        border: 0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .search-btn:hover {
+        background: #1E3A8A;
+    }
+
+    /* ==================================================
+       TABLE
+    ================================================== */
 
     .table-wrapper {
         width: 100%;
         overflow-x: auto;
-        background: #ffffff;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    table {
+    .category-table {
         width: 100%;
+        min-width: 720px;
         border-collapse: collapse;
+    }
+
+    .category-table th {
+        padding: 14px 16px;
+        color: #64748B;
+        background: #F8FAFC;
+        border-bottom: 1px solid #E2E8F0;
+        font-size: 13px;
+        line-height: 1.4;
+        font-weight: 600;
         text-align: left;
+        white-space: nowrap;
     }
 
-    thead {
-        background: #f1f5f9;
+    .category-table td {
+        padding: 15px 16px;
+        color: #334155;
+        border-bottom: 1px solid #E2E8F0;
+        font-size: 15px;
+        line-height: 1.5;
+        vertical-align: middle;
     }
 
-    th,
-    td {
-        padding: 12px;
-        border-bottom: 1px solid #e2e8f0;
+    .category-table tbody tr:last-child td {
+        border-bottom: 0;
     }
 
-    th {
+    .category-table tbody tr:hover {
+        background: #F8FAFC;
+    }
+
+    .category-name {
+        color: #0F172A;
         font-weight: 600;
     }
 
-    .actions {
-        display: flex;
-        gap: 5px;
-        justify-content: center;
+    .category-description-text {
+        max-width: 320px;
+        color: #64748B;
     }
 
-    .actions form {
+    .book-count {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    /* ==================================================
+       BADGES
+    ================================================== */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        padding: 4px 11px;
+        border-radius: 20px;
+        font-size: 13px;
+        line-height: 1.2;
+        font-weight: 600;
+        white-space: nowrap;
+        box-sizing: border-box;
+    }
+
+    .status-active {
+        color: #16A34A;
+        background: #F0FDF4;
+        border: 1px solid #DCFCE7;
+    }
+
+    .status-inactive {
+        color: #DC2626;
+        background: #FEF2F2;
+        border: 1px solid #FEE2E2;
+    }
+
+    /* ==================================================
+       ACTION
+    ================================================== */
+
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .action-btn {
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 11px;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        box-sizing: border-box;
+        transition:
+            background 0.15s ease,
+            transform 0.15s ease;
+    }
+
+    .action-edit {
+        color: #B45309;
+        background: #FFFBEB;
+        border: 1px solid #FEF3C7;
+    }
+
+    .action-edit:hover {
+        background: #FEF3C7;
+        transform: translateY(-1px);
+    }
+
+    .action-status {
+        color: #2563EB;
+        background: #EFF6FF;
+        border: 1px solid #BFDBFE;
+    }
+
+    .action-status:hover {
+        background: #DBEAFE;
+        transform: translateY(-1px);
+    }
+
+    .action-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* ==================================================
+       EMPTY
+    ================================================== */
+
+    .empty-state {
+        padding: 45px 20px;
+        text-align: center;
+        color: #64748B;
+        font-size: 15px;
+    }
+
+    /* ==================================================
+       ADMIN STATUS FORM
+    ================================================== */
+
+    .status-form {
         margin: 0;
     }
 
-    @media (max-width: 768px) {
-        .main-content {
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
+    .status-select {
+        height: 34px;
+        padding: 0 28px 0 10px;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px;
+        background: #FFFFFF;
+        color: #334155;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .status-select:focus {
+        border-color: #BFDBFE;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    /* ==================================================
+       RESPONSIVE
+    ================================================== */
+
+    @media (max-width: 1199px) {
+        .category-page {
+            padding: 24px;
         }
 
-        @media (max-width: 700px) {
-            body {
-                padding: 15px;
-            }
+        .category-layout {
+            grid-template-columns: 290px minmax(0, 1fr);
+        }
+    }
 
-            .navbar {
-                margin: -15px -15px 25px -15px;
-            }
+    @media (max-width: 960px) {
+        .category-page {
+            padding: 20px;
+        }
 
-            label {
-                width: 100%;
-                margin-bottom: 5px;
-            }
+        .category-layout {
+            grid-template-columns: 1fr;
+        }
 
-            .input-control {
-                width: 100%;
-            }
+        .category-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
 
-            table {
-                display: block;
-                overflow-x: auto;
-            }
+    @media (max-width: 768px) {
+        .category-page {
+            padding: 16px;
+        }
+
+        .category-title {
+            font-size: 24px;
+        }
+
+        .category-layout {
+            display: block;
+        }
+
+        .category-card {
+            margin-bottom: 16px;
+        }
+
+        .search-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-btn {
+            width: 100%;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+        .table-wrapper {
+            overflow: visible;
+        }
+
+        .category-table {
+            min-width: 0;
+        }
+
+        .category-table thead {
+            display: none;
+        }
+
+        .category-table,
+        .category-table tbody,
+        .category-table tr,
+        .category-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .category-table tr {
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            box-sizing: border-box;
+        }
+
+        .category-table td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 9px 4px;
+            border-bottom: 0;
+        }
+
+        .category-table td::before {
+            content: attr(data-label);
+            color: #64748B;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .category-description-text {
+            max-width: 55%;
+            text-align: right;
+        }
+
+        .table-actions {
+            justify-content: flex-end;
         }
     }
 </style>
-</head>
 
-<body>
+<div class="category-page">
+    <div class="category-container">
 
-<div class="layout">
-    <!-- SIDEBAR -->
-    <?php
-    $activePage = 'danhmuc';
-    require_once __DIR__ . '/../../layout/sidebar.php';
-    ?>
+        <!-- HEADER -->
+        <div class="category-header">
+            <div>
+                <h1 class="category-title">
+                    <?= escape($tieuDe) ?>
+                </h1>
 
-    <!-- NỘI DUNG CHÍNH -->
-    <main class="main-content">
-        <h1 style="margin-top: 0; margin-bottom: 25px; color: #1e3a8a;">
-            📚 Quản lý danh mục sách
-        </h1>
+                <p class="category-description">
+                    <?php if ($laThuThu): ?>
+                        Quản lý tên và thông tin mô tả các danh mục sách.
+                    <?php else: ?>
+                        Theo dõi và quản lý trạng thái các danh mục sách.
+                    <?php endif; ?>
+                </p>
+            </div>
+        </div>
 
-        <!-- THÔNG BÁO -->
-        <?php if (!empty($thongBaoThanhCong)): ?>
-            <div class="success-message">
+        <!-- SUCCESS -->
+        <?php if ($thongBaoThanhCong !== ''): ?>
+            <div class="category-alert success">
                 <?= escape($thongBaoThanhCong) ?>
             </div>
         <?php endif; ?>
 
-        <!-- FORM SỬA -->
-        <?php if (!empty($danhMucDangSua)): ?>
-            <h2>✏️ Sửa danh mục sách</h2>
-            <div class="form-card">
-                <form method="POST" action="index.php?controller=danhmuc">
-                    <input type="hidden" name="action" value="sua">
-                    <input type="hidden" name="category_id" value="<?= escape($danhMucDangSua['category_id']) ?>">
-
-                    <div class="form-group">
-                        <label>Tên danh mục <span style="color: red;">*</span></label>
-                        <input type="text" name="ten_danh_muc" value="<?= escape($danhMucDangSua['ten_danh_muc']) ?>" class="form-control">
-                        <?php if (isset($errors['ten_danh_muc'])): ?>
-                            <span class="error-message"><?= escape($errors['ten_danh_muc']) ?></span>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Mô tả:</label>
-                        <textarea name="mo_ta" class="form-control"><?= escape($danhMucDangSua['mo_ta'] ?? '') ?></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Trạng thái:</label>
-                        <select name="trang_thai" class="form-control">
-                            <option value="Hoạt động" <?= ($danhMucDangSua['trang_thai'] === 'Hoạt động') ? 'selected' : '' ?>>Hoạt động</option>
-                            <option value="Ngừng hoạt động" <?= ($danhMucDangSua['trang_thai'] === 'Ngừng hoạt động') ? 'selected' : '' ?>>Ngừng hoạt động</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-warning">💾 Cập nhật</button>
-                    <a href="index.php?controller=danhmuc" class="btn btn-secondary">Hủy</a>
-                </form>
+        <!-- ERROR -->
+        <?php if (!empty($errors['general'])): ?>
+            <div class="category-alert error">
+                <?= escape($errors['general']) ?>
             </div>
         <?php endif; ?>
 
-        <!-- FORM THÊM -->
-        <h2>➕ Thêm danh mục sách</h2>
-        <form method="POST" action="index.php?controller=danhmuc" class="form-card">
-            <input type="hidden" name="action" value="them">
+        <?php if ($laThuThu): ?>
 
-            <div class="form-group">
-                <label>Tên danh mục <span style="color: red;">*</span></label>
-                <input type="text" name="ten_danh_muc" placeholder="Nhập tên danh mục..." value="<?= escape($tenDanhMuc) ?>" class="form-control">
-                <?php if (isset($errors['ten_danh_muc'])): ?>
-                    <span class="error-message"><?= escape($errors['ten_danh_muc']) ?></span>
-                <?php endif; ?>
-            </div>
+            <div class="category-layout">
 
-            <div class="form-group">
-                <label>Mô tả:</label>
-                <textarea name="mo_ta" placeholder="Nhập mô tả danh mục..." class="form-control"><?= escape($moTa) ?></textarea>
-            </div>
+                <!-- FORM -->
+                <div class="category-card">
 
-            <div class="form-group">
-                <label>Trạng thái:</label>
-                <select name="trang_thai" class="form-control">
-                    <option value="Hoạt động" <?= ($trangThai === 'Hoạt động') ? 'selected' : '' ?>>Hoạt động</option>
-                    <option value="Ngừng hoạt động" <?= ($trangThai === 'Ngừng hoạt động') ? 'selected' : '' ?>>Ngừng hoạt động</option>
-                </select>
-            </div>
+                    <div class="category-card-header">
+                        <h2 class="category-card-title">
+                            <?= $danhMucDangSua ? 'Chỉnh sửa danh mục' : 'Thêm danh mục' ?>
+                        </h2>
 
-            <button type="submit" class="btn btn-primary">➕ Thêm danh mục</button>
-        </form>
+                        <p class="category-card-subtitle">
+                            <?= $danhMucDangSua
+                                ? 'Cập nhật thông tin danh mục sách.'
+                                : 'Tạo một danh mục sách mới.' ?>
+                        </p>
+                    </div>
 
-        <!-- DANH SÁCH DANH MỤC -->
-        <h2>📋 Danh sách danh mục sách</h2>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên danh mục</th>
-                        <th>Mô tả</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($danhSachDanhMuc)): ?>
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 15px; color: #7f8c8d;">
-                                Chưa có danh mục nào.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($danhSachDanhMuc as $index => $danhMuc): ?>
-                            <tr>
-                                <td><?= $index + 1 ?></td>
-                                <td><?= escape($danhMuc['ten_danh_muc']) ?></td>
-                                <td><?= escape($danhMuc['mo_ta'] ?? '') ?></td>
-                                <td><?= escape($danhMuc['trang_thai']) ?></td>
-                                <td>
-                                    <div class="actions">
-                                        <a href="index.php?controller=danhmuc&edit_id=<?= escape($danhMuc['category_id']) ?>" class="btn btn-warning">
-                                            ✏️ Sửa
-                                        </a>
-                                        <form method="POST" action="index.php?controller=danhmuc" onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này không?');">
-                                            <input type="hidden" name="action" value="xoa">
-                                            <input type="hidden" name="category_id" value="<?= escape($danhMuc['category_id']) ?>">
-                                            <button type="submit" class="btn btn-danger">🗑️ Xóa</button>
-                                        </form>
+                    <div class="category-card-body">
+
+                        <form method="POST"
+                              action="index.php?controller=danhmuc">
+
+                            <?php if ($danhMucDangSua): ?>
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="sua">
+
+                                <input type="hidden"
+                                       name="category_id"
+                                       value="<?= (int)$danhMucDangSua['category_id'] ?>">
+
+                            <?php else: ?>
+
+                                <input type="hidden"
+                                       name="action"
+                                       value="them">
+
+                            <?php endif; ?>
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Tên danh mục
+                                    <span class="required">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="ten_danh_muc"
+                                    class="form-input <?= isset($errors['ten_danh_muc']) ? 'error' : '' ?>"
+                                    value="<?= escape($tenDanhMuc) ?>"
+                                    maxlength="100"
+                                    placeholder="Nhập tên danh mục"
+                                    required
+                                >
+
+                                <?php if (!empty($errors['ten_danh_muc'])): ?>
+                                    <div class="error-message">
+                                        <?= escape($errors['ten_danh_muc']) ?>
                                     </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </main>
+                                <?php endif; ?>
+
+                            </div>
+
+                            <div class="form-group">
+
+                                <label class="form-label">
+                                    Mô tả
+                                </label>
+
+                                <textarea
+                                    name="mo_ta"
+                                    class="form-textarea <?= isset($errors['mo_ta']) ? 'error' : '' ?>"
+                                    maxlength="255"
+                                    placeholder="Nhập mô tả cho danh mục"
+                                ><?= escape($moTa) ?></textarea>
+
+                                <?php if (!empty($errors['mo_ta'])): ?>
+                                    <div class="error-message">
+                                        <?= escape($errors['mo_ta']) ?>
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
+
+                            <div class="form-actions">
+
+                                <button type="submit"
+                                        class="btn btn-primary">
+
+                                    <?php if ($danhMucDangSua): ?>
+
+                                        <svg width="18"
+                                             height="18"
+                                             viewBox="0 0 24 24"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             stroke-width="2"
+                                             stroke-linecap="round"
+                                             stroke-linejoin="round">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                            <polyline points="7 3 7 8 15 8"></polyline>
+                                        </svg>
+
+                                        Lưu thay đổi
+
+                                    <?php else: ?>
+
+                                        <svg width="18"
+                                             height="18"
+                                             viewBox="0 0 24 24"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             stroke-width="2"
+                                             stroke-linecap="round"
+                                             stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+
+                                        Thêm danh mục
+
+                                    <?php endif; ?>
+
+                                </button>
+
+                                <?php if ($danhMucDangSua): ?>
+
+                                    <a href="index.php?controller=danhmuc"
+                                       class="btn btn-secondary">
+                                        Hủy
+                                    </a>
+
+                                <?php endif; ?>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+
+                <!-- LIST -->
+                <div class="category-card">
+
+                    <div class="category-card-header">
+                        <h2 class="category-card-title">
+                            Danh sách danh mục
+                        </h2>
+
+                        <p class="category-card-subtitle">
+                            Danh sách các danh mục hiện có trong hệ thống.
+                        </p>
+                    </div>
+
+                    <div class="category-card-body">
+
+                        <form method="GET"
+                              action="index.php"
+                              class="search-form">
+
+                            <input type="hidden"
+                                   name="controller"
+                                   value="danhmuc">
+
+                            <div class="search-input-wrap">
+
+                                <svg viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="2"
+                                     stroke-linecap="round"
+                                     stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+
+                                <input
+                                    type="text"
+                                    name="search"
+                                    class="search-input"
+                                    value="<?= escape($tuKhoa) ?>"
+                                    placeholder="Tìm kiếm danh mục..."
+                                >
+
+                            </div>
+
+                            <button type="submit"
+                                    class="search-btn">
+                                Tìm kiếm
+                            </button>
+
+                        </form>
+
+                        <div class="table-wrapper">
+
+                            <table class="category-table">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>Tên danh mục</th>
+                                        <th>Mô tả</th>
+                                        <th style="width: 130px;">Số lượng sách</th>
+                                        <th style="width: 130px;">Trạng thái</th>
+                                        <th style="width: 100px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                <?php if (empty($danhSachDanhMuc)): ?>
+
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="empty-state">
+                                                Chưa có danh mục nào.
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                <?php else: ?>
+
+                                    <?php foreach ($danhSachDanhMuc as $index => $danhMuc): ?>
+
+                                        <tr>
+
+                                            <td data-label="STT">
+                                                <?= $index + 1 ?>
+                                            </td>
+
+                                            <td data-label="Tên danh mục">
+
+                                                <span class="category-name">
+                                                    <?= escape($danhMuc['ten_danh_muc']) ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Mô tả">
+
+                                                <span class="category-description-text">
+                                                    <?= $danhMuc['mo_ta']
+                                                        ? escape($danhMuc['mo_ta'])
+                                                        : 'Chưa có mô tả' ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Số lượng sách">
+
+                                                <span class="book-count">
+                                                    <?= (int)($danhMuc['so_luong_sach'] ?? 0) ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Trạng thái">
+
+                                                <?php if ($danhMuc['trang_thai'] === 'Hoạt động'): ?>
+
+                                                    <span class="status-badge status-active">
+                                                        Hoạt động
+                                                    </span>
+
+                                                <?php else: ?>
+
+                                                    <span class="status-badge status-inactive">
+                                                        Ngừng hoạt động
+                                                    </span>
+
+                                                <?php endif; ?>
+
+                                            </td>
+
+                                            <td data-label="Thao tác">
+
+                                                <div class="table-actions">
+
+                                                    <a
+                                                        href="index.php?controller=danhmuc&edit_id=<?= (int)$danhMuc['category_id'] ?>"
+                                                        class="action-btn action-edit"
+                                                    >
+
+                                                        <svg viewBox="0 0 24 24"
+                                                             fill="none"
+                                                             stroke="currentColor"
+                                                             stroke-width="2"
+                                                             stroke-linecap="round"
+                                                             stroke-linejoin="round">
+                                                            <path d="M12 20h9"></path>
+                                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                                                        </svg>
+
+                                                        Sửa
+
+                                                    </a>
+
+                                                </div>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                <?php endif; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        <?php elseif ($laAdmin): ?>
+
+            <!-- ADMIN -->
+            <div class="category-layout admin-layout">
+
+                <div class="category-card">
+
+                    <div class="category-card-header">
+
+                        <h2 class="category-card-title">
+                            Danh sách danh mục
+                        </h2>
+
+                        <p class="category-card-subtitle">
+                            Quản lý trạng thái hoạt động của danh mục sách.
+                        </p>
+
+                    </div>
+
+                    <div class="category-card-body">
+
+                        <form method="GET"
+                              action="index.php"
+                              class="search-form">
+
+                            <input type="hidden"
+                                   name="controller"
+                                   value="danhmuc">
+
+                            <div class="search-input-wrap">
+
+                                <svg viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="2"
+                                     stroke-linecap="round"
+                                     stroke-linejoin="round">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+
+                                <input
+                                    type="text"
+                                    name="search"
+                                    class="search-input"
+                                    value="<?= escape($tuKhoa) ?>"
+                                    placeholder="Tìm kiếm danh mục..."
+                                >
+
+                            </div>
+
+                            <button type="submit"
+                                    class="search-btn">
+                                Tìm kiếm
+                            </button>
+
+                        </form>
+
+                        <div class="table-wrapper">
+
+                            <table class="category-table">
+
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th>Tên danh mục</th>
+                                        <th>Mô tả</th>
+                                        <th style="width: 140px;">Số lượng sách</th>
+                                        <th style="width: 150px;">Trạng thái</th>
+                                        <th style="width: 170px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                <?php if (empty($danhSachDanhMuc)): ?>
+
+                                    <tr>
+                                        <td colspan="6">
+                                            <div class="empty-state">
+                                                Chưa có danh mục nào.
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                <?php else: ?>
+
+                                    <?php foreach ($danhSachDanhMuc as $index => $danhMuc): ?>
+
+                                        <tr>
+
+                                            <td data-label="STT">
+                                                <?= $index + 1 ?>
+                                            </td>
+
+                                            <td data-label="Tên danh mục">
+
+                                                <span class="category-name">
+                                                    <?= escape($danhMuc['ten_danh_muc']) ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Mô tả">
+
+                                                <span class="category-description-text">
+                                                    <?= $danhMuc['mo_ta']
+                                                        ? escape($danhMuc['mo_ta'])
+                                                        : 'Chưa có mô tả' ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Số lượng sách">
+
+                                                <span class="book-count">
+                                                    <?= (int)($danhMuc['so_luong_sach'] ?? 0) ?>
+                                                </span>
+
+                                            </td>
+
+                                            <td data-label="Trạng thái">
+
+                                                <?php if ($danhMuc['trang_thai'] === 'Hoạt động'): ?>
+
+                                                    <span class="status-badge status-active">
+                                                        Hoạt động
+                                                    </span>
+
+                                                <?php else: ?>
+
+                                                    <span class="status-badge status-inactive">
+                                                        Ngừng hoạt động
+                                                    </span>
+
+                                                <?php endif; ?>
+
+                                            </td>
+
+                                            <td data-label="Thao tác">
+
+                                                <form
+                                                    method="POST"
+                                                    action="index.php?controller=danhmuc"
+                                                    class="status-form"
+                                                >
+
+                                                    <input type="hidden"
+                                                           name="action"
+                                                           value="doi_trang_thai">
+
+                                                    <input type="hidden"
+                                                           name="category_id"
+                                                           value="<?= (int)$danhMuc['category_id'] ?>">
+
+                                                    <select
+                                                        name="trang_thai"
+                                                        class="status-select"
+                                                        onchange="this.form.submit()"
+                                                    >
+
+                                                        <option
+                                                            value="Hoạt động"
+                                                            <?= $danhMuc['trang_thai'] === 'Hoạt động' ? 'selected' : '' ?>
+                                                        >
+                                                            Hoạt động
+                                                        </option>
+
+                                                        <option
+                                                            value="Ngừng hoạt động"
+                                                            <?= $danhMuc['trang_thai'] === 'Ngừng hoạt động' ? 'selected' : '' ?>
+                                                        >
+                                                            Ngừng hoạt động
+                                                        </option>
+
+                                                    </select>
+
+                                                </form>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                <?php endif; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
 </div>
 
-</body>
-</html>
+    </div><!-- /.main-content -->
+</div><!-- /.layout -->
