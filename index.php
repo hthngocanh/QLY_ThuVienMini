@@ -1,5 +1,4 @@
 <?php
-// index.php - Front Controller / Trung tâm điều hướng MVC
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

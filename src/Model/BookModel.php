@@ -148,6 +148,7 @@ class BookModel
                 b.nam_xuat_ban,
                 b.isbn,
                 b.gia_sach,
+                b.trang_thai,
                 b.mo_ta
             FROM books b
             INNER JOIN Categories c
