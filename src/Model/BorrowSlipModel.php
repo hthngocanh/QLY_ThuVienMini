@@ -65,7 +65,35 @@ class BorrowSlipModel
         $stmt->execute([(int)$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+public function getPhieuMuonCuaNguoiDung($idNguoiDung)
+{
+    $sql = "
+        SELECT
+            bs.ID_PhieuMuon,
+            bs.ID_NguoiDung,
+            bs.ID_BanSao,
+            bc.ma_ban_sao,
+            b.ten_sach,
+            bs.NgayMuon,
+            bs.NgayTra,
+            bs.TrangThai
+        FROM borrow_slips bs
+        INNER JOIN book_copies bc
+            ON bs.ID_BanSao = bc.id
+        INNER JOIN books b
+            ON bc.book_id = b.id
+        WHERE bs.ID_NguoiDung = ?
+          AND bs.DaXoa = 0
+        ORDER BY bs.ID_PhieuMuon DESC
+    ";
 
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute([
+        (int)$idNguoiDung
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
     public function getIdNguoiDungTheoMa($maNguoiDung)
     {
         $sql = "
@@ -153,4 +181,52 @@ public function deletePhieuMuon($id)
         (int)$id
     ]);
     }
+public function getDanhSachSachDeMuon()
+{
+    $sql = "
+        SELECT
+            bc.id AS ID_BanSao,
+            bc.ma_ban_sao,
+            bc.vi_tri,
+            bc.trang_thai,
+            b.id AS ID_Sach,
+            b.ten_sach
+        FROM book_copies bc
+        INNER JOIN books b
+            ON bc.book_id = b.id
+        WHERE bc.trang_thai = 'Có sẵn'
+        ORDER BY b.ten_sach ASC
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function dangKyMuon($idNguoiDung, $idBanSao)
+{
+    $ngayMuon = date('Y-m-d');
+
+    $sql = "
+        INSERT INTO borrow_slips
+        (
+            ID_NguoiDung,
+            ID_BanSao,
+            NgayMuon,
+            NgayTra,
+            TrangThai,
+            DaXoa
+        )
+        VALUES (?, ?, ?, NULL, 'Chờ duyệt', 0)
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+
+    return $stmt->execute([
+        (int)$idNguoiDung,
+        (int)$idBanSao,
+        $ngayMuon
+    ]);
+}
 }

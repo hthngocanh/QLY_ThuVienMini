@@ -6,21 +6,23 @@ if (session_status() === PHP_SESSION_NONE) {
 // Xác định đường dẫn gốc của ứng dụng web
 $appRoot = '/QLY_ThuVienMini/';
 
-// Tự động nhận diện trang hiện tại nếu chưa đặt biến $activePage
+// Tự động nhận diện trang hiện tại
 $currentScript = $_SERVER['SCRIPT_NAME'] ?? '';
-$getController = strtolower($_GET['controller'] ?? '');
-$getAction = strtolower($_GET['action'] ?? ($activeAction ?? ''));
+$getController = mb_strtolower($_GET['controller'] ?? '', 'UTF-8');
+$getAction = mb_strtolower($_GET['action'] ?? ($activeAction ?? ''), 'UTF-8');
 
 if (!isset($activePage)) {
-    if ($getController === 'user' || $getController === 'nguoidung' || strpos($currentScript, 'nguoiDung') !== false || strpos($currentScript, 'User.php') !== false) {
+    if (in_array($getController, ['user', 'nguoidung']) || strpos($currentScript, 'nguoiDung') !== false || strpos($currentScript, 'User.php') !== false) {
         $activePage = 'nguoidung';
-    } elseif ($getController === 'dausach' || $getController === 'book' || strpos($currentScript, 'dausach') !== false) {
+    } elseif (in_array($getController, ['dausach', 'book']) || strpos($currentScript, 'dausach') !== false) {
         $activePage = 'dausach';
-    } elseif ($getController === 'bansao' || $getController === 'book_copy' || strpos($currentScript, 'banSaoSach') !== false || strpos($currentScript, 'bansao.php') !== false) {
+    } elseif (in_array($getController, ['bansao', 'book_copy']) || strpos($currentScript, 'banSaoSach') !== false || strpos($currentScript, 'bansao.php') !== false) {
         $activePage = 'bansao';
-    } elseif ($getController === 'phieumuon' || $getController === 'borrow_slip' || strpos($currentScript, 'phieuMuon') !== false || strpos($currentScript, 'phieumuon.php') !== false) {
+    } elseif (in_array($getController, ['phieumuon', 'borrow_slip']) || strpos($currentScript, 'phieuMuon') !== false || strpos($currentScript, 'phieumuon.php') !== false) {
         $activePage = 'phieumuon';
-    } elseif ($getController === 'danhmuc' || $getController === 'category' || strpos($currentScript, 'danhmucsach') !== false || strpos($currentScript, 'danhmuc.php') !== false) {
+    } elseif ($getController === 'quantri' || strpos($currentScript, 'quanLyQTV') !== false) {
+        $activePage = 'quantri';
+    } elseif (in_array($getController, ['danhmuc', 'category']) || strpos($currentScript, 'danhmucsach') !== false || strpos($currentScript, 'danhmuc.php') !== false) {
         $activePage = 'danhmuc';
     } else {
         $activePage = 'trangchu';
@@ -117,6 +119,7 @@ if ($vaiTro === "Quản trị viên") {
     .sidebar-top {
         padding: 24px 16px 12px;
         overflow-y: auto;
+        flex: 1;
     }
 
     .logo-box {
@@ -219,7 +222,6 @@ if ($vaiTro === "Quản trị viên") {
         padding-left: 11px;
     }
 
-    /* Submenu cho Quản trị viên */
     .menu-parent-group {
         display: flex;
         flex-direction: column;
@@ -550,10 +552,10 @@ if ($vaiTro === "Quản trị viên") {
                 </a>
 
                 <?php if ($vaiTro === "Quản trị viên"): ?>
-                    <!-- Menu Cha: Quản lý người dùng (Admin) -->
+                    <!-- Menu Cha 1: Quản lý người dùng (Admin) -->
                     <?php
                     $adminUserActions = ['quanlydocgia', 'quanlynhansu', 'yeucaucaplaimatkhau', 'yeucau'];
-                    $isUserSubmenuOpen = ($activePage === 'nguoidung' && in_array($getAction, $adminUserActions));
+                    $isUserSubmenuOpen = ($activePage === 'nguoidung' && (in_array($getAction, $adminUserActions) || $getAction === ''));
                     ?>
                     <div class="menu-parent-group <?= $isUserSubmenuOpen ? 'open' : '' ?>" id="adminUserMenuGroup">
                         <button type="button" class="menu-parent-btn <?= $isUserSubmenuOpen ? 'active' : '' ?>" onclick="toggleAdminUserSubmenu(event)">
@@ -633,17 +635,61 @@ if ($vaiTro === "Quản trị viên") {
                     <span>Bản sao sách</span>
                 </a>
 
-                <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
-                    <span class="icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                            <line x1="9" y1="12" x2="15" y2="12"></line>
-                            <line x1="9" y1="16" x2="13" y2="16"></line>
-                        </svg>
-                    </span>
-                    <span>Phiếu mượn</span>
-                </a>
+                <!-- ================= START: MODULE PHIẾU MƯỢN ================= -->
+                <?php
+                $isPhieuMuonSubmenuOpen = ($activePage === 'phieumuon');
+                ?>
+                <div class="menu-parent-group <?= $isPhieuMuonSubmenuOpen ? 'open' : '' ?>" id="phieuMuonMenuGroup">
+                    <button type="button" class="menu-parent-btn <?= $isPhieuMuonSubmenuOpen ? 'active' : '' ?>" onclick="togglePhieuMuonSubmenu(event)">
+                        <span class="icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                <line x1="9" y1="12" x2="15" y2="12"></line>
+                                <line x1="9" y1="16" x2="13" y2="16"></line>
+                            </svg>
+                        </span>
+                        <span style="flex:1;">Phiếu mượn</span>
+                        <span class="submenu-arrow">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="submenu-container" id="phieuMuonSubmenu">
+                        <!-- Chức năng chung cho mọi vai trò -->
+                        <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="submenu-link <?= ($activePage === 'phieumuon' && ($getAction === '' || $getAction === 'index')) ? 'active' : '' ?>">
+                            <span class="sub-dot"></span>
+                            <span>Danh sách phiếu mượn</span>
+                        </a>
+
+                        <!-- Chức năng riêng dành cho Quản trị viên -->
+                        <?php if ($vaiTro === "Quản trị viên"): ?>
+                            <a href="<?= $appRoot ?>index.php?controller=phieumuon&action=cauHinhHanMuc" class="submenu-link <?= ($activePage === 'phieumuon' && $getAction === 'cauhinhhanmuc') ? 'active' : '' ?>">
+                                <span class="sub-dot"></span>
+                                <span>Cấu hình hạn mức</span>
+                            </a>
+                            <a href="<?= $appRoot ?>index.php?controller=phieumuon&action=thongKe" class="submenu-link <?= ($activePage === 'phieumuon' && $getAction === 'thongke') ? 'active' : '' ?>">
+                                <span class="sub-dot"></span>
+                                <span>Bảng thống kê</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <!-- ================= END: MODULE PHIẾU MƯỢN ================= -->
+
+                <?php if ($vaiTro === "Quản trị viên"): ?>
+                    <!-- Menu Quản trị hệ thống -->
+                    <a href="<?= $appRoot ?>index.php?controller=quantri&action=quanLyQTV" class="menu-link <?= $activePage === 'quantri' ? 'active' : '' ?>">
+                        <span class="icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </span>
+                        <span>Quản trị & Thống kê</span>
+                    </a>
+                <?php endif; ?>
 
                 <?php if ($vaiTro === "Thủ thư" || $vaiTro === "Quản trị viên"): ?>
 
@@ -736,11 +782,13 @@ if ($vaiTro === "Quản trị viên") {
             </div>
 
         <?php else: ?>
-            <a href="<?= $appRoot ?>dangnhap.php" class="btn-login-now">
+            <a href="<?= $appRoot ?>index.php?controller=auth&action=login" class="btn-login-now">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
                     <polyline points="10 17 15 12 10 7"></polyline>
                     <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                <span>Đăng nhập</span>
             </a>
         <?php endif; ?>
 
@@ -749,29 +797,43 @@ if ($vaiTro === "Quản trị viên") {
 </aside>
 
 <script>
+    // Hàm bật/tắt menu Quản lý người dùng
     function toggleAdminUserSubmenu(event) {
         if (event) event.stopPropagation();
-        const group = document.getElementById('adminUserMenuGroup');
-        if (group) {
-            group.classList.toggle('open');
-        }
+        const adminGroup = document.getElementById('adminUserMenuGroup');
+        const phieuMuonGroup = document.getElementById('phieuMuonMenuGroup');
+        
+        if (phieuMuonGroup) phieuMuonGroup.classList.remove('open');
+        if (adminGroup) adminGroup.classList.toggle('open');
     }
 
+    // Hàm bật/tắt menu Phiếu mượn
+    function togglePhieuMuonSubmenu(event) {
+        if (event) event.stopPropagation();
+        const adminGroup = document.getElementById('adminUserMenuGroup');
+        const phieuMuonGroup = document.getElementById('phieuMuonMenuGroup');
+        
+        if (adminGroup) adminGroup.classList.remove('open');
+        if (phieuMuonGroup) phieuMuonGroup.classList.toggle('open');
+    }
+
+    // Hàm bật/tắt User Dropdown
     function toggleSidebarUserDropdown(event) {
-        event.stopPropagation();
+        if (event) event.stopPropagation();
         const dropdown = document.getElementById('userDropdownMenu');
         const card = document.getElementById('userCardTrigger');
         if (dropdown) {
             dropdown.classList.toggle('show');
-            card.classList.toggle('active');
+            if (card) card.classList.toggle('active');
         }
     }
 
+    // Đóng dropdown khi click ra ngoài
     document.addEventListener('click', function(event) {
         const dropdown = document.getElementById('userDropdownMenu');
         const card = document.getElementById('userCardTrigger');
         if (dropdown && dropdown.classList.contains('show')) {
-            if (!dropdown.contains(event.target) && !card.contains(event.target)) {
+            if (!dropdown.contains(event.target) && card && !card.contains(event.target)) {
                 dropdown.classList.remove('show');
                 card.classList.remove('active');
             }

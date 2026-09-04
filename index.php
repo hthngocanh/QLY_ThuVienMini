@@ -44,7 +44,7 @@ switch (strtolower($controller)) {
     case 'book_copy':
         require_once __DIR__ . '/src/Controller/BookCopyController.php';
         $bookCopyController = new BookCopyController();
-        if ($action === 'kiemtra' || $action === 'kiemTra') {
+        if (strtolower($action) === 'kiemtra') {
             $bookCopyController->kiemTra();
         } else {
             $bookCopyController->index();
@@ -55,22 +55,34 @@ switch (strtolower($controller)) {
     case 'borrow_slip':
         require_once __DIR__ . '/src/Controller/BorrowSlipController.php';
         $borrowSlipController = new BorrowSlipController();
-        $borrowSlipController->index();
+        
+        // --- ĐOẠN ĐÃ ĐƯỢC BỔ SUNG CHO PHIẾU MƯỢN ---
+        $actionLower = strtolower($action);
+        if ($actionLower === 'cauhinhhanmuc') {
+            $borrowSlipController->cauHinhHanMuc();
+        } elseif ($actionLower === 'thongke') {
+            $borrowSlipController->thongKe();
+        } else {
+            $borrowSlipController->index();
+        }
         break;
 
     case 'nguoidung':
     case 'user':
         require_once __DIR__ . '/src/Controller/UserController.php';
         $userController = new UserController();
-        if ($action === 'profile') {
+        
+        // Chuyển action về chữ thường để tránh lỗi phân biệt hoa/thường từ URL
+        $actionLower = strtolower($action);
+        if ($actionLower === 'profile') {
             $userController->profile();
-        } elseif ($action === 'traCuuDocGia' || $action === 'tracuu') {
+        } elseif ($actionLower === 'tracuudocgia' || $actionLower === 'tracuu') {
             $userController->traCuuDocGia();
-        } elseif ($action === 'quanLyDocGia') {
+        } elseif ($actionLower === 'quanlydocgia') {
             $userController->quanLyDocGia();
-        } elseif ($action === 'quanLyNhanSu') {
+        } elseif ($actionLower === 'quanlynhansu') {
             $userController->quanLyNhanSu();
-        } elseif ($action === 'yeuCauCapLaiMatKhau' || $action === 'yeucau') {
+        } elseif ($actionLower === 'yeucaucaplaimatkhau' || $actionLower === 'yeucau') {
             $userController->yeuCauCapLaiMatKhau();
         } else {
             $userController->index();

@@ -1,6 +1,8 @@
 <?php
 // views/phieumuon/index.php
 
+$id = $id ?? 0;
+
 if (!function_exists('e')) {
     function e($value)
     {
