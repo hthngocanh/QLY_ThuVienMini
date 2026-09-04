@@ -647,11 +647,10 @@ if ($vaiTro === "Quản trị viên") {
 
                 <?php if ($vaiTro === "Thủ thư" || $vaiTro === "Quản trị viên"): ?>
 
-    <a href="<?= $appRoot ?>index.php?controller=danhmuc"
-       class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
-
-        <span class="icon">
-            <svg width="20" height="20"
+               <a href="<?= $appRoot ?>index.php?controller=danhmuc"
+                  class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
+                <span class="icon">
+                  <svg width="20" height="20"
                  viewBox="0 0 24 24"
                  fill="none"
                  stroke="currentColor"

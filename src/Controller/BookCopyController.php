@@ -13,11 +13,19 @@ class BookCopyController extends BaseController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
         $this->bookCopyModel = new BookCopyModel();
     }
 
     public function index()
     {
+        // ================= PHÂN QUYỀN =================
+        $vaiTroHienTai = $_SESSION["user"]["vai_tro"] ?? "";
+        $duocQuanLyBanSao = in_array($vaiTroHienTai, ["Thủ thư", "Quản trị viên"], true);
+        $laQuanTriVien = ($vaiTroHienTai === "Quản trị viên");
+        $laDocGia = ($vaiTroHienTai === "Độc giả");
+
+        // ================= DỮ LIỆU FORM =================
         $bookId = "";
         $maBanSao = "";
         $viTri = "";
@@ -32,52 +40,112 @@ class BookCopyController extends BaseController
         $thongBao = "";
         $thongBaoLoi = "";
 
+        // ================= THÔNG BÁO =================
         if (isset($_GET["success"])) {
             if ($_GET["success"] === "add") {
                 $thongBao = "Thêm bản sao sách thành công!";
-            }
-            if ($_GET["success"] === "update") {
+            } elseif ($_GET["success"] === "update") {
                 $thongBao = "Cập nhật bản sao sách thành công!";
-            }
-            if ($_GET["success"] === "delete") {
-                $thongBao = "Xóa bản sao sách thành công!";
+            } elseif ($_GET["success"] === "delete") {
+                $thongBao = "Xóa mềm bản sao sách thành công!";
+            } elseif ($_GET["success"] === "restore") {
+                $thongBao = "Khôi phục bản sao sách thành công!";
             }
         }
 
         if (isset($_GET["error"])) {
-            if ($_GET["error"] === "borrowed") {
-                $thongBaoLoi = "Không thể xóa vì bản sao đã có lịch sử mượn.";
-            }
-            if ($_GET["error"] === "delete") {
+            if ($_GET["error"] === "borrowing") {
+                $thongBaoLoi = "Không thể xóa vì bản sao hiện đang được mượn.";
+            } elseif ($_GET["error"] === "delete") {
                 $thongBaoLoi = "Không thể xóa bản sao sách.";
+            } elseif ($_GET["error"] === "restore") {
+                $thongBaoLoi = "Không thể khôi phục bản sao sách.";
+            } elseif ($_GET["error"] === "forbidden") {
+                $thongBaoLoi = "Bạn không có quyền thực hiện thao tác này.";
+            } elseif ($_GET["error"] === "notfound") {
+                $thongBaoLoi = "Không tìm thấy bản sao sách cần thao tác.";
             }
         }
 
         $danhSachDauSach = $this->bookCopyModel->layDanhSachDauSach();
 
-        // Xử lý Xóa
-        if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST" && ($_POST["action"] ?? "") === "delete") {
-            $deleteId = trim($_POST["delete_id"] ?? "");
-            if (ctype_digit($deleteId)) {
-                try {
-                    $soPhieuMuon = $this->bookCopyModel->demSoPhieuMuonCuaBanSao($deleteId);
-                    if ($soPhieuMuon > 0) {
-                        $this->redirect("index.php?controller=bansao&error=borrowed");
-                    }
+        // ================= XÓA MỀM - CHỈ QUẢN TRỊ VIÊN =================
+        if (
+            ($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST"
+            && ($_POST["action"] ?? "") === "delete"
+        ) {
+            if (!$laQuanTriVien) {
+                $this->redirect("index.php?controller=bansao&error=forbidden");
+            }
 
-                    $this->bookCopyModel->xoaBanSao($deleteId);
-                    $this->redirect("index.php?controller=bansao&success=delete");
-                } catch (PDOException $e) {
+            $deleteId = trim($_POST["delete_id"] ?? "");
+            if (!ctype_digit($deleteId)) {
+                $this->redirect("index.php?controller=bansao&error=delete");
+            }
+
+            try {
+                $banSaoCanXoa = $this->bookCopyModel->layBanSaoTheoId($deleteId);
+
+                if (!$banSaoCanXoa) {
+                    $this->redirect("index.php?controller=bansao&error=notfound");
+                }
+
+                if (($banSaoCanXoa["trang_thai"] ?? "") === "Đang mượn") {
+                    $this->redirect("index.php?controller=bansao&error=borrowing");
+                }
+
+                if (!$this->bookCopyModel->xoaBanSao($deleteId)) {
                     $this->redirect("index.php?controller=bansao&error=delete");
                 }
+
+                $this->redirect("index.php?controller=bansao&success=delete");
+            } catch (PDOException $e) {
+                $this->redirect("index.php?controller=bansao&error=delete");
             }
         }
 
-        // Lấy dữ liệu cần sửa
-        if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "GET" && isset($_GET["edit"])) {
+        // ================= KHÔI PHỤC - CHỈ QUẢN TRỊ VIÊN =================
+        if (
+            ($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST"
+            && ($_POST["action"] ?? "") === "restore"
+        ) {
+            if (!$laQuanTriVien) {
+                $this->redirect("index.php?controller=bansao&error=forbidden");
+            }
+
+            $restoreId = trim($_POST["restore_id"] ?? "");
+            if (!ctype_digit($restoreId)) {
+                $this->redirect("index.php?controller=bansao&error=restore");
+            }
+
+            try {
+                if (!$this->bookCopyModel->khoiPhucBanSao($restoreId)) {
+                    $this->redirect("index.php?controller=bansao&error=restore");
+                }
+
+                $this->redirect("index.php?controller=bansao&success=restore");
+            } catch (PDOException $e) {
+                $this->redirect("index.php?controller=bansao&error=restore");
+            }
+        }
+
+        // ================= MỞ CHẾ ĐỘ SỬA =================
+        if (
+            ($_SERVER["REQUEST_METHOD"] ?? "GET") === "GET"
+            && isset($_GET["edit"])
+        ) {
+            if (!$duocQuanLyBanSao) {
+                $this->redirect("index.php?controller=bansao&error=forbidden");
+            }
+
             $editId = trim($_GET["edit"]);
-            if (ctype_digit($editId)) {
+
+            if (!ctype_digit($editId)) {
+                $editId = "";
+                $thongBaoLoi = "ID bản sao cần sửa không hợp lệ.";
+            } else {
                 $banSaoSua = $this->bookCopyModel->layBanSaoTheoId($editId);
+
                 if ($banSaoSua) {
                     $bookId = $banSaoSua["book_id"];
                     $maBanSao = $banSaoSua["ma_ban_sao"];
@@ -90,8 +158,15 @@ class BookCopyController extends BaseController
             }
         }
 
-        // Xử lý Thêm / Cập nhật
-        if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST" && in_array($_POST["action"] ?? "", ["add", "update"], true)) {
+        // ================= THÊM / CẬP NHẬT - THỦ THƯ + QUẢN TRỊ VIÊN =================
+        if (
+            ($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST"
+            && in_array($_POST["action"] ?? "", ["add", "update"], true)
+        ) {
+            if (!$duocQuanLyBanSao) {
+                $this->redirect("index.php?controller=bansao&error=forbidden");
+            }
+
             $action = $_POST["action"];
             $editId = trim($_POST["edit_id"] ?? "");
             $bookId = trim($_POST["book_id"] ?? "");
@@ -115,12 +190,17 @@ class BookCopyController extends BaseController
                 $loiViTri = "Vui lòng nhập vị trí bản sao.";
             }
 
-            $trangThaiHopLe = ["Có sẵn", "Đang mượn", "Hỏng"];
+            $trangThaiHopLe = ["Có sẵn", "Đang mượn", "Chưa có sẵn"];
             if (!in_array($trangThai, $trangThaiHopLe, true)) {
                 $loiTrangThai = "Trạng thái không hợp lệ.";
             }
 
-            if ($loiBookId === "" && $loiMaBanSao === "" && $loiViTri === "" && $loiTrangThai === "") {
+            if (
+                $loiBookId === ""
+                && $loiMaBanSao === ""
+                && $loiViTri === ""
+                && $loiTrangThai === ""
+            ) {
                 try {
                     if ($action === "add") {
                         $this->bookCopyModel->themBanSao($bookId, $maBanSao, $viTri, $trangThai);
@@ -132,11 +212,14 @@ class BookCopyController extends BaseController
                             throw new Exception("ID bản sao không hợp lệ.");
                         }
 
-                        $this->bookCopyModel->suaBanSao($editId, $bookId, $maBanSao, $viTri, $trangThai);
+                        if (!$this->bookCopyModel->suaBanSao($editId, $bookId, $maBanSao, $viTri, $trangThai)) {
+                            throw new Exception("Không tìm thấy bản sao đang hoạt động để cập nhật.");
+                        }
+
                         $this->redirect("index.php?controller=bansao&success=update");
                     }
                 } catch (PDOException $e) {
-                    if (isset($e->errorInfo[1]) && $e->errorInfo[1] == 1062) {
+                    if (isset($e->errorInfo[1]) && (int)$e->errorInfo[1] === 1062) {
                         $loiMaBanSao = "Mã bản sao đã tồn tại.";
                     } else {
                         $thongBaoLoi = "Không thể lưu bản sao sách.";
@@ -147,7 +230,15 @@ class BookCopyController extends BaseController
             }
         }
 
+        // ================= DỮ LIỆU HIỂN THỊ =================
         $danhSachBanSao = $this->bookCopyModel->layDanhSachBanSao();
+        $danhSachBanSaoDaXoa = $laQuanTriVien
+            ? $this->bookCopyModel->layDanhSachBanSaoDaXoa()
+            : [];
+        $danhSachTraCuu = $this->bookCopyModel->layTinhTrangDauSach();
+        $thongKeBanSao = $laQuanTriVien
+            ? $this->bookCopyModel->thongKeBanSao()
+            : [];
 
         $this->renderView("bansao/index.php", [
             'bookId' => $bookId,
@@ -163,10 +254,20 @@ class BookCopyController extends BaseController
             'thongBaoLoi' => $thongBaoLoi,
             'danhSachDauSach' => $danhSachDauSach,
             'danhSachBanSao' => $danhSachBanSao,
+            'danhSachBanSaoDaXoa' => $danhSachBanSaoDaXoa,
+            'danhSachTraCuu' => $danhSachTraCuu,
+            'thongKeBanSao' => $thongKeBanSao,
+            'vaiTroHienTai' => $vaiTroHienTai,
+            'duocQuanLyBanSao' => $duocQuanLyBanSao,
+            'laQuanTriVien' => $laQuanTriVien,
+            'laDocGia' => $laDocGia,
             'activePage' => 'bansao'
         ]);
     }
 
+    /**
+     * Giữ lại action cũ để không làm hỏng route hiện tại.
+     */
     public function kiemTra()
     {
         $id_ban_sao = $_POST['id_ban_sao'] ?? '';
@@ -175,8 +276,14 @@ class BookCopyController extends BaseController
         $trang_thai = $_POST['trang_thai'] ?? '';
 
         $ketQua = [];
+
         if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['btn_kiem_tra'])) {
-            $ketQua = $this->bookCopyModel->kiemTraTrangThaiBanSao($id_ban_sao, $id_dau_sach, $ma_ban_sao, $trang_thai);
+            $ketQua = $this->bookCopyModel->kiemTraTrangThaiBanSao(
+                $id_ban_sao,
+                $id_dau_sach,
+                $ma_ban_sao,
+                $trang_thai
+            );
         }
 
         $this->renderView("bansao/kiemtra.php", [

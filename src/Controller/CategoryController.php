@@ -50,6 +50,7 @@ class CategoryController extends BaseController
         $moTa = '';
 
         $tuKhoa = trim($_GET['search'] ?? '');
+        $locTrangThai = trim($_GET['trang_thai'] ?? '');
 
         /*
          * ==========================================
@@ -262,8 +263,51 @@ class CategoryController extends BaseController
                 $errors['general'] =
                     'Không thể thay đổi trạng thái.';
             }
-        }
 
+            /*
+             * XÓA DANH MỤC
+             * CHỈ ADMIN
+             */
+            elseif ($action === 'xoa') {
+
+                if ($vaiTro !== 'Quản trị viên') {
+                    header('Location: index.php?controller=danhmuc');
+                    exit;
+                }
+
+                $categoryId =
+                    (int)($_POST['category_id'] ?? 0);
+
+                if ($categoryId <= 0) {
+                    header(
+                        'Location: index.php?controller=danhmuc'
+                    );
+                    exit;
+                }
+
+                if (
+                    $this->categoryModel
+                        ->kiemTraCoSachTrongDanhMuc($categoryId)
+                ) {
+                    $errors['general'] =
+                        'Không thể xóa vì vẫn còn sách thuộc danh mục này.';
+                } else {
+
+                    if (
+                        $this->categoryModel
+                            ->xoaDanhMuc($categoryId)
+                    ) {
+                        $this->redirect(
+                            'index.php?controller=danhmuc&success=deleted'
+                        );
+                    }
+
+                    $errors['general'] =
+                        'Không thể xóa danh mục.';
+                }
+            }
+        }
+     
         /*
          * ==========================================
          * CHỌN DANH MỤC ĐỂ SỬA
@@ -318,6 +362,11 @@ class CategoryController extends BaseController
                 'Cập nhật trạng thái danh mục thành công.';
         }
 
+        elseif ($success === 'deleted') {
+            $thongBaoThanhCong =
+                'Xóa danh mục sách thành công.';
+        }
+
         /*
          * ==========================================
          * LẤY DANH SÁCH
@@ -326,7 +375,30 @@ class CategoryController extends BaseController
 
         $danhSachDanhMuc =
             $this->categoryModel
-                ->layDanhSachDanhMuc($tuKhoa);
+                ->layDanhSachDanhMuc($tuKhoa, $locTrangThai);
+
+        /*
+         * ==========================================
+         * SỐ LIỆU THỐNG KÊ (CHỈ ADMIN)
+         * ==========================================
+         */
+
+        $tongDanhMuc = 0;
+        $soDangHoatDong = 0;
+        $soNgungHoatDong = 0;
+
+        if ($vaiTro === 'Quản trị viên') {
+            $tongDanhMuc =
+                $this->categoryModel->demTongSoDanhMuc();
+
+            $soDangHoatDong =
+                $this->categoryModel
+                    ->demTheoTrangThai('Hoạt động');
+
+            $soNgungHoatDong =
+                $this->categoryModel
+                    ->demTheoTrangThai('Ngừng hoạt động');
+        }
 
         /*
          * ==========================================
@@ -352,6 +424,10 @@ class CategoryController extends BaseController
                 'vaiTro' => $vaiTro,
                 'tieuDe' => $tieuDe,
                 'tuKhoa' => $tuKhoa,
+                'locTrangThai' => $locTrangThai,
+                'tongDanhMuc' => $tongDanhMuc,
+                'soDangHoatDong' => $soDangHoatDong,
+                'soNgungHoatDong' => $soNgungHoatDong,
                 'activePage' => 'danhmuc'
             ]
         );

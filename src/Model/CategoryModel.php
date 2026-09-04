@@ -13,7 +13,8 @@ class CategoryModel
     }
 
     // Lấy danh sách danh mục + số lượng sách
-    public function layDanhSachDanhMuc($tuKhoa = '')
+    // $trangThai: '' = tất cả, hoặc 'Hoạt động' / 'Ngừng hoạt động'
+    public function layDanhSachDanhMuc($tuKhoa = '', $trangThai = '')
     {
         $sql = "
             SELECT 
@@ -25,17 +26,28 @@ class CategoryModel
             FROM Categories c
             LEFT JOIN books b 
                 ON c.category_id = b.category_id
+            WHERE 1 = 1
         ";
 
         $params = [];
 
         if ($tuKhoa !== '') {
             $sql .= "
-                WHERE c.ten_danh_muc LIKE :tu_khoa
-                OR c.mo_ta LIKE :tu_khoa
+                AND (
+                    c.ten_danh_muc LIKE :tu_khoa
+                    OR c.mo_ta LIKE :tu_khoa
+                )
             ";
 
             $params['tu_khoa'] = '%' . $tuKhoa . '%';
+        }
+
+        if ($trangThai !== '') {
+            $sql .= "
+                AND c.trang_thai = :trang_thai
+            ";
+
+            $params['trang_thai'] = $trangThai;
         }
 
         $sql .= "
@@ -179,5 +191,81 @@ class CategoryModel
             'category_id' => $categoryId,
             'trang_thai' => $trangThai
         ]);
+    }
+
+    // ==========================================
+    // BỔ SUNG MỚI
+    // ==========================================
+
+    // Đếm tổng số danh mục (dùng cho ô số liệu Admin)
+    public function demTongSoDanhMuc()
+    {
+        $sql = "SELECT COUNT(*) FROM Categories";
+
+        $stmt = $this->pdo->query($sql);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    // Đếm số danh mục theo trạng thái (dùng cho ô số liệu Admin)
+    public function demTheoTrangThai(string $trangThai)
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM Categories
+            WHERE trang_thai = :trang_thai
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['trang_thai' => $trangThai]);
+
+        return (int)$stmt->fetchColumn();
+    }
+
+    // Kiểm tra danh mục còn sách hay không -> dùng để chặn xóa
+    public function kiemTraCoSachTrongDanhMuc(int $categoryId)
+    {
+        $sql = "
+            SELECT COUNT(*)
+            FROM books
+            WHERE category_id = :category_id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['category_id' => $categoryId]);
+
+        return (int)$stmt->fetchColumn() > 0;
+    }
+
+    // Admin xóa danh mục
+    public function xoaDanhMuc(int $categoryId)
+    {
+        $sql = "
+            DELETE FROM Categories
+            WHERE category_id = :category_id
+        ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute([
+            'category_id' => $categoryId
+        ]);
+    }
+
+    // Danh sách danh mục đang "Hoạt động" - dùng cho dropdown
+    // ở màn hình Thêm sách, để không thể thêm sách vào danh mục
+    // đã bị Ngừng hoạt động.
+    public function layDanhMucDangHoatDong()
+    {
+        $sql = "
+            SELECT category_id, ten_danh_muc
+            FROM Categories
+            WHERE trang_thai = 'Hoạt động'
+            ORDER BY ten_danh_muc ASC
+        ";
+
+        $stmt = $this->pdo->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
