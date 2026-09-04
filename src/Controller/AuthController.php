@@ -225,15 +225,6 @@ class AuthController extends BaseController
         $currentUser = $_SESSION["user"];
         $vaiTro = $currentUser["vai_tro"] ?? "";
 
-        // Chỉ Độc giả mới tự đổi mật khẩu theo logic ban đầu
-        if ($vaiTro !== "Độc giả") {
-            echo "<script>
-                    alert('Chức năng đổi mật khẩu chỉ dành cho Độc giả. Tài khoản nội bộ do Quản trị viên cấp/quản lý.');
-                    window.location.href = 'index.php';
-                  </script>";
-            exit;
-        }
-
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
@@ -313,24 +304,29 @@ class AuthController extends BaseController
         }
 
         $errors = [];
-        $taiKhoan = "";
+        $maNguoiDung = "";
+        $hoTen = "";
+        $email = "";
         $matKhauMoi = "";
         $xacNhanMatKhau = "";
 
-        if ($_SERVER["REQUEST_METHOD"] === "POST") {
-            $taiKhoan = trim($_POST["taiKhoan"] ?? "");
+        if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST") {
+            $maNguoiDung = trim($_POST["maNguoiDung"] ?? "");
+            $hoTen = trim($_POST["hoTen"] ?? "");
+            $email = trim($_POST["email"] ?? "");
             $matKhauMoi = $_POST["matKhauMoi"] ?? "";
             $xacNhanMatKhau = $_POST["xacNhanMatKhau"] ?? "";
 
-            if ($taiKhoan === "") {
-                $errors["taiKhoan"] = "Vui lòng nhập mã sinh viên hoặc email.";
-            } else {
-                $nguoiDung = $this->userModel->layNguoiDungDangNhap($taiKhoan);
-                if (!$nguoiDung) {
-                    $errors["taiKhoan"] = "Không tìm thấy tài khoản hoặc email trong hệ thống.";
-                } elseif ($nguoiDung["trang_thai"] === "Bị khóa") {
-                    $errors["taiKhoan"] = "Tài khoản này đã bị khóa. Vui lòng liên hệ thủ thư/quản trị viên.";
-                }
+            if ($maNguoiDung === "") {
+                $errors["maNguoiDung"] = "Vui lòng nhập mã sinh viên / mã người dùng.";
+            }
+
+            if ($hoTen === "") {
+                $errors["hoTen"] = "Vui lòng nhập họ và tên.";
+            }
+
+            if ($email === "" || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors["email"] = "Email không hợp lệ.";
             }
 
             if ($matKhauMoi === "") {
@@ -345,22 +341,36 @@ class AuthController extends BaseController
                 $errors["xacNhanMatKhau"] = "Mật khẩu xác nhận không khớp.";
             }
 
-            if (empty($errors) && isset($nguoiDung)) {
-                $matKhauHash = password_hash($matKhauMoi, PASSWORD_DEFAULT);
-                $this->userModel->doiMatKhauTheoMa($nguoiDung["ma_nguoi_dung"], $matKhauHash);
+            // Kiểm tra đối chiếu với CSDL
+            if (empty($errors)) {
+                $userDB = $this->userModel->layNguoiDungTheoMa($maNguoiDung);
+                if (!$userDB) {
+                    $errors["chung"] = "Mã người dùng không tồn tại trong hệ thống.";
+                } elseif (mb_strtolower(trim($userDB["ho_ten"])) !== mb_strtolower(trim($hoTen))) {
+                    $errors["chung"] = "Họ và tên không khớp với thông tin tài khoản đã đăng ký.";
+                } elseif (strtolower(trim($userDB["email"])) !== strtolower(trim($email))) {
+                    $errors["chung"] = "Email không khớp với thông tin tài khoản đã đăng ký.";
+                } elseif ($userDB["trang_thai"] === "Bị khóa") {
+                    $errors["chung"] = "Tài khoản đang bị khóa. Vui lòng liên hệ trực tiếp Quản trị viên.";
+                } else {
+                    $hashMoi = password_hash($matKhauMoi, PASSWORD_DEFAULT);
+                    $this->userModel->taoYeuCauCapLaiMatKhau($maNguoiDung, $hoTen, $email, $hashMoi);
 
-                echo "<script>
-                        alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
-                        window.location.href = 'index.php?controller=auth&action=login';
-                      </script>";
-                exit;
+                    echo "<script>
+                            alert('Gửi yêu cầu cấp lại mật khẩu thành công! Yêu cầu đang ở trạng thái \"Chờ duyệt\". Vui lòng chờ Quản trị viên phê duyệt.');
+                            window.location.href = 'index.php?controller=auth&action=login';
+                          </script>";
+                    exit;
+                }
             }
         }
 
         $this->renderView("auth/forgot_password.php", [
-            'errors' => $errors,
-            'taiKhoan' => $taiKhoan,
-            'matKhauMoi' => $matKhauMoi,
+            'errors'         => $errors,
+            'maNguoiDung'    => $maNguoiDung,
+            'hoTen'          => $hoTen,
+            'email'          => $email,
+            'matKhauMoi'     => $matKhauMoi,
             'xacNhanMatKhau' => $xacNhanMatKhau
         ]);
     }

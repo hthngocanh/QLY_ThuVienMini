@@ -64,6 +64,14 @@ switch (strtolower($controller)) {
         $userController = new UserController();
         if ($action === 'profile') {
             $userController->profile();
+        } elseif ($action === 'traCuuDocGia' || $action === 'tracuu') {
+            $userController->traCuuDocGia();
+        } elseif ($action === 'quanLyDocGia') {
+            $userController->quanLyDocGia();
+        } elseif ($action === 'quanLyNhanSu') {
+            $userController->quanLyNhanSu();
+        } elseif ($action === 'yeuCauCapLaiMatKhau' || $action === 'yeucau') {
+            $userController->yeuCauCapLaiMatKhau();
         } else {
             $userController->index();
         }
