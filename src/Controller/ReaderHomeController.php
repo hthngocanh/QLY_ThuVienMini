@@ -4,13 +4,13 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Model/DashboardModel.php';
 require_once __DIR__ . '/../Model/BookCopyModel.php';
-require_once __DIR__ . '/../Model/ReaderBorrowModel.php';
+require_once __DIR__ . '/../Model/ReaderHomeModel.php';
 
 class ReaderHomeController extends BaseController
 {
     private $dashboardModel;
     private $bookCopyModel;
-    private $borrowSlipModel;
+    private $readerHomeModel;
 
     public function __construct()
     {
@@ -20,7 +20,7 @@ class ReaderHomeController extends BaseController
 
         $this->dashboardModel = new DashboardModel();
         $this->bookCopyModel = new BookCopyModel();
-        $this->borrowSlipModel = new ReaderBorrowModel();
+        $this->readerHomeModel = new ReaderHomeModel();
     }
 
     public function index()
@@ -45,9 +45,9 @@ class ReaderHomeController extends BaseController
 
                 $maNguoiDung = $_SESSION["user"]["ma_nguoi_dung"] ?? "";
                 if ($maNguoiDung !== "") {
-                    $idNguoiDung = $this->borrowSlipModel->getIdNguoiDungTheoMa($maNguoiDung);
+                    $idNguoiDung = $this->readerHomeModel->getIdNguoiDungTheoMa($maNguoiDung);
                     if ($idNguoiDung > 0) {
-                        $trangThaiMuonCuaToi = $this->borrowSlipModel->getTrangThaiDauSachCuaNguoiDung($idNguoiDung);
+                        $trangThaiMuonCuaToi = $this->readerHomeModel->getTrangThaiDauSachCuaNguoiDung($idNguoiDung);
                     }
                 }
             }

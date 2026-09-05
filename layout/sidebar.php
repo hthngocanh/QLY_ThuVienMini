@@ -9,14 +9,6 @@ $__sidebarRole = $__sidebarUser["vai_tro"] ?? "";
 // Dùng Unicode escape để tránh lỗi mã hóa tiếng Việt trên Windows.
 $__roleLibrarian = "Th\u{1EE7} th\u{01B0}";
 $__roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
-
-// Độc giả dùng sidebar riêng.
-// Thủ thư / Quản trị viên vẫn dùng nguyên sidebar chung của nhóm.
-if ($__sidebarUser && !in_array($__sidebarRole, [$__roleLibrarian, $__roleAdmin], true)) {
-    require __DIR__ . "/sidebar_reader.php";
-    return;
-}
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -500,6 +492,7 @@ if ($vaiTro === "Quản trị viên") {
                     <span><?= $userMenuLabel ?></span>
                 </a>
 
+                <?php if ($vaiTro !== "Độc giả"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=dausach" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -509,7 +502,9 @@ if ($vaiTro === "Quản trị viên") {
                     </span>
                     <span>Đầu sách</span>
                 </a>
+                <?php endif; ?>
 
+                <?php if ($vaiTro !== "Độc giả"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=bansao" class="menu-link <?= $activePage === 'bansao' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -519,6 +514,7 @@ if ($vaiTro === "Quản trị viên") {
                     </span>
                     <span>Bản sao sách</span>
                 </a>
+                <?php endif; ?>
 
                 <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
                     <span class="icon">
@@ -532,6 +528,7 @@ if ($vaiTro === "Quản trị viên") {
                     <span>Phiếu mượn</span>
                 </a>
 
+                <?php if ($vaiTro !== "Độc giả"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=danhmuc" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -541,6 +538,7 @@ if ($vaiTro === "Quản trị viên") {
                     </span>
                     <span>Danh mục</span>
                 </a>
+                <?php endif; ?>
             </nav>
         </div>
 

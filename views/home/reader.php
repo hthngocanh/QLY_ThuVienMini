@@ -411,7 +411,8 @@ if ($isLoggedIn):
             </div>
             <button type="button" class="borrow-modal-close" id="borrowModalClose" aria-label="Đóng">&times;</button>
         </div>
-        <form id="borrowRequestForm" method="POST" action="index.php?controller=phieumuon&action=yeuCauMuon">
+        <form id="borrowRequestForm" method="GET" action="index.php">
+            <input type="hidden" name="controller" value="phieumuon">
             <input type="hidden" id="borrowBookId" name="book_id" value="">
             <div class="borrow-form-grid">
                 <div class="borrow-form-group"><label>Mã độc giả</label><input type="text" value="<?= htmlspecialchars($maNguoiDung) ?>" readonly></div>
@@ -422,10 +423,10 @@ if ($isLoggedIn):
                 <div class="borrow-form-group"><label>Ngày gửi yêu cầu</label><input type="date" id="borrowDate" readonly></div>
                 <div class="borrow-form-group"><label>Trạng thái</label><input type="text" value="Chờ duyệt" readonly></div>
             </div>
-            <div class="borrow-modal-note">Khi bấm <strong>Gửi yêu cầu</strong>, hệ thống sẽ tự chọn một bản sao còn có sẵn. Phiếu mượn được tạo với trạng thái <strong>Chờ duyệt</strong>; bản sao chưa chuyển sang <strong>Đang mượn</strong> cho tới khi Thủ thư duyệt.</div>
+            <div class="borrow-modal-note">Khi bấm <strong>Sang Phiếu mượn</strong>, hệ thống sẽ chuyển bạn tới chức năng Phiếu mượn chung để chọn bản sao còn có sẵn và gửi đăng ký mượn.</div>
             <div class="borrow-modal-actions">
                 <button type="button" class="borrow-cancel" id="borrowCancel">Hủy</button>
-                <button type="submit" class="borrow-submit" id="borrowSubmit">Gửi yêu cầu</button>
+                <button type="submit" class="borrow-submit" id="borrowSubmit">Sang Phiếu mượn</button>
             </div>
         </form>
     </div>
@@ -615,7 +616,7 @@ if ($isLoggedIn):
 
             if (borrowSubmit) {
                 borrowSubmit.disabled = true;
-                borrowSubmit.textContent = 'Đang gửi...';
+                borrowSubmit.textContent = 'Đang chuyển...';
             }
         });
     }

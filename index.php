@@ -74,20 +74,7 @@ switch (strtolower($controller)) {
     case 'borrow_slip':
         $actionLower = strtolower($action);
 
-        // Độc giả dùng luồng riêng đã khôi phục.
-        if ($isReader) {
-            require_once __DIR__ . '/src/Controller/ReaderBorrowController.php';
-            $readerBorrowController = new ReaderBorrowController();
-
-            if ($actionLower === 'yeucaumuon') {
-                $readerBorrowController->yeuCauMuon();
-            } else {
-                $readerBorrowController->index();
-            }
-            break;
-        }
-
-        // Thủ thư / Quản trị viên vẫn dùng code mới của nhóm.
+        // Dùng chung Phiếu mượn cho Độc giả, Thủ thư và Quản trị viên.
         require_once __DIR__ . '/src/Controller/BorrowSlipController.php';
         $borrowSlipController = new BorrowSlipController();
 
@@ -99,7 +86,6 @@ switch (strtolower($controller)) {
             $borrowSlipController->index();
         }
         break;
-
     case 'nguoidung':
     case 'user':
         require_once __DIR__ . '/src/Controller/UserController.php';
