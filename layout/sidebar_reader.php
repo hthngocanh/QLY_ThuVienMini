@@ -3,24 +3,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$__sidebarUser = $_SESSION["user"] ?? null;
-$__sidebarRole = $__sidebarUser["vai_tro"] ?? "";
-
-// Dùng Unicode escape để tránh lỗi mã hóa tiếng Việt trên Windows.
-$__roleLibrarian = "Th\u{1EE7} th\u{01B0}";
-$__roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
-
-// Nếu đã đăng nhập và không phải Thủ thư/Admin thì dùng sidebar riêng của Độc giả.
-if ($__sidebarUser && !in_array($__sidebarRole, [$__roleLibrarian, $__roleAdmin], true)) {
-    require __DIR__ . "/sidebar_reader.php";
-    return;
-}
-?>
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Xác định đường dẫn gốc của ứng dụng web
 $appRoot = '/QLY_ThuVienMini/';
 
@@ -453,7 +435,7 @@ if ($vaiTro === "Quản trị viên") {
 
         <!-- Navigation Menu -->
         <div class="nav-section">
-            <div class="nav-label">Quản lý hệ thống</div>
+            <div class="nav-label">Menu độc giả</div>
 
             <nav class="menu">
                 <a href="<?= $appRoot ?>index.php" class="menu-link <?= $activePage === 'trangchu' ? 'active' : '' ?>">
@@ -500,26 +482,6 @@ if ($vaiTro === "Quản trị viên") {
                     <span><?= $userMenuLabel ?></span>
                 </a>
 
-                <a href="<?= $appRoot ?>index.php?controller=dausach" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">
-                    <span class="icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                        </svg>
-                    </span>
-                    <span>Đầu sách</span>
-                </a>
-
-                <a href="<?= $appRoot ?>index.php?controller=bansao" class="menu-link <?= $activePage === 'bansao' ? 'active' : '' ?>">
-                    <span class="icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </span>
-                    <span>Bản sao sách</span>
-                </a>
-
                 <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -530,16 +492,6 @@ if ($vaiTro === "Quản trị viên") {
                         </svg>
                     </span>
                     <span>Phiếu mượn</span>
-                </a>
-
-                <a href="<?= $appRoot ?>index.php?controller=danhmuc" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
-                    <span class="icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                        </svg>
-                    </span>
-                    <span>Danh mục</span>
                 </a>
             </nav>
         </div>
