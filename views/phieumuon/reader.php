@@ -154,7 +154,7 @@ $duocQuanLy = $duocQuanLy ?? in_array($vaiTroHienTai, ['Thủ thư', 'Quản tr�
 <div class="layout">
     <?php
     $activePage = 'phieumuon';
-    require_once __DIR__ . '/../../layout/sidebar_reader.php';
+    require_once __DIR__ . '/../../layout/sidebar.php';
     ?>
 
     <main class="main-content" style="flex: 1; min-width: 0; padding: 30px; overflow-y: auto; background: #f8fafc;">

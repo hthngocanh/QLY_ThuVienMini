@@ -269,7 +269,7 @@ if ($isLoggedIn):
 </head>
 <body>
 <div class="reader-layout">
-    <?php require_once __DIR__ . '/../../layout/sidebar_reader.php'; ?>
+    <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
 
     <main class="reader-main">
         <div class="reader-header">
@@ -795,7 +795,7 @@ if ($isLoggedIn):
 <body>
     <div class="layout">
         <!-- Nhúng Sidebar dùng chung -->
-        <?php require_once __DIR__ . '/../../layout/sidebar_reader.php'; ?>
+        <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
 
         <!-- Nội dung chính Dashboard -->
         <main class="main">
