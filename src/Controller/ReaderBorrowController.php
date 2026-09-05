@@ -83,6 +83,16 @@ class ReaderBorrowController extends BaseController
 
         $code = $ketQua['code'] ?? 'error';
 
+
+        if ($code === 'limit_reached') {
+            $limit = (int)($ketQua['limit'] ?? 5);
+            $this->redirect(
+                'index.php?controller=home&borrow=limit_reached&limit=' . $limit
+            );
+        }
+        if ($code === 'user_invalid') {
+             $this->redirect('index.php?controller=home&borrow=user_invalid');
+        }
         if ($code === 'unavailable') {
             $this->redirect('index.php?controller=home&borrow=unavailable&book_id=' . $bookId);
         }

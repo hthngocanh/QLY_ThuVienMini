@@ -634,6 +634,13 @@ if ($isLoggedIn):
             'Sách của bạn đang trong trạng thái chờ duyệt.',
             true
         );
+    } else if (borrowResult === 'limit_reached') {
+        const borrowLimit = <?= (int)($_GET['limit'] ?? 5) ?>;
+        openResultModal(
+            'Kh\u00f4ng th\u1ec3 m\u01b0\u1ee3n th\u00eam',
+            'B\u1ea1n \u0111\u00e3 \u0111\u1ea1t h\u1ea1n m\u1ee9c m\u01b0\u1ee3n t\u1ed1i \u0111a ' + borrowLimit + ' cu\u1ed1n.',
+            true
+        );
     } else if (borrowResult === 'unavailable') {
         openUnavailableModal('Bạn không thể mượn sách vì sách không có sẵn.');
     } else if (borrowResult === 'forbidden') {

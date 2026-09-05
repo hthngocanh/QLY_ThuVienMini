@@ -229,6 +229,65 @@ class ReaderBorrowModel
         try {
             $this->pdo->beginTransaction();
 
+            // Lock reader row so simultaneous requests cannot pass the quota together.
+            $statusActive = "Ho\u{1EA1}t \u{0111}\u{1ED9}ng";
+            $stmtUserLock = $this->pdo->prepare("
+                SELECT id, trang_thai
+                FROM users
+                WHERE id = :user_id
+                LIMIT 1
+                FOR UPDATE
+            ");
+
+            $stmtUserLock->execute([
+                ':user_id' => (int)$idNguoiDung
+            ]);
+
+            $lockedUser = $stmtUserLock->fetch(PDO::FETCH_ASSOC);
+
+            if (!$lockedUser || ($lockedUser['trang_thai'] ?? '') !== $statusActive) {
+                $this->pdo->rollBack();
+
+                return [
+                    'success' => false,
+                    'code' => 'user_invalid'
+                ];
+            }
+            // Current borrowing limit used by the project.
+            $hanMucMuon = 5;
+
+            // Count requests/loans that still occupy the reader quota.
+            $statusPending = "Ch\u{1EDD} duy\u{1EC7}t";
+            $statusBorrowing = "\u{0110}ang m\u{01B0}\u{1EE3}n";
+            $statusOverdue = "Qu\u{00E1} h\u{1EA1}n";
+
+            $stmtLimit = $this->pdo->prepare("
+                SELECT COUNT(*)
+                FROM borrow_slips
+                WHERE ID_NguoiDung = :user_id
+                  AND DaXoa = 0
+                  AND TrangThai IN (:pending, :borrowing, :overdue)
+            ");
+
+            $stmtLimit->execute([
+                ':user_id' => (int)$idNguoiDung,
+                ':pending' => $statusPending,
+                ':borrowing' => $statusBorrowing,
+                ':overdue' => $statusOverdue
+            ]);
+
+            $soLuongDangHoatDong = (int)$stmtLimit->fetchColumn();
+
+            if ($soLuongDangHoatDong >= $hanMucMuon) {
+                $this->pdo->rollBack();
+
+                return [
+                    'success' => false,
+                    'code' => 'limit_reached',
+                    'limit' => $hanMucMuon
+                ];
+            }
+
             // Không chặn chỉ vì độc giả đang mượn một bản khác của cùng đầu sách.
             // Quy tắc bắt buộc là: một BẢN SAO chỉ có tối đa một lượt mượn chưa trả.
             // Vì vậy hệ thống tìm một bản sao khác còn thực sự rảnh.
