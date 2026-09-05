@@ -197,6 +197,34 @@
         .input-error { border-color: var(--copy-danger) !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, .10) !important; }
         .field-error { margin: 5px 0 0; color: var(--copy-danger); font-size: 13px; font-weight: 500; }
 
+
+        .field-locked {
+            width: 100%;
+            min-height: 40px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            background: #F1F5F9;
+            color: #64748B;
+            padding: 9px 13px;
+            font: inherit;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: not-allowed;
+        }
+
+        .field-note {
+            margin: 6px 0 0;
+            color: #64748B;
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+
+        .field-note.warning {
+            color: #92400E;
+        }
+
         .form-actions {
             grid-column: 1 / -1;
             display: flex;
@@ -420,6 +448,65 @@
         .btn-delete:hover { color: #fff; background: #DC2626; }
         .btn-restore { color: #166534; background: #F0FDF4; border: 1px solid #DCFCE7; }
         .btn-restore:hover { color: #fff; background: #16A34A; }
+        .btn-disabled { color: #94A3B8; background: #F8FAFC; border: 1px solid #E2E8F0; cursor: not-allowed; opacity: .78; }
+        .status-note { display: block; margin-top: 5px; color: #B45309; font-size: 12px; font-weight: 600; }
+
+
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--copy-border);
+            flex-wrap: wrap;
+        }
+
+        .pagination-info {
+            color: var(--copy-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .pagination-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-btn {
+            min-width: 38px;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--copy-border);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--copy-body);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--copy-border-blue);
+            color: var(--copy-primary);
+            background: var(--copy-primary-light);
+        }
+
+        .page-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .page-current {
+            min-width: 84px;
+            text-align: center;
+            color: var(--copy-text);
+            font-size: 13px;
+            font-weight: 700;
+        }
 
         .empty-state {
             padding: 34px 20px;
@@ -447,6 +534,34 @@
 
         .summary-card .summary-number { font-size: 24px; font-weight: 800; color: var(--copy-text); }
         .summary-card .summary-label { margin-top: 5px; color: var(--copy-muted); font-size: 13px; font-weight: 600; }
+
+
+        .quick-check {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) auto;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 14px;
+            border: 1px solid var(--copy-border);
+            border-radius: 12px;
+            background: #F8FAFC;
+        }
+
+        .quick-check .filter-select { min-width: 0; }
+        .quick-result {
+            grid-column: 1 / -1;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--copy-border);
+            background: #FFFFFF;
+            color: var(--copy-body);
+            font-size: 13.5px;
+            line-height: 1.6;
+            white-space: pre-line;
+        }
+        .quick-result.success { border-color: #BBF7D0; background: #F0FDF4; color: #166534; }
+        .quick-result.warning { border-color: #FDE68A; background: #FFFBEB; color: #92400E; }
+        .quick-result.error { border-color: #FECACA; background: #FEF2F2; color: #991B1B; }
 
         .modal-overlay {
             position: fixed;
@@ -581,6 +696,7 @@
             .form-grid { grid-template-columns: 1fr; }
             .field.full, .form-actions { grid-column: auto; }
             .toolbar { grid-template-columns: 1fr; }
+            .quick-check { grid-template-columns: 1fr; }
             .management-toolbar {
                 grid-template-columns: 1fr;
             }
@@ -650,6 +766,8 @@ $danhSachBanSaoDaXoa = $danhSachBanSaoDaXoa ?? [];
 $danhSachTraCuu = $danhSachTraCuu ?? [];
 $thongKeBanSao = $thongKeBanSao ?? [];
 $danhSachDauSach = $danhSachDauSach ?? [];
+$trangThaiPhieuDangSua = $trangThaiPhieuDangSua ?? '';
+$csrfToken = $csrfToken ?? '';
 
 $isReaderView = !$duocQuanLyBanSao;
 
@@ -778,6 +896,19 @@ if ($laQuanTriVien) {
                     </div>
                 </div>
 
+                <div class="quick-check" aria-label="Kiểm tra nhanh trạng thái bản sao">
+                    <select id="quickBookSelect" class="filter-select">
+                        <option value="">-- Chọn đầu sách để kiểm tra nhanh --</option>
+                        <?php foreach ($danhSachDauSach as $dauSach): ?>
+                            <option value="<?= (int)($dauSach['id'] ?? 0); ?>">
+                                <?= htmlspecialchars(($dauSach['ma_sach'] ?? '') . ' - ' . ($dauSach['ten_sach'] ?? '')); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="quickBookCheck">Kiểm tra trạng thái</button>
+                    <div id="quickBookResult" class="quick-result" hidden aria-live="polite"></div>
+                </div>
+
                 <div class="toolbar">
                     <div class="search-wrap">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -835,6 +966,7 @@ if ($laQuanTriVien) {
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-bar" id="readerPagination"></div>
             </section>
 
         <?php else: ?>
@@ -926,8 +1058,10 @@ if ($laQuanTriVien) {
                             <?php $stt = 1; foreach ($danhSachBanSao as $banSao): ?>
                                 <?php
                                 $tt = $banSao['trang_thai'] ?? '';
+                                $trangThaiPhieu = (string)($banSao['trang_thai_phieu'] ?? '');
+                                $coPhieuDangHieuLuc = in_array($trangThaiPhieu, ['Chờ duyệt', 'Đang mượn', 'Quá hạn'], true);
                                 $badgeClass = $tt === 'Có sẵn' ? 'available' : ($tt === 'Đang mượn' ? 'borrowed' : 'unavailable');
-                                $searchText = strtolower(($banSao['ma_ban_sao'] ?? '') . ' ' . ($banSao['ma_sach'] ?? '') . ' ' . ($banSao['ten_sach'] ?? '') . ' ' . ($banSao['vi_tri'] ?? ''));
+                                $searchText = strtolower(($banSao['ma_ban_sao'] ?? '') . ' ' . ($banSao['ma_sach'] ?? '') . ' ' . ($banSao['ten_sach'] ?? '') . ' ' . ($banSao['vi_tri'] ?? '') . ' ' . $trangThaiPhieu);
                                 ?>
                                 <tr class="filter-row" data-search="<?= htmlspecialchars($searchText, ENT_QUOTES, 'UTF-8'); ?>" data-status="<?= htmlspecialchars($tt, ENT_QUOTES, 'UTF-8'); ?>">
                                     <td data-label="STT"><?= $stt++; ?></td>
@@ -936,7 +1070,14 @@ if ($laQuanTriVien) {
                                     <td data-label="Mã sách"><?= htmlspecialchars($banSao['ma_sach'] ?? ''); ?></td>
                                     <td data-label="Tên sách"><?= htmlspecialchars($banSao['ten_sach'] ?? ''); ?></td>
                                     <td data-label="Vị trí"><?= htmlspecialchars($banSao['vi_tri'] ?? ''); ?></td>
-                                    <td data-label="Trạng thái"><span class="badge <?= $badgeClass; ?>"><?= htmlspecialchars($tt); ?></span></td>
+                                    <td data-label="Trạng thái">
+                                        <span class="badge <?= $badgeClass; ?>"><?= htmlspecialchars($tt); ?></span>
+                                        <?php if ($trangThaiPhieu === 'Chờ duyệt'): ?>
+                                            <span class="status-note">Phiếu: Chờ duyệt</span>
+                                        <?php elseif ($trangThaiPhieu === 'Quá hạn'): ?>
+                                            <span class="status-note" style="color:#DC2626;">Phiếu: Quá hạn</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td data-label="Thao tác">
                                         <div class="actions">
                                             <a class="btn-action btn-edit js-confirm-edit" href="index.php?controller=bansao&edit=<?= (int)$banSao['id']; ?>" data-code="<?= htmlspecialchars($banSao['ma_ban_sao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -945,14 +1086,22 @@ if ($laQuanTriVien) {
                                             </a>
 
                                             <?php if ($laQuanTriVien): ?>
-                                                <form class="action-form js-delete-form" method="post" action="index.php?controller=bansao" data-code="<?= htmlspecialchars($banSao['ma_ban_sao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="delete_id" value="<?= (int)$banSao['id']; ?>">
-                                                    <button class="btn-action btn-delete js-confirm-delete" type="button">
+                                                <?php if ($coPhieuDangHieuLuc || $tt === 'Đang mượn'): ?>
+                                                    <button class="btn-action btn-disabled" type="button" disabled title="Bản sao đang gắn với phiếu mượn hiệu lực nên không thể xóa.">
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                                         Xóa
                                                     </button>
-                                                </form>
+                                                <?php else: ?>
+                                                    <form class="action-form js-delete-form" method="post" action="index.php?controller=bansao" data-code="<?= htmlspecialchars($banSao['ma_ban_sao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+                                                        <input type="hidden" name="delete_id" value="<?= (int)$banSao['id']; ?>">
+                                                        <button class="btn-action btn-delete js-confirm-delete" type="button">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                                            Xóa
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -962,6 +1111,7 @@ if ($laQuanTriVien) {
                         </tbody>
                     </table>
                 </div>
+                <div class="pagination-bar" id="activePagination"></div>
             </section>
 
             <?php if ($laQuanTriVien): ?>
@@ -1010,6 +1160,7 @@ if ($laQuanTriVien) {
                                         <td data-label="Thao tác">
                                             <form class="action-form js-restore-form" method="post" action="index.php?controller=bansao" data-code="<?= htmlspecialchars($banSaoDaXoa['ma_ban_sao'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                                 <input type="hidden" name="action" value="restore">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
                                                 <input type="hidden" name="restore_id" value="<?= (int)$banSaoDaXoa['id']; ?>">
                                                 <button class="btn-action btn-restore js-confirm-restore" type="button">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"></path></svg>
@@ -1023,6 +1174,7 @@ if ($laQuanTriVien) {
                             </tbody>
                         </table>
                     </div>
+                    <div class="pagination-bar" id="deletedPagination"></div>
                 </section>
             <?php endif; ?>
         <?php endif; ?>
@@ -1040,18 +1192,46 @@ if ($laQuanTriVien) {
         <div class="copy-modal-body">
 <form method="post" action="index.php?controller=bansao" class="form-grid" id="copyForm">
                     <input type="hidden" name="action" value="<?= !empty($editId) ? 'update' : 'add'; ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="edit_id" value="<?= htmlspecialchars($editId ?? ''); ?>">
 
                     <div class="field">
                         <label for="book_id">Đầu sách</label>
-                        <select id="book_id" name="book_id" class="<?= !empty($loiBookId) ? 'input-error' : ''; ?>">
-                            <option value="">-- Chọn đầu sách --</option>
-                            <?php foreach ($danhSachDauSach as $dauSach): ?>
-                                <option value="<?= (int)$dauSach['id']; ?>" <?= ((string)($bookId ?? '') === (string)$dauSach['id']) ? 'selected' : ''; ?>>
-                                    <?= htmlspecialchars(($dauSach['ma_sach'] ?? '') . ' - ' . ($dauSach['ten_sach'] ?? '')); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <?php
+                        $coPhieuHieuLucKhiSua = !empty($editId) && in_array(
+                            (string)$trangThaiPhieuDangSua,
+                            ['Chờ duyệt', 'Đang mượn', 'Quá hạn'],
+                            true
+                        );
+                        $khoaNghiepVuKhiSua = !empty($editId) && ($coPhieuHieuLucKhiSua || (($trangThai ?? '') === 'Đang mượn'));
+                        ?>
+                        <?php if ($khoaNghiepVuKhiSua): ?>
+                            <input type="hidden" name="book_id" value="<?= htmlspecialchars($bookId ?? ''); ?>">
+                            <div class="field-locked" aria-disabled="true">
+                                <?php
+                                $tenDauSachDangSua = '';
+                                foreach ($danhSachDauSach as $dauSach) {
+                                    if ((string)($bookId ?? '') === (string)($dauSach['id'] ?? '')) {
+                                        $tenDauSachDangSua = ($dauSach['ma_sach'] ?? '') . ' - ' . ($dauSach['ten_sach'] ?? '');
+                                        break;
+                                    }
+                                }
+                                ?>
+                                🔒 <?= htmlspecialchars($tenDauSachDangSua !== '' ? $tenDauSachDangSua : ('ID đầu sách: ' . ($bookId ?? ''))); ?>
+                            </div>
+                            <p class="field-note warning">
+                                Bản sao đang gắn với phiếu <?= htmlspecialchars($trangThaiPhieuDangSua !== '' ? $trangThaiPhieuDangSua : 'Đang mượn'); ?> nên không thể đổi sang đầu sách khác.
+                            </p>
+                        <?php else: ?>
+                            <select id="book_id" name="book_id" class="<?= !empty($loiBookId) ? 'input-error' : ''; ?>">
+                                <option value="">-- Chọn đầu sách --</option>
+                                <?php foreach ($danhSachDauSach as $dauSach): ?>
+                                    <option value="<?= (int)$dauSach['id']; ?>" <?= ((string)($bookId ?? '') === (string)$dauSach['id']) ? 'selected' : ''; ?>>
+                                        <?= htmlspecialchars(($dauSach['ma_sach'] ?? '') . ' - ' . ($dauSach['ten_sach'] ?? '')); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php endif; ?>
                         <?php if (!empty($loiBookId)): ?><p class="field-error"><?= htmlspecialchars($loiBookId); ?></p><?php endif; ?>
                     </div>
 
@@ -1069,11 +1249,22 @@ if ($laQuanTriVien) {
 
                     <div class="field">
                         <label for="trang_thai">Trạng thái</label>
-                        <select id="trang_thai" name="trang_thai" class="<?= !empty($loiTrangThai) ? 'input-error' : ''; ?>">
-                            <option value="Có sẵn" <?= (($trangThai ?? '') === 'Có sẵn') ? 'selected' : ''; ?>>Có sẵn</option>
-                            <option value="Đang mượn" <?= (($trangThai ?? '') === 'Đang mượn') ? 'selected' : ''; ?>>Đang mượn</option>
-                            <option value="Chưa có sẵn" <?= (($trangThai ?? '') === 'Chưa có sẵn') ? 'selected' : ''; ?>>Chưa có sẵn</option>
-                        </select>
+                        <?php if ($khoaNghiepVuKhiSua): ?>
+                            <input type="hidden" name="trang_thai" value="<?= htmlspecialchars($trangThai ?? ''); ?>">
+                            <div class="field-locked" aria-disabled="true">
+                                🔒 <?= htmlspecialchars($trangThai ?? ''); ?>
+                                <?php if ($trangThaiPhieuDangSua !== ''): ?>
+                                    — Phiếu: <?= htmlspecialchars($trangThaiPhieuDangSua); ?>
+                                <?php endif; ?>
+                            </div>
+                            <p class="field-note warning">Đầu sách và trạng thái đang do Phiếu mượn kiểm soát. Chỉ mã bản sao và vị trí còn được sửa.</p>
+                        <?php else: ?>
+                            <select id="trang_thai" name="trang_thai" class="<?= !empty($loiTrangThai) ? 'input-error' : ''; ?>">
+                                <option value="Có sẵn" <?= (($trangThai ?? '') === 'Có sẵn') ? 'selected' : ''; ?>>Có sẵn</option>
+                                <option value="Chưa có sẵn" <?= (($trangThai ?? '') === 'Chưa có sẵn') ? 'selected' : ''; ?>>Chưa có sẵn</option>
+                            </select>
+                            <p class="field-note">“Đang mượn” không nhập thủ công; trạng thái này được cập nhật tự động khi Thủ thư duyệt Phiếu mượn.</p>
+                        <?php endif; ?>
                         <?php if (!empty($loiTrangThai)): ?><p class="field-error"><?= htmlspecialchars($loiTrangThai); ?></p><?php endif; ?>
                     </div>
 
@@ -1115,31 +1306,177 @@ if ($laQuanTriVien) {
 (function () {
     const normalize = (value) => (value || '').toString().trim().toLowerCase();
 
-    function setupFilter(tableId, searchId, statusId) {
+    function setupFilterAndPagination(tableId, searchId, statusId, paginationId, pageSize = 10) {
         const table = document.getElementById(tableId);
         const search = document.getElementById(searchId);
         const status = statusId ? document.getElementById(statusId) : null;
-        if (!table || !search) return;
+        const pagination = document.getElementById(paginationId);
+        if (!table || !search || !pagination) return;
 
-        const apply = () => {
+        const rows = Array.from(table.querySelectorAll('tbody tr.filter-row'));
+        let currentPage = 1;
+
+        const render = () => {
             const q = normalize(search.value);
             const statusValue = status ? status.value : 'all';
-            table.querySelectorAll('tbody tr.filter-row').forEach((row) => {
+
+            const matchedRows = rows.filter((row) => {
                 const haystack = normalize(row.dataset.search);
                 const rowStatus = row.dataset.status || '';
                 const matchSearch = q === '' || haystack.includes(q);
                 const matchStatus = statusValue === 'all' || rowStatus === statusValue;
-                row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+                return matchSearch && matchStatus;
             });
+
+            const totalRows = matchedRows.length;
+            const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            rows.forEach((row) => {
+                row.style.display = 'none';
+            });
+
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            matchedRows.slice(start, end).forEach((row) => {
+                row.style.display = '';
+            });
+
+            pagination.innerHTML = '';
+
+            if (rows.length === 0) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+
+            const info = document.createElement('div');
+            info.className = 'pagination-info';
+            if (totalRows === 0) {
+                info.textContent = 'Không có kết quả phù hợp';
+            } else {
+                const first = start + 1;
+                const last = Math.min(end, totalRows);
+                info.textContent = `Hiển thị ${first}-${last} / ${totalRows} kết quả`;
+            }
+
+            const actions = document.createElement('div');
+            actions.className = 'pagination-actions';
+
+            const prev = document.createElement('button');
+            prev.type = 'button';
+            prev.className = 'page-btn';
+            prev.textContent = 'Trước';
+            prev.disabled = currentPage <= 1 || totalRows === 0;
+            prev.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    render();
+                }
+            });
+
+            const page = document.createElement('span');
+            page.className = 'page-current';
+            page.textContent = totalRows === 0 ? 'Trang 0/0' : `Trang ${currentPage}/${totalPages}`;
+
+            const next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'page-btn';
+            next.textContent = 'Sau';
+            next.disabled = currentPage >= totalPages || totalRows === 0;
+            next.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    render();
+                }
+            });
+
+            actions.append(prev, page, next);
+            pagination.append(info, actions);
         };
 
-        search.addEventListener('input', apply);
-        if (status) status.addEventListener('change', apply);
+        search.addEventListener('input', () => {
+            currentPage = 1;
+            render();
+        });
+
+        if (status) {
+            status.addEventListener('change', () => {
+                currentPage = 1;
+                render();
+            });
+        }
+
+        render();
     }
 
-    setupFilter('readerTable', 'readerSearch', 'readerStatus');
-    setupFilter('activeTable', 'activeSearch', 'activeStatus');
-    setupFilter('deletedTable', 'deletedSearch', null);
+    setupFilterAndPagination('readerTable', 'readerSearch', 'readerStatus', 'readerPagination', 10);
+    setupFilterAndPagination('activeTable', 'activeSearch', 'activeStatus', 'activePagination', 10);
+    setupFilterAndPagination('deletedTable', 'deletedSearch', null, 'deletedPagination', 10);
+
+
+    // ===== JSON ENDPOINT + FETCH API: kiểm tra nhanh trạng thái bản sao =====
+    const quickBookSelect = document.getElementById('quickBookSelect');
+    const quickBookCheck = document.getElementById('quickBookCheck');
+    const quickBookResult = document.getElementById('quickBookResult');
+
+    async function fetchQuickBookStatus() {
+        if (!quickBookSelect || !quickBookCheck || !quickBookResult) return;
+
+        const bookId = quickBookSelect.value;
+        quickBookResult.hidden = false;
+        quickBookResult.className = 'quick-result';
+
+        if (!bookId) {
+            quickBookResult.classList.add('warning');
+            quickBookResult.textContent = 'Vui lòng chọn một đầu sách để kiểm tra.';
+            return;
+        }
+
+        const oldText = quickBookCheck.textContent;
+        quickBookCheck.disabled = true;
+        quickBookCheck.textContent = 'Đang kiểm tra...';
+        quickBookResult.textContent = 'Đang lấy trạng thái mới nhất...';
+
+        try {
+            const response = await fetch(
+                `index.php?controller=bansao&action=apiTrangThai&book_id=${encodeURIComponent(bookId)}`,
+                { headers: { 'Accept': 'application/json' } }
+            );
+
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                throw new Error('Phản hồi từ máy chủ không phải JSON hợp lệ.');
+            }
+
+            if (!response.ok || !data?.ok) {
+                throw new Error(data?.message || 'Không thể kiểm tra trạng thái bản sao.');
+            }
+
+            quickBookResult.className = 'quick-result ' + (data.co_the_muon ? 'success' : 'warning');
+            quickBookResult.textContent =
+                `${data.ma_sach} - ${data.ten_sach}\n` +
+                `Trạng thái: ${data.trang_thai}\n` +
+                `Có thể mượn: ${data.so_ban_con}/${data.tong_ban} bản | ` +
+                `Đang mượn: ${data.so_ban_dang_muon} | ` +
+                `Chưa có sẵn/đang giữ: ${data.so_ban_chua_co_san}\n` +
+                `${data.message}`;
+        } catch (error) {
+            quickBookResult.className = 'quick-result error';
+            quickBookResult.textContent = error?.message || 'Có lỗi khi kiểm tra trạng thái.';
+        } finally {
+            quickBookCheck.disabled = false;
+            quickBookCheck.textContent = oldText;
+        }
+    }
+
+    quickBookCheck?.addEventListener('click', fetchQuickBookStatus);
+    quickBookSelect?.addEventListener('change', () => {
+        if (quickBookSelect.value) fetchQuickBookStatus();
+    });
 
     const copyModal = document.getElementById('copyModal');
     const openCopyModalButton = document.getElementById('openCopyModal');

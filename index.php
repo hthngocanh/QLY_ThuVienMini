@@ -1,4 +1,5 @@
 <?php
+// index.php - Front Controller / Trung tâm điều hướng MVC
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -44,8 +45,11 @@ switch (strtolower($controller)) {
     case 'book_copy':
         require_once __DIR__ . '/src/Controller/BookCopyController.php';
         $bookCopyController = new BookCopyController();
-        if (strtolower($action) === 'kiemtra') {
+
+        if ($action === 'kiemtra' || $action === 'kiemTra') {
             $bookCopyController->kiemTra();
+        } elseif ($action === 'apiTrangThai' || $action === 'api_trang_thai') {
+            $bookCopyController->apiTrangThai();
         } else {
             $bookCopyController->index();
         }
@@ -55,34 +59,22 @@ switch (strtolower($controller)) {
     case 'borrow_slip':
         require_once __DIR__ . '/src/Controller/BorrowSlipController.php';
         $borrowSlipController = new BorrowSlipController();
-        
-        // --- ĐOẠN ĐÃ ĐƯỢC BỔ SUNG CHO PHIẾU MƯỢN ---
-        $actionLower = strtolower($action);
-        if ($actionLower === 'cauhinhhanmuc') {
-            $borrowSlipController->cauHinhHanMuc();
-        } elseif ($actionLower === 'thongke') {
-            $borrowSlipController->thongKe();
-        } else {
-            $borrowSlipController->index();
-        }
+        $borrowSlipController->index();
         break;
 
     case 'nguoidung':
     case 'user':
         require_once __DIR__ . '/src/Controller/UserController.php';
         $userController = new UserController();
-        
-        // Chuyển action về chữ thường để tránh lỗi phân biệt hoa/thường từ URL
-        $actionLower = strtolower($action);
-        if ($actionLower === 'profile') {
+        if ($action === 'profile') {
             $userController->profile();
-        } elseif ($actionLower === 'tracuudocgia' || $actionLower === 'tracuu') {
+        } elseif ($action === 'traCuuDocGia' || $action === 'tracuu') {
             $userController->traCuuDocGia();
-        } elseif ($actionLower === 'quanlydocgia') {
+        } elseif ($action === 'quanLyDocGia') {
             $userController->quanLyDocGia();
-        } elseif ($actionLower === 'quanlynhansu') {
+        } elseif ($action === 'quanLyNhanSu') {
             $userController->quanLyNhanSu();
-        } elseif ($actionLower === 'yeucaucaplaimatkhau' || $actionLower === 'yeucau') {
+        } elseif ($action === 'yeuCauCapLaiMatKhau' || $action === 'yeucau') {
             $userController->yeuCauCapLaiMatKhau();
         } else {
             $userController->index();

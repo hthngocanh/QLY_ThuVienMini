@@ -17,6 +17,42 @@ class BookCopyController extends BaseController
         $this->bookCopyModel = new BookCopyModel();
     }
 
+    /**
+     * Sinh CSRF token riêng cho module Bản sao và lưu trong session.
+     */
+    private function getCsrfToken()
+    {
+        if (empty($_SESSION['csrf_token_bansao'])) {
+            $_SESSION['csrf_token_bansao'] = bin2hex(random_bytes(32));
+        }
+
+        return (string)$_SESSION['csrf_token_bansao'];
+    }
+
+    /**
+     * Xác minh CSRF token bằng hash_equals để tránh so sánh không an toàn.
+     */
+    private function csrfTokenHopLe($token)
+    {
+        $tokenTrongSession = (string)($_SESSION['csrf_token_bansao'] ?? '');
+        $tokenGuiLen = is_string($token) ? $token : '';
+
+        return $tokenTrongSession !== ''
+            && $tokenGuiLen !== ''
+            && hash_equals($tokenTrongSession, $tokenGuiLen);
+    }
+
+    /**
+     * Trả dữ liệu JSON và kết thúc request.
+     */
+    private function traJson($data, $statusCode = 200)
+    {
+        http_response_code((int)$statusCode);
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
     public function index()
     {
         // ================= PHÂN QUYỀN =================
@@ -25,12 +61,27 @@ class BookCopyController extends BaseController
         $laQuanTriVien = ($vaiTroHienTai === "Quản trị viên");
         $laDocGia = ($vaiTroHienTai === "Độc giả");
 
+        // ================= CSRF =================
+        $csrfToken = $this->getCsrfToken();
+        $requestMethod = $_SERVER["REQUEST_METHOD"] ?? "GET";
+        $postAction = $_POST["action"] ?? "";
+
+        // Mọi thao tác thay đổi dữ liệu của module Bản sao đều phải có CSRF token hợp lệ.
+        if (
+            $requestMethod === "POST"
+            && in_array($postAction, ["add", "update", "delete", "restore"], true)
+            && !$this->csrfTokenHopLe($_POST["csrf_token"] ?? "")
+        ) {
+            $this->redirect("index.php?controller=bansao&error=csrf");
+        }
+
         // ================= DỮ LIỆU FORM =================
         $bookId = "";
         $maBanSao = "";
         $viTri = "";
         $trangThai = "Có sẵn";
         $editId = "";
+        $trangThaiPhieuDangSua = "";
 
         $loiBookId = "";
         $loiMaBanSao = "";
@@ -56,6 +107,8 @@ class BookCopyController extends BaseController
         if (isset($_GET["error"])) {
             if ($_GET["error"] === "borrowing") {
                 $thongBaoLoi = "Không thể xóa vì bản sao hiện đang được mượn.";
+            } elseif ($_GET["error"] === "active-slip") {
+                $thongBaoLoi = "Không thể xóa vì bản sao đang có phiếu Chờ duyệt, Đang mượn hoặc Quá hạn.";
             } elseif ($_GET["error"] === "delete") {
                 $thongBaoLoi = "Không thể xóa bản sao sách.";
             } elseif ($_GET["error"] === "restore") {
@@ -64,6 +117,8 @@ class BookCopyController extends BaseController
                 $thongBaoLoi = "Bạn không có quyền thực hiện thao tác này.";
             } elseif ($_GET["error"] === "notfound") {
                 $thongBaoLoi = "Không tìm thấy bản sao sách cần thao tác.";
+            } elseif ($_GET["error"] === "csrf") {
+                $thongBaoLoi = "Yêu cầu không hợp lệ hoặc phiên làm việc đã thay đổi. Vui lòng tải lại trang và thử lại.";
             }
         }
 
@@ -88,6 +143,11 @@ class BookCopyController extends BaseController
 
                 if (!$banSaoCanXoa) {
                     $this->redirect("index.php?controller=bansao&error=notfound");
+                }
+
+                $trangThaiPhieuCanXoa = (string)($banSaoCanXoa["trang_thai_phieu"] ?? "");
+                if (in_array($trangThaiPhieuCanXoa, ["Chờ duyệt", "Đang mượn", "Quá hạn"], true)) {
+                    $this->redirect("index.php?controller=bansao&error=active-slip");
                 }
 
                 if (($banSaoCanXoa["trang_thai"] ?? "") === "Đang mượn") {
@@ -151,6 +211,7 @@ class BookCopyController extends BaseController
                     $maBanSao = $banSaoSua["ma_ban_sao"];
                     $viTri = $banSaoSua["vi_tri"];
                     $trangThai = $banSaoSua["trang_thai"];
+                    $trangThaiPhieuDangSua = (string)($banSaoSua["trang_thai_phieu"] ?? "");
                 } else {
                     $editId = "";
                     $thongBaoLoi = "Không tìm thấy bản sao cần sửa.";
@@ -174,6 +235,49 @@ class BookCopyController extends BaseController
             $viTri = trim($_POST["vi_tri"] ?? "");
             $trangThai = trim($_POST["trang_thai"] ?? "");
 
+            // Khi cập nhật phải lấy lại dữ liệu thật từ DB.
+            // Không tin giá trị hidden/select gửi từ trình duyệt vì có thể bị sửa bằng DevTools.
+            $banSaoHienTai = null;
+            if ($action === "update") {
+                if (!ctype_digit($editId)) {
+                    $thongBaoLoi = "ID bản sao không hợp lệ.";
+                } else {
+                    $banSaoHienTai = $this->bookCopyModel->layBanSaoTheoId($editId);
+                    if (!$banSaoHienTai) {
+                        $thongBaoLoi = "Không tìm thấy bản sao đang hoạt động để cập nhật.";
+                    }
+                }
+            }
+
+            // Nếu bản sao đang có phiếu Chờ duyệt / Đang mượn / Quá hạn thì
+            // đầu sách và trạng thái vật lý phải do luồng Phiếu mượn kiểm soát.
+            // Vẫn cho sửa mã bản sao và vị trí vì phiếu mượn liên kết bằng ID bản sao.
+            if ($banSaoHienTai) {
+                $trangThaiPhieuDangSua = (string)($banSaoHienTai["trang_thai_phieu"] ?? "");
+                $coPhieuDangHieuLuc = in_array(
+                    $trangThaiPhieuDangSua,
+                    ["Chờ duyệt", "Đang mượn", "Quá hạn"],
+                    true
+                );
+
+                if ($coPhieuDangHieuLuc || (($banSaoHienTai["trang_thai"] ?? "") === "Đang mượn")) {
+                    $bookIdGoc = (string)($banSaoHienTai["book_id"] ?? "");
+                    $trangThaiGoc = (string)($banSaoHienTai["trang_thai"] ?? "");
+
+                    if ($bookId !== $bookIdGoc) {
+                        $loiBookId = "Bản sao đang gắn với phiếu mượn hiệu lực nên không thể đổi sang đầu sách khác.";
+                    }
+
+                    if ($trangThai !== $trangThaiGoc) {
+                        $loiTrangThai = "Trạng thái của bản sao đang được Phiếu mượn kiểm soát, không thể thay đổi thủ công.";
+                    }
+
+                    // Không tin dữ liệu POST: luôn dùng lại đầu sách và trạng thái thật từ DB.
+                    $bookId = $bookIdGoc;
+                    $trangThai = $trangThaiGoc;
+                }
+            }
+
             if ($bookId === "") {
                 $loiBookId = "Vui lòng chọn đầu sách.";
             } elseif (!ctype_digit($bookId)) {
@@ -190,13 +294,32 @@ class BookCopyController extends BaseController
                 $loiViTri = "Vui lòng nhập vị trí bản sao.";
             }
 
-            $trangThaiHopLe = ["Có sẵn", "Đang mượn", "Chưa có sẵn"];
-            if (!in_array($trangThai, $trangThaiHopLe, true)) {
-                $loiTrangThai = "Trạng thái không hợp lệ.";
+            if ($action === "add") {
+                // Bản sao mới không được tạo trực tiếp ở trạng thái Đang mượn.
+                // Đang mượn chỉ phát sinh khi Thủ thư duyệt Phiếu mượn.
+                $trangThaiHopLe = ["Có sẵn", "Chưa có sẵn"];
+                if (!in_array($trangThai, $trangThaiHopLe, true)) {
+                    $loiTrangThai = "Bản sao mới chỉ được chọn Có sẵn hoặc Chưa có sẵn.";
+                }
+            } elseif ($action === "update" && $banSaoHienTai) {
+                $coPhieuDangHieuLuc = in_array(
+                    (string)($banSaoHienTai["trang_thai_phieu"] ?? ""),
+                    ["Chờ duyệt", "Đang mượn", "Quá hạn"],
+                    true
+                );
+
+                if (!$coPhieuDangHieuLuc && (($banSaoHienTai["trang_thai"] ?? "") !== "Đang mượn")) {
+                    // Chỉ bản sao không bị phiếu giữ mới được chỉnh thủ công giữa 2 trạng thái này.
+                    $trangThaiHopLe = ["Có sẵn", "Chưa có sẵn"];
+                    if (!in_array($trangThai, $trangThaiHopLe, true)) {
+                        $loiTrangThai = "Không thể đặt thủ công trạng thái Đang mượn. Trạng thái này do Phiếu mượn cập nhật.";
+                    }
+                }
             }
 
             if (
-                $loiBookId === ""
+                $thongBaoLoi === ""
+                && $loiBookId === ""
                 && $loiMaBanSao === ""
                 && $loiViTri === ""
                 && $loiTrangThai === ""
@@ -208,8 +331,8 @@ class BookCopyController extends BaseController
                     }
 
                     if ($action === "update") {
-                        if (!ctype_digit($editId)) {
-                            throw new Exception("ID bản sao không hợp lệ.");
+                        if (!$banSaoHienTai) {
+                            throw new Exception("Không tìm thấy bản sao đang hoạt động để cập nhật.");
                         }
 
                         if (!$this->bookCopyModel->suaBanSao($editId, $bookId, $maBanSao, $viTri, $trangThai)) {
@@ -246,6 +369,7 @@ class BookCopyController extends BaseController
             'viTri' => $viTri,
             'trangThai' => $trangThai,
             'editId' => $editId,
+            'trangThaiPhieuDangSua' => $trangThaiPhieuDangSua,
             'loiBookId' => $loiBookId,
             'loiMaBanSao' => $loiMaBanSao,
             'loiViTri' => $loiViTri,
@@ -261,7 +385,64 @@ class BookCopyController extends BaseController
             'duocQuanLyBanSao' => $duocQuanLyBanSao,
             'laQuanTriVien' => $laQuanTriVien,
             'laDocGia' => $laDocGia,
+            'csrfToken' => $csrfToken,
             'activePage' => 'bansao'
+        ]);
+    }
+
+    /**
+     * Endpoint JSON: kiểm tra nhanh trạng thái bản sao theo đầu sách.
+     * Được gọi bằng Fetch API từ giao diện Bản sao.
+     */
+    public function apiTrangThai()
+    {
+        if (empty($_SESSION['user'])) {
+            $this->traJson([
+                'ok' => false,
+                'message' => 'Bạn cần đăng nhập để sử dụng chức năng này.'
+            ], 401);
+        }
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            $this->traJson([
+                'ok' => false,
+                'message' => 'Phương thức yêu cầu không hợp lệ.'
+            ], 405);
+        }
+
+        $bookId = trim((string)($_GET['book_id'] ?? ''));
+        if ($bookId === '' || !ctype_digit($bookId) || (int)$bookId <= 0) {
+            $this->traJson([
+                'ok' => false,
+                'message' => 'Đầu sách không hợp lệ.'
+            ], 422);
+        }
+
+        $data = $this->bookCopyModel->layTinhTrangMotDauSach((int)$bookId);
+        if (!$data) {
+            $this->traJson([
+                'ok' => false,
+                'message' => 'Không tìm thấy đầu sách.'
+            ], 404);
+        }
+
+        $trangThai = (string)($data['trang_thai_ban_sao'] ?? 'Chưa có sẵn');
+        $soBanCon = (int)($data['so_ban_con'] ?? 0);
+
+        $this->traJson([
+            'ok' => true,
+            'book_id' => (int)($data['book_id'] ?? 0),
+            'ma_sach' => (string)($data['ma_sach'] ?? ''),
+            'ten_sach' => (string)($data['ten_sach'] ?? ''),
+            'tong_ban' => (int)($data['tong_ban'] ?? 0),
+            'so_ban_con' => $soBanCon,
+            'so_ban_dang_muon' => (int)($data['so_ban_dang_muon'] ?? 0),
+            'so_ban_chua_co_san' => (int)($data['so_ban_chua_co_san'] ?? 0),
+            'trang_thai' => $trangThai,
+            'co_the_muon' => $soBanCon > 0,
+            'message' => $soBanCon > 0
+                ? 'Đầu sách hiện còn bản sao có thể mượn.'
+                : 'Hiện không có bản sao nào có thể mượn.'
         ]);
     }
 
