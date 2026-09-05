@@ -10,12 +10,12 @@ $__sidebarRole = $__sidebarUser["vai_tro"] ?? "";
 $__roleLibrarian = "Th\u{1EE7} th\u{01B0}";
 $__roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
 
-// Nếu đã đăng nhập và không phải Thủ thư/Admin thì dùng sidebar riêng của Độc giả.
+// Độc giả dùng sidebar riêng.
+// Thủ thư / Quản trị viên vẫn dùng nguyên sidebar chung của nhóm.
 if ($__sidebarUser && !in_array($__sidebarRole, [$__roleLibrarian, $__roleAdmin], true)) {
     require __DIR__ . "/sidebar_reader.php";
     return;
 }
-?>
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
