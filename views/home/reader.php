@@ -340,10 +340,6 @@ if ($isLoggedIn):
                             $statusClass = $status === 'Có sẵn'
                                 ? 'status-available'
                                 : ($status === 'Đang mượn' ? 'status-borrowed' : 'status-unavailable');
-
-                            $bookId = (int)($sach['book_id'] ?? 0);
-                            $trangThaiCuaToi = $trangThaiMuonCuaToi[$bookId] ?? '';
-                            $coTheMuon = ($status === 'Có sẵn' && $trangThaiCuaToi !== 'Chờ duyệt');
                             ?>
                             <tr class="book-row"
                                 data-search="<?= htmlspecialchars($searchText, ENT_QUOTES, 'UTF-8') ?>"
@@ -356,24 +352,20 @@ if ($isLoggedIn):
                                 <td data-label="Danh mục"><span class="category-badge"><?= htmlspecialchars($category) ?></span></td>
                                 <td data-label="Trạng thái"><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span></td>
                                 <td data-label="Thao tác">
-                                    <?php if ($trangThaiCuaToi === 'Chờ duyệt'): ?>
-                                        <button type="button"
-                                                class="btn-borrow pending js-pending-btn"
-                                                data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                                            Chờ duyệt
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button"
-                                                class="btn-borrow <?= $coTheMuon ? 'available' : 'unavailable' ?> js-borrow-btn"
-                                                data-can-borrow="<?= $coTheMuon ? '1' : '0' ?>"
-                                                data-book-id="<?= $bookId ?>"
-                                                data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                                data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                                data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                                            Mượn
-                                        </button>
-                                    <?php endif; ?>
-                                </td>
+    <?php if ($status === 'Có sẵn'): ?>
+        <button type="button"
+        class="btn-borrow available js-borrow-btn"
+        data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    Mượn
+</button>
+    <?php else: ?>
+        <span class="btn-borrow unavailable">
+            Mượn
+        </span>
+    <?php endif; ?>
+</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -385,69 +377,91 @@ if ($isLoggedIn):
     </main>
 </div>
 <!-- Popup Phiếu mượn -->
-<div class="unavailable-modal-overlay" id="unavailableModal" aria-hidden="true">
-    <div class="unavailable-modal" role="dialog" aria-modal="true" aria-labelledby="unavailableModalTitle">
-        <div class="unavailable-modal-icon" aria-hidden="true">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-        </div>
-        <h3 id="unavailableModalTitle">Không thể mượn sách</h3>
-        <p id="unavailableMessage">Bạn không thể mượn sách vì sách không có sẵn.</p>
-        <div class="unavailable-modal-actions">
-            <button type="button" class="unavailable-ok" id="unavailableOk">OK</button>
-        </div>
-    </div>
-</div>
-
 <div class="borrow-modal-overlay" id="borrowModal" aria-hidden="true">
     <div class="borrow-modal" role="dialog" aria-modal="true" aria-labelledby="borrowModalTitle">
+
         <div class="borrow-modal-header">
             <div>
                 <h2 id="borrowModalTitle">Phiếu mượn sách</h2>
-                <p>Kiểm tra thông tin và chọn thời gian mượn trước khi gửi yêu cầu.</p>
+                <p>Kiểm tra thông tin trước khi xác nhận mượn sách.</p>
             </div>
-            <button type="button" class="borrow-modal-close" id="borrowModalClose" aria-label="Đóng">&times;</button>
+
+            <button type="button"
+                    class="borrow-modal-close"
+                    id="borrowModalClose"
+                    aria-label="Đóng">&times;</button>
         </div>
-        <form id="borrowRequestForm" method="GET" action="index.php">
-            <input type="hidden" name="controller" value="phieumuon">
-            <input type="hidden" id="borrowBookId" name="book_id" value="">
-            <div class="borrow-form-grid">
-                <div class="borrow-form-group"><label>Mã độc giả</label><input type="text" value="<?= htmlspecialchars($maNguoiDung) ?>" readonly></div>
-                <div class="borrow-form-group"><label>Người mượn</label><input type="text" value="<?= htmlspecialchars($hoTen) ?>" readonly></div>
-                <div class="borrow-form-group"><label>Mã sách</label><input type="text" id="borrowBookCode" readonly></div>
-                <div class="borrow-form-group"><label>Tác giả</label><input type="text" id="borrowAuthor" readonly></div>
-                <div class="borrow-form-group full"><label>Tên sách</label><input type="text" id="borrowBookName" readonly></div>
-                <div class="borrow-form-group"><label>Ngày gửi yêu cầu</label><input type="date" id="borrowDate" readonly></div>
-                <div class="borrow-form-group"><label>Trạng thái</label><input type="text" value="Chờ duyệt" readonly></div>
+
+        <div class="borrow-form-grid">
+
+            <div class="borrow-form-group">
+                <label>Mã độc giả</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($maNguoiDung) ?>"
+                       readonly>
             </div>
-            <div class="borrow-modal-note">Khi bấm <strong>Sang Phiếu mượn</strong>, hệ thống sẽ chuyển bạn tới chức năng Phiếu mượn chung để chọn bản sao còn có sẵn và gửi đăng ký mượn.</div>
-            <div class="borrow-modal-actions">
-                <button type="button" class="borrow-cancel" id="borrowCancel">Hủy</button>
-                <button type="submit" class="borrow-submit" id="borrowSubmit">Sang Phiếu mượn</button>
+
+            <div class="borrow-form-group">
+                <label>Người mượn</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($hoTen) ?>"
+                       readonly>
             </div>
-        </form>
+
+            <div class="borrow-form-group">
+                <label>Mã sách</label>
+                <input type="text"
+                       id="borrowBookCode"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Tác giả</label>
+                <input type="text"
+                       id="borrowAuthor"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group full">
+                <label>Tên sách</label>
+                <input type="text"
+                       id="borrowBookName"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Ngày gửi yêu cầu</label>
+                <input type="date"
+                       id="borrowDate"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Trạng thái</label>
+                <input type="text"
+                       value="Có sẵn"
+                       readonly>
+            </div>
+
+        </div>
+
+        <div class="borrow-modal-actions">
+            <button type="button"
+                    class="borrow-cancel"
+                    id="borrowCancel">
+                Hủy
+            </button>
+
+            <button type="button"
+                    class="borrow-submit"
+                    id="borrowSubmit">
+                Xác nhận mượn
+            </button>
+        </div>
+
     </div>
 </div>
 
-<div class="result-modal-overlay" id="resultModal" aria-hidden="true">
-    <div class="result-modal" id="resultModalBox" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
-        <div class="result-modal-icon" aria-hidden="true">
-            <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        </div>
-        <h3 id="resultModalTitle">Gửi yêu cầu thành công</h3>
-        <p id="resultModalMessage">Sách của bạn đang trong trạng thái chờ duyệt.</p>
-        <div class="result-modal-actions">
-            <button type="button" class="result-ok" id="resultOk">OK</button>
-        </div>
-    </div>
-</div>
-
-<div class="mini-notice" id="miniNotice"></div>
 <script>
 (function () {
     const search = document.getElementById('bookSearch');
@@ -455,202 +469,140 @@ if ($isLoggedIn):
     const status = document.getElementById('statusFilter');
     const rows = Array.from(document.querySelectorAll('.book-row'));
     const visibleCount = document.getElementById('visibleCount');
-    const notice = document.getElementById('miniNotice');
+
     const borrowModal = document.getElementById('borrowModal');
     const borrowModalClose = document.getElementById('borrowModalClose');
     const borrowCancel = document.getElementById('borrowCancel');
-    const borrowForm = document.getElementById('borrowRequestForm');
-    const borrowBookId = document.getElementById('borrowBookId');
+    const borrowSubmit = document.getElementById('borrowSubmit');
+
     const borrowBookCode = document.getElementById('borrowBookCode');
     const borrowBookName = document.getElementById('borrowBookName');
     const borrowAuthor = document.getElementById('borrowAuthor');
     const borrowDate = document.getElementById('borrowDate');
-    const borrowSubmit = document.getElementById('borrowSubmit');
-    const unavailableModal = document.getElementById('unavailableModal');
-    const unavailableOk = document.getElementById('unavailableOk');
-    const unavailableMessage = document.getElementById('unavailableMessage');
-    const resultModal = document.getElementById('resultModal');
-    const resultModalBox = document.getElementById('resultModalBox');
-    const resultModalTitle = document.getElementById('resultModalTitle');
-    const resultModalMessage = document.getElementById('resultModalMessage');
-    const resultOk = document.getElementById('resultOk');
-    let noticeTimer = null;
 
     function normalize(value) {
-        return (value || '').toString().trim().toLocaleLowerCase('vi-VN');
+        return (value || '')
+            .toString()
+            .trim()
+            .toLocaleLowerCase('vi-VN');
     }
 
     function filterRows() {
         const q = normalize(search ? search.value : '');
         const cat = normalize(category ? category.value : '');
         const st = normalize(status ? status.value : '');
+
         let count = 0;
 
         rows.forEach(row => {
-            const okSearch = !q || normalize(row.dataset.search).includes(q);
-            const okCategory = !cat || normalize(row.dataset.category) === cat;
-            const okStatus = !st || normalize(row.dataset.status) === st;
+            const okSearch =
+                !q || normalize(row.dataset.search).includes(q);
+
+            const okCategory =
+                !cat || normalize(row.dataset.category) === cat;
+
+            const okStatus =
+                !st || normalize(row.dataset.status) === st;
+
             const show = okSearch && okCategory && okStatus;
+
             row.style.display = show ? '' : 'none';
-            if (show) count++;
+
+            if (show) {
+                count++;
+            }
         });
 
-        if (visibleCount) visibleCount.textContent = count;
+        if (visibleCount) {
+            visibleCount.textContent = count;
+        }
     }
-
-    function showNotice(message) {
-        if (!notice) return;
-        notice.textContent = message;
-        notice.classList.add('show');
-        clearTimeout(noticeTimer);
-        noticeTimer = setTimeout(() => notice.classList.remove('show'), 2600);
-    }
-
-    if (search) search.addEventListener('input', filterRows);
-    if (category) category.addEventListener('change', filterRows);
-    if (status) status.addEventListener('change', filterRows);
 
     function formatDate(date) {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, '0');
         const d = String(date.getDate()).padStart(2, '0');
+
         return `${y}-${m}-${d}`;
     }
 
     function openBorrowModal(button) {
-        if (!borrowModal) return;
-        if (borrowBookId) borrowBookId.value = button.dataset.bookId || '';
-        if (borrowBookCode) borrowBookCode.value = button.dataset.bookCode || '';
-        if (borrowBookName) borrowBookName.value = button.dataset.bookName || '';
-        if (borrowAuthor) borrowAuthor.value = button.dataset.author || '';
-        const today = new Date();
-        if (borrowDate) borrowDate.value = formatDate(today);
-        borrowModal.classList.add('show');
-        borrowModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
+        if (borrowBookCode) {
+            borrowBookCode.value = button.dataset.bookCode || '';
+        }
+
+        if (borrowBookName) {
+            borrowBookName.value = button.dataset.bookName || '';
+        }
+
+        if (borrowAuthor) {
+            borrowAuthor.value = button.dataset.author || '';
+        }
+
+        if (borrowDate) {
+            borrowDate.value = formatDate(new Date());
+        }
+
+        if (borrowModal) {
+            borrowModal.classList.add('show');
+            borrowModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function closeBorrowModal() {
         if (!borrowModal) return;
+
         borrowModal.classList.remove('show');
         borrowModal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
     }
 
-    function openUnavailableModal(message) {
-        if (!unavailableModal) return;
-        if (unavailableMessage && message) unavailableMessage.textContent = message;
-        unavailableModal.classList.add('show');
-        unavailableModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        if (unavailableOk) setTimeout(() => unavailableOk.focus(), 0);
+    if (search) {
+        search.addEventListener('input', filterRows);
     }
 
-    function closeUnavailableModal() {
-        if (!unavailableModal) return;
-        unavailableModal.classList.remove('show');
-        unavailableModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+    if (category) {
+        category.addEventListener('change', filterRows);
     }
 
-    function openResultModal(title, message, warning) {
-        if (!resultModal) return;
-        if (resultModalTitle) resultModalTitle.textContent = title || 'Thông báo';
-        if (resultModalMessage) resultModalMessage.textContent = message || '';
-        if (resultModalBox) resultModalBox.classList.toggle('warning', !!warning);
-        resultModal.classList.add('show');
-        resultModal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        if (resultOk) setTimeout(() => resultOk.focus(), 0);
-    }
-
-    function closeResultModal() {
-        if (!resultModal) return;
-        resultModal.classList.remove('show');
-        resultModal.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+    if (status) {
+        status.addEventListener('change', filterRows);
     }
 
     document.querySelectorAll('.js-borrow-btn').forEach(button => {
         button.addEventListener('click', function () {
-            if (this.dataset.canBorrow !== '1') {
-                openUnavailableModal('Bạn không thể mượn sách vì sách không có sẵn.');
-                return;
-            }
             openBorrowModal(this);
         });
     });
 
-    document.querySelectorAll('.js-pending-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            openResultModal(
-                'Yêu cầu đang chờ duyệt',
-                'Sách của bạn đang trong trạng thái chờ duyệt.',
-                true
-            );
-        });
-    });
+    if (borrowModalClose) {
+        borrowModalClose.addEventListener('click', closeBorrowModal);
+    }
 
-    if (borrowModalClose) borrowModalClose.addEventListener('click', closeBorrowModal);
-    if (borrowCancel) borrowCancel.addEventListener('click', closeBorrowModal);
-    if (borrowModal) borrowModal.addEventListener('click', function (event) { if (event.target === borrowModal) closeBorrowModal(); });
-    if (unavailableOk) unavailableOk.addEventListener('click', closeUnavailableModal);
-    if (unavailableModal) unavailableModal.addEventListener('click', function (event) { if (event.target === unavailableModal) closeUnavailableModal(); });
-    if (resultOk) resultOk.addEventListener('click', closeResultModal);
-    if (resultModal) resultModal.addEventListener('click', function (event) { if (event.target === resultModal) closeResultModal(); });
+    if (borrowCancel) {
+        borrowCancel.addEventListener('click', closeBorrowModal);
+    }
+
+    if (borrowModal) {
+        borrowModal.addEventListener('click', function (event) {
+            if (event.target === borrowModal) {
+                closeBorrowModal();
+            }
+        });
+    }
+
+    if (borrowSubmit) {
+        borrowSubmit.addEventListener('click', function () {
+            window.location.href = 'index.php?controller=phieumuon';
+        });
+    }
+
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
-            if (borrowModal && borrowModal.classList.contains('show')) closeBorrowModal();
-            if (unavailableModal && unavailableModal.classList.contains('show')) closeUnavailableModal();
-            if (resultModal && resultModal.classList.contains('show')) closeResultModal();
+            closeBorrowModal();
         }
     });
-
-    if (borrowForm) {
-        borrowForm.addEventListener('submit', function (event) {
-            if (!borrowBookId || !borrowBookId.value) {
-                event.preventDefault();
-                showNotice('Không xác định được đầu sách cần mượn.');
-                return;
-            }
-
-            if (borrowSubmit) {
-                borrowSubmit.disabled = true;
-                borrowSubmit.textContent = 'Đang chuyển...';
-            }
-        });
-    }
-
-    // Hiện popup kết quả sau khi server tạo yêu cầu và redirect về Trang chủ.
-    const borrowResult = <?= json_encode($_GET['borrow'] ?? '', JSON_UNESCAPED_UNICODE) ?>;
-    if (borrowResult === 'success') {
-        openResultModal(
-            'Gửi yêu cầu thành công',
-            'Sách của bạn đang trong trạng thái chờ duyệt.',
-            false
-        );
-    } else if (borrowResult === 'already_pending') {
-        openResultModal(
-            'Yêu cầu đang chờ duyệt',
-            'Sách của bạn đang trong trạng thái chờ duyệt.',
-            true
-        );
-    } else if (borrowResult === 'limit_reached') {
-        const borrowLimit = <?= (int)($_GET['limit'] ?? 5) ?>;
-        openResultModal(
-            'Kh\u00f4ng th\u1ec3 m\u01b0\u1ee3n th\u00eam',
-            'B\u1ea1n \u0111\u00e3 \u0111\u1ea1t h\u1ea1n m\u1ee9c m\u01b0\u1ee3n t\u1ed1i \u0111a ' + borrowLimit + ' cu\u1ed1n.',
-            true
-        );
-    } else if (borrowResult === 'unavailable') {
-        openUnavailableModal('Bạn không thể mượn sách vì sách không có sẵn.');
-    } else if (borrowResult === 'forbidden') {
-        openUnavailableModal('Bạn không có quyền gửi yêu cầu mượn sách.');
-    } else if (borrowResult === 'user_invalid') {
-        openUnavailableModal('Tài khoản của bạn không hoạt động hoặc không hợp lệ.');
-    } else if (borrowResult === 'invalid' || borrowResult === 'error') {
-        openUnavailableModal('Không thể gửi yêu cầu mượn lúc này. Vui lòng thử lại.');
-    }
 })();
 </script>
 </body>

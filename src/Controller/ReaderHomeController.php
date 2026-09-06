@@ -4,13 +4,11 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Model/DashboardModel.php';
 require_once __DIR__ . '/../Model/BookCopyModel.php';
-require_once __DIR__ . '/../Model/ReaderHomeModel.php';
 
 class ReaderHomeController extends BaseController
 {
     private $dashboardModel;
     private $bookCopyModel;
-    private $readerHomeModel;
 
     public function __construct()
     {
@@ -20,7 +18,6 @@ class ReaderHomeController extends BaseController
 
         $this->dashboardModel = new DashboardModel();
         $this->bookCopyModel = new BookCopyModel();
-        $this->readerHomeModel = new ReaderHomeModel();
     }
 
     public function index()
@@ -28,7 +25,6 @@ class ReaderHomeController extends BaseController
         $isLoggedIn = isset($_SESSION["user"]);
         $stats = [];
         $danhSachSach = [];
-        $trangThaiMuonCuaToi = [];
 
         if ($isLoggedIn) {
             $vaiTro = $_SESSION["user"]["vai_tro"] ?? "";
@@ -42,14 +38,6 @@ class ReaderHomeController extends BaseController
             // và trạng thái yêu cầu mượn của chính tài khoản đang đăng nhập.
             if ($vaiTro === "Độc giả") {
                 $danhSachSach = $this->bookCopyModel->layTinhTrangDauSach();
-
-                $maNguoiDung = $_SESSION["user"]["ma_nguoi_dung"] ?? "";
-                if ($maNguoiDung !== "") {
-                    $idNguoiDung = $this->readerHomeModel->getIdNguoiDungTheoMa($maNguoiDung);
-                    if ($idNguoiDung > 0) {
-                        $trangThaiMuonCuaToi = $this->readerHomeModel->getTrangThaiDauSachCuaNguoiDung($idNguoiDung);
-                    }
-                }
             }
         }
 
@@ -57,7 +45,6 @@ class ReaderHomeController extends BaseController
             'isLoggedIn' => $isLoggedIn,
             'stats' => $stats,
             'danhSachSach' => $danhSachSach,
-            'trangThaiMuonCuaToi' => $trangThaiMuonCuaToi,
             'activePage' => 'trangchu'
         ]);
     }
