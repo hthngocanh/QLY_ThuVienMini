@@ -21,6 +21,34 @@ class BookModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Chỉ lấy danh mục đang "Hoạt động" - dùng riêng cho dropdown ở form THÊM sách.
+    // Form SỬA và bộ lọc tìm kiếm vẫn dùng layDanhSachDanhMuc() (lấy tất cả)
+    // để không làm mất lựa chọn của sách đã có category ngừng hoạt động từ trước.
+    public function layDanhSachDanhMucHoatDong()
+    {
+        $stmt = $this->pdo->query("
+            SELECT category_id, ten_danh_muc
+            FROM Categories
+            WHERE trang_thai = 'Hoạt động'
+            ORDER BY category_id ASC
+        ");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Lấy category_id kèm trạng thái theo tên danh mục.
+    // Dùng để validate khi THÊM sách: chặn cả trường hợp người dùng
+    // sửa HTML (devtools) để gửi tên 1 danh mục đã ngừng hoạt động.
+    public function layDanhMucTheoTen($tenDanhMuc)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT category_id, trang_thai
+            FROM Categories
+            WHERE ten_danh_muc = :ten_danh_muc
+        ");
+        $stmt->execute(["ten_danh_muc" => $tenDanhMuc]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function layDauSachTheoId($id)
     {
         $stmt = $this->pdo->prepare("
@@ -105,7 +133,7 @@ class BookModel
 
     public function layDanhSachDauSach($tuKhoa = "", $locTacGia = "", $locDanhMuc = "", $locNam = "", $limit = 5, $offset = 0)
     {
-        $where = ["b.trang_thai = 'Hoạt động'"];
+$where = ["b.trang_thai = 'Hoạt động'"];
         $params = [];
 
         if ($tuKhoa !== "") {
@@ -208,7 +236,7 @@ class BookModel
                 FROM books
                 WHERE isbn = :isbn
             ");
-            $stmt->execute([
+$stmt->execute([
                 "isbn" => $isbn
             ]);
         }

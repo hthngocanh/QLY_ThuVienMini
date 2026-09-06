@@ -397,33 +397,48 @@ $laAdmin  = ($vaiTro === 'Quản trị viên');
         align-items: center;
         gap: 8px;
         flex: 1;
-        min-width: 260px;
+        min-width: 0;
+        flex-wrap: nowrap;
     }
 
+    /* Ô tìm kiếm: icon + input nằm chung 1 hàng flex,
+       không dùng position:absolute nữa nên không thể bị đè lên nhau. */
     .search-input-wrap {
-        position: relative;
-        flex: 1;
-        min-width: 200px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 40px;
+        padding: 0 13px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        background: #FFFFFF;
+        box-sizing: border-box;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .search-input-wrap:focus-within {
+        border-color: #BFDBFE;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
     .search-input-wrap svg {
-        position: absolute;
-        left: 13px;
-        top: 50%;
         width: 18px;
         height: 18px;
         color: #64748B;
-        transform: translateY(-50%);
+        flex-shrink: 0;
         pointer-events: none;
     }
 
     .search-input {
+        flex: 1 1 auto;
+        min-width: 0;
         width: 100%;
-        height: 40px;
-        padding: 8px 13px 8px 40px;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        background: #FFFFFF;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
         color: #0F172A;
         font-family: inherit;
         font-size: 15px;
@@ -431,14 +446,13 @@ $laAdmin  = ($vaiTro === 'Quản trị viên');
         box-sizing: border-box;
     }
 
-    .search-input:focus {
-        border-color: #BFDBFE;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-    }
-
+    /* Ô lọc trạng thái: chiều rộng CỐ ĐỊNH (width, không chỉ min-width)
+       để trình duyệt không tự giãn theo option dài nhất. */
     .filter-select {
+        flex: 0 0 160px;
+        width: 160px;
         height: 40px;
-        padding: 0 30px 0 14px;
+        padding: 0 28px 0 14px;
         border: 1px solid #E2E8F0;
         border-radius: 8px;
         background: #FFFFFF;
@@ -448,9 +462,10 @@ $laAdmin  = ($vaiTro === 'Quản trị viên');
         font-weight: 500;
         outline: none;
         cursor: pointer;
-        flex-shrink: 0;
-        min-width: 170px;
         box-sizing: border-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .filter-select:focus {
@@ -769,7 +784,9 @@ $laAdmin  = ($vaiTro === 'Quản trị viên');
 
         .toolbar-row { flex-direction: column; align-items: stretch; }
         .search-form { flex-direction: column; align-items: stretch; min-width: 0; }
-        .filter-select, .search-btn, .btn-add-category { width: 100%; }
+        .search-input-wrap { flex: 1 1 auto; width: 100%; }
+        .filter-select { flex: 1 1 auto; width: 100%; }
+        .search-btn, .btn-add-category { width: 100%; }
 
         .form-actions { flex-direction: column; }
         .form-actions .btn { width: 100%; }
