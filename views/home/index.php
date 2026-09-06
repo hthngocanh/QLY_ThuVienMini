@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // views/home/index.php
 
 $isLoggedIn = isset($_SESSION["user"]);
@@ -8,7 +8,606 @@ if ($isLoggedIn):
     $currentUser = $_SESSION["user"];
     $hoTen = $currentUser["ho_ten"] ?? "Người dùng";
     $vaiTro = $currentUser["vai_tro"] ?? "Độc giả";
+    $maNguoiDung = $currentUser["ma_nguoi_dung"] ?? "";
 ?>
+
+<?php if ($vaiTro === 'Độc giả'): ?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ độc giả - Thư viện Mini</title>
+    <link rel="stylesheet" href="assets/css/design-system.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            min-height: 100vh;
+        }
+        .reader-layout { display: flex; min-height: 100vh; width: 100%; }
+        .reader-main {
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
+            padding: clamp(16px, 3vw, 36px);
+            overflow-x: hidden;
+        }
+        .reader-header { margin-bottom: 24px; }
+        .reader-header h1 { font-size: clamp(24px, 3vw, 32px); line-height: 1.25; font-weight: 800; letter-spacing: -0.6px; }
+        .reader-header h1 span { color: #2563eb; }
+        .reader-header p { margin-top: 6px; color: #64748b; font-size: 14px; }
+        .toolbar {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(160px, 210px) minmax(160px, 210px);
+            gap: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(15,23,42,.04);
+        }
+        .toolbar input, .toolbar select {
+            width: 100%; height: 44px; border: 1px solid #cbd5e1; border-radius: 9px;
+            padding: 0 13px; background: #fff; color: #334155; font-size: 14px; outline: none;
+        }
+        .toolbar input:focus, .toolbar select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.08); }
+        .table-card {
+            background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 4px 18px rgba(15,23,42,.04);
+        }
+        .table-wrap { width: 100%; overflow-x: auto; }
+        .book-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+        .book-table th {
+            background: #f8fafc; color: #334155; font-size: 13px; font-weight: 700;
+            text-align: left; padding: 15px 14px; border-bottom: 1px solid #e2e8f0; white-space: nowrap;
+        }
+        .book-table td { padding: 16px 14px; border-bottom: 1px solid #eef2f7; vertical-align: middle; font-size: 14px; color: #334155; }
+        .book-table tbody tr:last-child td { border-bottom: 0; }
+        .book-table tbody tr:hover { background: #fbfdff; }
+        .book-name { font-weight: 700; color: #1d4ed8; }
+        .description { max-width: 270px; line-height: 1.5; color: #64748b; }
+        .category-badge { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; font-size: 12px; font-weight: 700; }
+        .status-badge { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .status-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .status-available { color: #15803d; background: #dcfce7; }
+        .status-borrowed { color: #b45309; background: #fef3c7; }
+        .status-unavailable { color: #dc2626; background: #fee2e2; }
+        .btn-borrow {
+            border: 0; border-radius: 8px; padding: 9px 15px; font-size: 13px; font-weight: 700;
+            cursor: pointer; min-width: 78px; transition: .15s ease;
+        }
+        .btn-borrow.available { background: #16a34a; color: #fff; }
+        .btn-borrow.available:hover { background: #15803d; transform: translateY(-1px); }
+        .btn-borrow.unavailable { background: #e2e8f0; color: #94a3b8; cursor: pointer; }
+        .btn-borrow.pending { background: #fef3c7; color: #b45309; cursor: pointer; }
+        .btn-borrow.borrowing { background: #e2e8f0; color: #64748b; cursor: pointer; }
+        .btn-borrow.overdue { background: #fee2e2; color: #dc2626; cursor: pointer; }
+        .empty-row { text-align: center; padding: 34px !important; color: #94a3b8 !important; }
+        .table-footer { padding: 13px 16px; background: #fff; border-top: 1px solid #eef2f7; color: #64748b; font-size: 13px; }
+        .mini-notice {
+            position: fixed; right: 24px; bottom: 24px; background: #0f172a; color: #fff; padding: 12px 16px;
+            border-radius: 10px; box-shadow: 0 10px 30px rgba(15,23,42,.22); font-size: 13px; opacity: 0;
+            transform: translateY(10px); pointer-events: none; transition: .2s ease; z-index: 9999; max-width: 360px;
+        }
+        .mini-notice.show { opacity: 1; transform: translateY(0); }
+        /* ================= POPUP PHIẾU MƯỢN ================= */
+        .borrow-modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.48); display: none; align-items: center; justify-content: center; padding: 18px; z-index: 3000; }
+        .borrow-modal-overlay.show { display: flex; }
+        .borrow-modal { width: min(560px, 100%); max-height: calc(100vh - 36px); overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22); padding: clamp(20px, 4vw, 30px); }
+        .borrow-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+        .borrow-modal-header h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+        .borrow-modal-header p { color: #64748b; font-size: 13.5px; line-height: 1.5; }
+        .borrow-modal-close { width: 36px; height: 36px; flex: 0 0 36px; border: 0; border-radius: 9px; background: #f1f5f9; color: #475569; cursor: pointer; font-size: 22px; line-height: 1; }
+        .borrow-modal-close:hover { background: #e2e8f0; }
+        .borrow-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .borrow-form-group { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+        .borrow-form-group.full { grid-column: 1 / -1; }
+        .borrow-form-group label { font-size: 13.5px; font-weight: 700; color: #334155; }
+        .borrow-form-group input { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 9px; background: #fff; color: #0f172a; font: inherit; outline: none; }
+        .borrow-form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10); }
+        .borrow-form-group input[readonly] { background: #f8fafc; color: #475569; }
+        .borrow-modal-note { margin-top: 16px; padding: 11px 12px; border-radius: 9px; background: #eff6ff; color: #1e40af; font-size: 13px; line-height: 1.5; }
+        .borrow-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+        .borrow-modal-actions button { border: 0; border-radius: 9px; padding: 11px 17px; font: inherit; font-weight: 700; cursor: pointer; }
+        .borrow-cancel { background: #f1f5f9; color: #475569; }
+        .borrow-submit { background: #16a34a; color: #fff; }
+        .borrow-submit:hover { background: #15803d; }
+
+        /* ================= POPUP KHÔNG THỂ MƯỢN ================= */
+        .unavailable-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 3100;
+        }
+        .unavailable-modal-overlay.show { display: flex; }
+        .unavailable-modal {
+            width: min(420px, 100%);
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+            padding: 26px;
+            text-align: center;
+        }
+        .unavailable-modal-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .unavailable-modal h3 {
+            margin: 0 0 9px;
+            font-size: 20px;
+            color: #0f172a;
+        }
+        .unavailable-modal p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .unavailable-modal-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 22px;
+        }
+        .unavailable-ok {
+            min-width: 96px;
+            border: 0;
+            border-radius: 9px;
+            padding: 11px 20px;
+            background: #2563eb;
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .unavailable-ok:hover { background: #1d4ed8; }
+
+        /* ================= POPUP KẾT QUẢ GỬI YÊU CẦU ================= */
+        .result-modal-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.48);
+            display: none; align-items: center; justify-content: center; padding: 18px; z-index: 3200;
+        }
+        .result-modal-overlay.show { display: flex; }
+        .result-modal {
+            width: min(430px, 100%); background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 18px; box-shadow: 0 24px 70px rgba(15,23,42,.22);
+            padding: 28px; text-align: center;
+        }
+        .result-modal-icon {
+            width: 58px; height: 58px; margin: 0 auto 16px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #dcfce7; color: #16a34a;
+        }
+        .result-modal.warning .result-modal-icon { background: #fef3c7; color: #b45309; }
+        .result-modal h3 { margin: 0 0 9px; font-size: 20px; color: #0f172a; }
+        .result-modal p { margin: 0; color: #64748b; font-size: 14px; line-height: 1.6; }
+        .result-modal-actions { display: flex; justify-content: center; margin-top: 22px; }
+        .result-ok {
+            min-width: 96px; border: 0; border-radius: 9px; padding: 11px 20px;
+            background: #2563eb; color: #fff; font: inherit; font-weight: 700; cursor: pointer;
+        }
+        .result-ok:hover { background: #1d4ed8; }
+
+        @media (max-width: 1100px) {
+            .toolbar { grid-template-columns: 1fr 1fr; }
+            .toolbar .search-box { grid-column: 1 / -1; }
+            .book-table { min-width: 900px; }
+        }
+
+        @media (max-width: 760px) {
+            .reader-main { padding: 16px 12px 26px; }
+            .reader-header { margin-bottom: 18px; }
+            .reader-header p { font-size: 13px; line-height: 1.5; }
+            .toolbar { grid-template-columns: 1fr; padding: 12px; gap: 10px; }
+            .toolbar .search-box { grid-column: auto; }
+            .table-card { border-radius: 12px; }
+            .table-wrap { overflow-x: visible; }
+            .book-table, .book-table tbody, .book-table tr, .book-table td { display: block; width: 100%; }
+            .book-table { min-width: 0; }
+            .book-table thead { display: none; }
+            .book-table tbody { padding: 8px 0; }
+            .book-table tr.book-row {
+                margin: 0 10px 12px;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #fff;
+            }
+            .book-table td {
+                display: grid;
+                grid-template-columns: minmax(105px, 34%) 1fr;
+                gap: 12px;
+                align-items: start;
+                padding: 10px 12px;
+                border-bottom: 1px solid #eef2f7;
+                font-size: 13px;
+                word-break: break-word;
+            }
+            .book-table td:last-child { border-bottom: 0; }
+            .book-table td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #64748b;
+            }
+            .description { max-width: none; }
+            .btn-borrow { width: 100%; max-width: 150px; }
+            .empty-row { display: block !important; }
+            .empty-row::before { display: none; }
+            .table-footer { font-size: 12px; }
+            .mini-notice { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+        }
+
+        @media (max-width: 430px) {
+            .reader-main { padding: 14px 9px 22px; }
+            .reader-header h1 { font-size: 22px; }
+            .toolbar input, .toolbar select { height: 42px; font-size: 13px; }
+            .book-table td { grid-template-columns: 96px 1fr; padding: 9px 10px; }
+        }
+        @media (max-width: 560px) {
+            .borrow-form-grid { grid-template-columns: 1fr; }
+            .borrow-form-group.full { grid-column: auto; }
+            .borrow-modal-actions { flex-direction: column-reverse; }
+            .borrow-modal-actions button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="reader-layout">
+    <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
+
+    <main class="reader-main">
+        <div class="reader-header">
+            <h1>Xin chào, <span><?= htmlspecialchars($hoTen) ?></span> 👋</h1>
+            <p>Tra cứu sách và kiểm tra tình trạng bản sao hiện có trong thư viện.</p>
+        </div>
+
+        <?php
+        $danhSachSach = $danhSachSach ?? [];
+        $trangThaiMuonCuaToi = $trangThaiMuonCuaToi ?? [];
+        $danhMucOptions = [];
+        foreach ($danhSachSach as $sach) {
+            $dm = trim((string)($sach['danh_muc'] ?? ''));
+            if ($dm !== '') $danhMucOptions[$dm] = $dm;
+        }
+        ksort($danhMucOptions, SORT_NATURAL | SORT_FLAG_CASE);
+        ?>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input id="bookSearch" type="text" placeholder="Tìm theo mã sách, tên sách, tác giả...">
+            </div>
+            <select id="categoryFilter">
+                <option value="">Tất cả danh mục</option>
+                <?php foreach ($danhMucOptions as $dm): ?>
+                    <option value="<?= htmlspecialchars(mb_strtolower($dm, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($dm) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select id="statusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="có sẵn">Có sẵn</option>
+                <option value="đang mượn">Đang mượn</option>
+                <option value="chưa có sẵn">Chưa có sẵn</option>
+            </select>
+        </div>
+
+        <section class="table-card">
+            <div class="table-wrap">
+                <table class="book-table" id="readerBookTable">
+                    <thead>
+                    <tr>
+                        <th>Mã sách</th>
+                        <th>Tên sách</th>
+                        <th>Tác giả</th>
+                        <th>Mô tả</th>
+                        <th>Danh mục</th>
+                        <th>Trạng thái bản sao</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($danhSachSach)): ?>
+                        <tr><td colspan="7" class="empty-row">Chưa có dữ liệu đầu sách.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($danhSachSach as $sach): ?>
+                            <?php
+                            $status = $sach['trang_thai_ban_sao'] ?? 'Chưa có sẵn';
+                            $statusLower = mb_strtolower($status, 'UTF-8');
+                            $category = $sach['danh_muc'] ?? 'Chưa phân loại';
+                            $searchText = mb_strtolower(
+                                ($sach['ma_sach'] ?? '') . ' ' .
+                                ($sach['ten_sach'] ?? '') . ' ' .
+                                ($sach['tac_gia'] ?? '') . ' ' .
+                                ($sach['mo_ta'] ?? '') . ' ' .
+                                $category,
+                                'UTF-8'
+                            );
+                            $statusClass = $status === 'Có sẵn'
+                                ? 'status-available'
+                                : ($status === 'Đang mượn' ? 'status-borrowed' : 'status-unavailable');
+                            ?>
+                            <tr class="book-row"
+                                data-search="<?= htmlspecialchars($searchText, ENT_QUOTES, 'UTF-8') ?>"
+                                data-category="<?= htmlspecialchars(mb_strtolower($category, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>"
+                                data-status="<?= htmlspecialchars($statusLower, ENT_QUOTES, 'UTF-8') ?>">
+                                <td data-label="Mã sách"><?= htmlspecialchars($sach['ma_sach'] ?? '') ?></td>
+                                <td data-label="Tên sách"><span class="book-name"><?= htmlspecialchars($sach['ten_sach'] ?? '') ?></span></td>
+                                <td data-label="Tác giả"><?= htmlspecialchars($sach['tac_gia'] ?? '') ?></td>
+                                <td data-label="Mô tả" class="description"><?= htmlspecialchars($sach['mo_ta'] ?? 'Chưa có mô tả') ?></td>
+                                <td data-label="Danh mục"><span class="category-badge"><?= htmlspecialchars($category) ?></span></td>
+                                <td data-label="Trạng thái"><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span></td>
+                                <td data-label="Thao tác">
+    <?php if ($status === 'Có sẵn'): ?>
+        <button type="button"
+        class="btn-borrow available js-borrow-btn"
+        data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    Mượn
+</button>
+    <?php else: ?>
+        <span class="btn-borrow unavailable">
+            Mượn
+        </span>
+    <?php endif; ?>
+</td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">Hiển thị <span id="visibleCount"><?= count($danhSachSach) ?></span> / <?= count($danhSachSach) ?> đầu sách</div>
+        </section>
+    </main>
+</div>
+<!-- Popup Phiếu mượn -->
+<div class="borrow-modal-overlay" id="borrowModal" aria-hidden="true">
+    <div class="borrow-modal" role="dialog" aria-modal="true" aria-labelledby="borrowModalTitle">
+
+        <div class="borrow-modal-header">
+            <div>
+                <h2 id="borrowModalTitle">Phiếu mượn sách</h2>
+                <p>Kiểm tra thông tin trước khi xác nhận mượn sách.</p>
+            </div>
+
+            <button type="button"
+                    class="borrow-modal-close"
+                    id="borrowModalClose"
+                    aria-label="Đóng">&times;</button>
+        </div>
+
+        <div class="borrow-form-grid">
+
+            <div class="borrow-form-group">
+                <label>Mã độc giả</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($maNguoiDung) ?>"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Người mượn</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($hoTen) ?>"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Mã sách</label>
+                <input type="text"
+                       id="borrowBookCode"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Tác giả</label>
+                <input type="text"
+                       id="borrowAuthor"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group full">
+                <label>Tên sách</label>
+                <input type="text"
+                       id="borrowBookName"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Ngày gửi yêu cầu</label>
+                <input type="date"
+                       id="borrowDate"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Trạng thái</label>
+                <input type="text"
+                       value="Có sẵn"
+                       readonly>
+            </div>
+
+        </div>
+
+        <div class="borrow-modal-actions">
+            <button type="button"
+                    class="borrow-cancel"
+                    id="borrowCancel">
+                Hủy
+            </button>
+
+            <button type="button"
+                    class="borrow-submit"
+                    id="borrowSubmit">
+                Xác nhận mượn
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    const search = document.getElementById('bookSearch');
+    const category = document.getElementById('categoryFilter');
+    const status = document.getElementById('statusFilter');
+    const rows = Array.from(document.querySelectorAll('.book-row'));
+    const visibleCount = document.getElementById('visibleCount');
+
+    const borrowModal = document.getElementById('borrowModal');
+    const borrowModalClose = document.getElementById('borrowModalClose');
+    const borrowCancel = document.getElementById('borrowCancel');
+    const borrowSubmit = document.getElementById('borrowSubmit');
+
+    const borrowBookCode = document.getElementById('borrowBookCode');
+    const borrowBookName = document.getElementById('borrowBookName');
+    const borrowAuthor = document.getElementById('borrowAuthor');
+    const borrowDate = document.getElementById('borrowDate');
+
+    function normalize(value) {
+        return (value || '')
+            .toString()
+            .trim()
+            .toLocaleLowerCase('vi-VN');
+    }
+
+    function filterRows() {
+        const q = normalize(search ? search.value : '');
+        const cat = normalize(category ? category.value : '');
+        const st = normalize(status ? status.value : '');
+
+        let count = 0;
+
+        rows.forEach(row => {
+            const okSearch =
+                !q || normalize(row.dataset.search).includes(q);
+
+            const okCategory =
+                !cat || normalize(row.dataset.category) === cat;
+
+            const okStatus =
+                !st || normalize(row.dataset.status) === st;
+
+            const show = okSearch && okCategory && okStatus;
+
+            row.style.display = show ? '' : 'none';
+
+            if (show) {
+                count++;
+            }
+        });
+
+        if (visibleCount) {
+            visibleCount.textContent = count;
+        }
+    }
+
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+
+        return `${y}-${m}-${d}`;
+    }
+
+    function openBorrowModal(button) {
+        if (borrowBookCode) {
+            borrowBookCode.value = button.dataset.bookCode || '';
+        }
+
+        if (borrowBookName) {
+            borrowBookName.value = button.dataset.bookName || '';
+        }
+
+        if (borrowAuthor) {
+            borrowAuthor.value = button.dataset.author || '';
+        }
+
+        if (borrowDate) {
+            borrowDate.value = formatDate(new Date());
+        }
+
+        if (borrowModal) {
+            borrowModal.classList.add('show');
+            borrowModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeBorrowModal() {
+        if (!borrowModal) return;
+
+        borrowModal.classList.remove('show');
+        borrowModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    if (search) {
+        search.addEventListener('input', filterRows);
+    }
+
+    if (category) {
+        category.addEventListener('change', filterRows);
+    }
+
+    if (status) {
+        status.addEventListener('change', filterRows);
+    }
+
+    document.querySelectorAll('.js-borrow-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            openBorrowModal(this);
+        });
+    });
+
+    if (borrowModalClose) {
+        borrowModalClose.addEventListener('click', closeBorrowModal);
+    }
+
+    if (borrowCancel) {
+        borrowCancel.addEventListener('click', closeBorrowModal);
+    }
+
+    if (borrowModal) {
+        borrowModal.addEventListener('click', function (event) {
+            if (event.target === borrowModal) {
+                closeBorrowModal();
+            }
+        });
+    }
+
+    if (borrowSubmit) {
+        borrowSubmit.addEventListener('click', function () {
+            window.location.href = 'index.php?controller=phieumuon';
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeBorrowModal();
+        }
+    });
+})();
+</script>
+</body>
+</html>
+<?php else: ?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -229,11 +828,9 @@ if ($isLoggedIn):
     </div>
 </body>
 </html>
+<?php endif; ?>
 
-<?php
-else:
-    // Giao diện Landing Page cho khách
-?>
+<?php else: ?>
 <!DOCTYPE html>
 <html lang="vi">
 

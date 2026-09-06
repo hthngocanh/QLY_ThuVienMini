@@ -41,7 +41,7 @@ class ReaderHomeController extends BaseController
             }
         }
 
-        $this->renderView("home/reader.php", [
+        $this->renderView("home/index.php", [
             'isLoggedIn' => $isLoggedIn,
             'stats' => $stats,
             'danhSachSach' => $danhSachSach,
