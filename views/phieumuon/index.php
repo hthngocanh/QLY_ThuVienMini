@@ -1,4 +1,3 @@
-```php
 <?php
 
 /*
@@ -38,7 +37,16 @@ $laThuThu = $laThuThu ?? false;
 
 $laQuanTriVien = $laQuanTriVien ?? false;
 
+// ĐÃ THÊM: đảm bảo sidebar highlight đúng menu "Phiếu mượn"
+$activePage = $activePage ?? 'phieumuon';
+
 ?>
+
+<!-- ĐÃ THÊM: mở khung layout + include sidebar dùng chung -->
+<div class="layout">
+    <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
+
+    <div class="main-content">
 
 <style>
 
@@ -61,11 +69,9 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 ========================================================= */
 
 .module-hero {
-    background: linear-gradient(
-        135deg,
-        #1e3a8a 0%,
-        #2563eb 100%
-    );
+    background: #FFFFFF;
+
+    border: 1px solid #e2e8f0;
 
     border-radius: 20px;
 
@@ -73,14 +79,16 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 
     margin-bottom: 24px;
 
-    color: white;
+    color: #0f172a;
 
     box-shadow:
-        0 12px 30px rgba(37, 99, 235, 0.16);
+        0 4px 20px rgba(15, 23, 42, 0.04);
 }
 
 .module-hero h1 {
     margin: 0 0 8px;
+
+    color: #0f172a;
 
     font-size: 28px;
 
@@ -92,9 +100,11 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 .module-hero p {
     margin: 0;
 
+    color: #64748b;
+
     font-size: 14px;
 
-    opacity: 0.9;
+    opacity: 1;
 }
 
 
@@ -242,6 +252,8 @@ $laQuanTriVien = $laQuanTriVien ?? false;
     align-items: center;
 
     gap: 10px;
+
+    flex-wrap: wrap;
 }
 
 
@@ -251,6 +263,8 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 
 .search-box {
     position: relative;
+
+    flex-shrink: 0;
 }
 
 .search-box input {
@@ -300,7 +314,11 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 ========================================================= */
 
 .status-filter {
-    padding: 11px 34px 11px 12px;
+    flex-shrink: 0;
+
+    width: 170px;
+
+    padding: 11px 30px 11px 12px;
 
     border: 1px solid #cbd5e1;
 
@@ -313,6 +331,14 @@ $laQuanTriVien = $laQuanTriVien ?? false;
     outline: none;
 
     cursor: pointer;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 }
 
 .status-filter:focus {
@@ -339,6 +365,10 @@ $laQuanTriVien = $laQuanTriVien ?? false;
     color: white;
 
     font-weight: 700;
+
+    white-space: nowrap;
+
+    flex-shrink: 0;
 
     cursor: pointer;
 
@@ -1329,6 +1359,9 @@ $laQuanTriVien = $laQuanTriVien ?? false;
 
 </main>
 
+    </div><!-- ĐÃ THÊM: đóng .main-content -->
+</div><!-- ĐÃ THÊM: đóng .layout -->
+
 
 <!-- =========================================================
      MODAL THÊM / SỬA
@@ -2099,4 +2132,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 </script>
-```
