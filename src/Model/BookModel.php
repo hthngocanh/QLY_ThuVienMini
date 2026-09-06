@@ -20,7 +20,33 @@ class BookModel
         ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+public function layDanhSachDanhMucHoatDong()
+{
+    $stmt = $this->pdo->query("
+        SELECT category_id, ten_danh_muc, trang_thai
+        FROM Categories
+        WHERE trang_thai = 'Hoạt động'
+        ORDER BY category_id ASC
+    ");
 
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function layDanhMucTheoTen($tenDanhMuc)
+{
+    $stmt = $this->pdo->prepare("
+        SELECT category_id, ten_danh_muc, trang_thai
+        FROM Categories
+        WHERE ten_danh_muc = :ten_danh_muc
+        LIMIT 1
+    ");
+
+    $stmt->execute([
+        'ten_danh_muc' => $tenDanhMuc
+    ]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
     public function layDauSachTheoId($id)
     {
         $stmt = $this->pdo->prepare("
