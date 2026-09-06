@@ -25,7 +25,12 @@ class HomeController extends BaseController
             $stats = $this->dashboardModel->layThongKeTongQuan();
         }
 
-        $this->renderView("home/index.php", [
+        // Thủ thư có dashboard riêng; Admin vẫn dùng dashboard hiện tại.
+        $view = (($_SESSION['user']['vai_tro'] ?? '') === 'Thủ thư')
+            ? "home/librarian.php"
+            : "home/index.php";
+
+        $this->renderView($view, [
             'isLoggedIn' => $isLoggedIn,
             'stats' => $stats,
             'activePage' => 'trangchu'

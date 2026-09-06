@@ -594,7 +594,7 @@ if ($vaiTro === "Quản trị viên") {
                             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                         </svg>
                     </span>
-                    <span>Đầu sách</span>
+                    <span><?= $vaiTro === "Thủ thư" ? "Quản lý sách" : "Đầu sách" ?></span>
                 </a>
                 <?php endif; ?>
 
@@ -606,7 +606,7 @@ if ($vaiTro === "Quản trị viên") {
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
                     </span>
-                    <span>Bản sao sách</span>
+                    <span><?= $vaiTro === "Thủ thư" ? "Quản lý bản sao" : "Bản sao sách" ?></span>
                 </a>
                 <?php endif; ?>
 
@@ -630,7 +630,7 @@ if ($vaiTro === "Quản trị viên") {
                                     <line x1="9" y1="16" x2="13" y2="16"></line>
                                 </svg>
                             </span>
-                            <span>Phiếu mượn</span>
+                            <span><?= $vaiTro === "Thủ thư" ? "Quản lý phiếu mượn" : "Phiếu mượn" ?></span>
                             <span class="menu-arrow <?= $__isBorrowMenuOpen ? 'open' : '' ?>" id="borrowMenuArrow">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
@@ -659,7 +659,7 @@ if ($vaiTro === "Quản trị viên") {
                                 <line x1="9" y1="16" x2="13" y2="16"></line>
                             </svg>
                         </span>
-                        <span>Phiếu mượn</span>
+                        <span><?= $vaiTro === "Thủ thư" ? "Quản lý phiếu mượn" : "Phiếu mượn" ?></span>
                     </a>
                 <?php endif; ?>
 
@@ -671,7 +671,7 @@ if ($vaiTro === "Quản trị viên") {
                             <line x1="7" y1="7" x2="7.01" y2="7"></line>
                         </svg>
                     </span>
-                    <span>Danh mục</span>
+                    <span><?= $vaiTro === "Thủ thư" ? "Quản lý danh mục" : "Danh mục" ?></span>
                 </a>
                 <?php endif; ?>
             </nav>
