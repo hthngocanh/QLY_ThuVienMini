@@ -3,13 +3,22 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+$__sidebarUser = $_SESSION["user"] ?? null;
+$__sidebarRole = $__sidebarUser["vai_tro"] ?? "";
+
+// Dùng Unicode escape để tránh lỗi mã hóa tiếng Việt trên Windows.
+$__roleLibrarian = "Th\u{1EE7} th\u{01B0}";
+$__roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Xác định đường dẫn gốc của ứng dụng web
 $appRoot = '/QLY_ThuVienMini/';
 
 // Tự động nhận diện trang hiện tại nếu chưa đặt biến $activePage
 $currentScript = $_SERVER['SCRIPT_NAME'] ?? '';
 $getController = strtolower($_GET['controller'] ?? '');
-$getAction = strtolower($_GET['action'] ?? ($activeAction ?? ''));
 
 if (!isset($activePage)) {
     if ($getController === 'user' || $getController === 'nguoidung' || strpos($currentScript, 'nguoiDung') !== false || strpos($currentScript, 'User.php') !== false) {
@@ -219,102 +228,66 @@ if ($vaiTro === "Quản trị viên") {
         padding-left: 11px;
     }
 
-    /* Submenu cho Quản trị viên */
-    .menu-parent-group {
+    .menu-group {
         display: flex;
         flex-direction: column;
+        gap: 4px;
     }
 
-    .menu-parent-btn {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 14px;
-        color: var(--sb-text);
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        border-radius: 8px;
-        transition: all 0.15s ease;
-        background: transparent;
-        border: none;
+    .menu-toggle {
         width: 100%;
-        cursor: pointer;
+        border: 0;
+        background: transparent;
         font-family: inherit;
-        box-sizing: border-box;
         text-align: left;
+        cursor: pointer;
     }
 
-    .menu-parent-btn:hover {
-        color: var(--sb-hover-text);
-        background: var(--sb-hover-bg);
-    }
-
-    .menu-parent-btn.active {
-        color: var(--sb-active-text);
-        background: var(--sb-active-bg);
-        font-weight: 600;
-        border-left: 3px solid var(--sb-primary);
-        border-radius: 0 8px 8px 0;
-        padding-left: 11px;
-    }
-
-    .submenu-arrow {
+    .menu-arrow {
+        margin-left: auto;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: auto;
-        color: var(--sb-text-muted);
         transition: transform 0.2s ease;
     }
 
-    .menu-parent-group.open .submenu-arrow {
-        transform: rotate(90deg);
+    .menu-arrow.open {
+        transform: rotate(180deg);
     }
 
-    .submenu-container {
+    .submenu {
         display: none;
         flex-direction: column;
-        gap: 2px;
-        padding-left: 20px;
-        margin-top: 3px;
-        margin-bottom: 3px;
+        gap: 4px;
+        margin: 2px 0 4px 34px;
+        padding-left: 10px;
+        border-left: 1px solid var(--sb-border);
     }
 
-    .menu-parent-group.open .submenu-container {
+    .submenu.show {
         display: flex;
     }
 
     .submenu-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        color: var(--sb-text);
+        display: block;
+        padding: 9px 12px;
+        color: var(--sb-text-muted);
         text-decoration: none;
-        font-size: 13.5px;
-        border-radius: 6px;
-        transition: all 0.15s ease;
+        font-size: 13px;
         font-weight: 500;
+        border-radius: 7px;
+        transition: all 0.15s ease;
     }
 
     .submenu-link:hover {
-        color: var(--sb-primary);
+        color: var(--sb-hover-text);
         background: var(--sb-hover-bg);
     }
 
     .submenu-link.active {
-        color: var(--sb-primary);
+        color: var(--sb-active-text);
         background: var(--sb-active-bg);
-        font-weight: 700;
-    }
-
-    .submenu-link .sub-dot {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background-color: currentColor;
-        flex-shrink: 0;
+        font-weight: 600;
     }
 
     /* ================= USER PROFILE WIDGET ================= */
@@ -471,11 +444,9 @@ if ($vaiTro === "Quản trị viên") {
         transition: all 0.15s ease;
     }
 
-    .dropdown-item:hover,
-    .dropdown-item.active {
+    .dropdown-item:hover {
         background: #EFF6FF;
         color: var(--sb-primary);
-        font-weight: 600;
     }
 
     .dropdown-item.logout {
@@ -550,13 +521,18 @@ if ($vaiTro === "Quản trị viên") {
                 </a>
 
                 <?php if ($vaiTro === "Quản trị viên"): ?>
-                    <!-- Menu Cha: Quản lý người dùng (Admin) -->
                     <?php
-                    $adminUserActions = ['quanlydocgia', 'quanlynhansu', 'yeucaucaplaimatkhau', 'yeucau'];
-                    $isUserSubmenuOpen = ($activePage === 'nguoidung' && in_array($getAction, $adminUserActions));
+                    $__userAction = strtolower($_GET['action'] ?? '');
+                    $__isUserReader = $__userAction === 'quanlydocgia' || $__userAction === '';
+                    $__isUserStaff = $__userAction === 'quanlynhansu';
+                    $__isUserReset = $__userAction === 'yeucaucaplaimatkhau' || $__userAction === 'yeucau';
+                    $__isUserMenuOpen = $activePage === 'nguoidung';
                     ?>
-                    <div class="menu-parent-group <?= $isUserSubmenuOpen ? 'open' : '' ?>" id="adminUserMenuGroup">
-                        <button type="button" class="menu-parent-btn <?= $isUserSubmenuOpen ? 'active' : '' ?>" onclick="toggleAdminUserSubmenu(event)">
+                    <div class="menu-group">
+                        <button type="button"
+                                class="menu-link menu-toggle <?= $__isUserMenuOpen ? 'active' : '' ?>"
+                                onclick="toggleUserSubmenu(event)"
+                                aria-expanded="<?= $__isUserMenuOpen ? 'true' : 'false' ?>">
                             <span class="icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -565,32 +541,31 @@ if ($vaiTro === "Quản trị viên") {
                                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                 </svg>
                             </span>
-                            <span style="flex:1;">Quản lý người dùng</span>
-                            <span class="submenu-arrow">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="9 18 15 12 9 6"></polyline>
+                            <span>Người dùng</span>
+                            <span class="menu-arrow <?= $__isUserMenuOpen ? 'open' : '' ?>" id="userMenuArrow">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </span>
                         </button>
-                        <div class="submenu-container" id="adminUserSubmenu">
-                            <a href="<?= $appRoot ?>index.php?controller=user&action=quanLyDocGia" class="submenu-link <?= ($activePage === 'nguoidung' && ($getAction === 'quanlydocgia' || $getAction === '')) ? 'active' : '' ?>">
-                                <span class="sub-dot"></span>
-                                <span>Quản lý độc giả</span>
+
+                        <div class="submenu <?= $__isUserMenuOpen ? 'show' : '' ?>" id="userSubmenu">
+                            <a href="<?= $appRoot ?>index.php?controller=user&action=quanLyDocGia"
+                               class="submenu-link <?= $__isUserReader ? 'active' : '' ?>">
+                                Quản lý độc giả
                             </a>
-                            <a href="<?= $appRoot ?>index.php?controller=user&action=quanLyNhanSu" class="submenu-link <?= ($activePage === 'nguoidung' && $getAction === 'quanlynhansu') ? 'active' : '' ?>">
-                                <span class="sub-dot"></span>
-                                <span>Quản lý nhân sự</span>
+                            <a href="<?= $appRoot ?>index.php?controller=user&action=quanLyNhanSu"
+                               class="submenu-link <?= $__isUserStaff ? 'active' : '' ?>">
+                                Quản lý nhân sự
                             </a>
-                            <a href="<?= $appRoot ?>index.php?controller=user&action=yeuCauCapLaiMatKhau" class="submenu-link <?= ($activePage === 'nguoidung' && ($getAction === 'yeucaucaplaimatkhau' || $getAction === 'yeucau')) ? 'active' : '' ?>">
-                                <span class="sub-dot"></span>
-                                <span>Yêu cầu cấp lại mật khẩu</span>
+                            <a href="<?= $appRoot ?>index.php?controller=user&action=yeuCauCapLaiMatKhau"
+                               class="submenu-link <?= $__isUserReset ? 'active' : '' ?>">
+                                Yêu cầu cấp lại mật khẩu
                             </a>
                         </div>
                     </div>
-
                 <?php elseif ($vaiTro === "Thủ thư"): ?>
-                    <!-- Menu Thủ thư: Tra cứu độc giả -->
-                    <a href="<?= $appRoot ?>index.php?controller=user&action=traCuuDocGia" class="menu-link <?= ($activePage === 'nguoidung' && $getAction !== 'profile') ? 'active' : '' ?>">
+                    <a href="<?= $appRoot ?>index.php?controller=user&action=traCuuDocGia" class="menu-link <?= $activePage === 'nguoidung' ? 'active' : '' ?>">
                         <span class="icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -599,10 +574,8 @@ if ($vaiTro === "Quản trị viên") {
                         </span>
                         <span>Tra cứu độc giả</span>
                     </a>
-
                 <?php else: ?>
-                    <!-- Menu Độc giả: Thông tin cá nhân -->
-                    <a href="<?= $appRoot ?>index.php?controller=user&action=profile" class="menu-link <?= ($activePage === 'nguoidung') ? 'active' : '' ?>">
+                    <a href="<?= $appRoot ?>index.php?controller=user&action=profile" class="menu-link <?= $activePage === 'nguoidung' ? 'active' : '' ?>">
                         <span class="icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -613,6 +586,7 @@ if ($vaiTro === "Quản trị viên") {
                     </a>
                 <?php endif; ?>
 
+                <?php if ($vaiTro !== "Độc giả"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=dausach" class="menu-link <?= $activePage === 'dausach' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -622,7 +596,9 @@ if ($vaiTro === "Quản trị viên") {
                     </span>
                     <span>Đầu sách</span>
                 </a>
+                <?php endif; ?>
 
+                <?php if ($vaiTro !== "Độc giả"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=bansao" class="menu-link <?= $activePage === 'bansao' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -632,48 +608,72 @@ if ($vaiTro === "Quản trị viên") {
                     </span>
                     <span>Bản sao sách</span>
                 </a>
+                <?php endif; ?>
 
-                <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
+                <?php if ($vaiTro === "Quản trị viên"): ?>
+                    <?php
+                    $__borrowAction = strtolower($_GET['action'] ?? '');
+                    $__isBorrowConfig = $__borrowAction === 'cauhinhhanmuc';
+                    $__isBorrowStats = $__borrowAction === 'thongke';
+                    $__isBorrowMenuOpen = $activePage === 'phieumuon';
+                    ?>
+                    <div class="menu-group">
+                        <button type="button"
+                                class="menu-link menu-toggle <?= $__isBorrowMenuOpen ? 'active' : '' ?>"
+                                onclick="toggleBorrowSubmenu(event)"
+                                aria-expanded="<?= $__isBorrowMenuOpen ? 'true' : 'false' ?>">
+                            <span class="icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                                    <line x1="9" y1="16" x2="13" y2="16"></line>
+                                </svg>
+                            </span>
+                            <span>Phiếu mượn</span>
+                            <span class="menu-arrow <?= $__isBorrowMenuOpen ? 'open' : '' ?>" id="borrowMenuArrow">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <div class="submenu <?= $__isBorrowMenuOpen ? 'show' : '' ?>" id="borrowSubmenu">
+                            <a href="<?= $appRoot ?>index.php?controller=phieumuon&action=cauHinhHanMuc"
+                               class="submenu-link <?= $__isBorrowConfig ? 'active' : '' ?>">
+                                Cấu hình hạn mức
+                            </a>
+                            <a href="<?= $appRoot ?>index.php?controller=phieumuon&action=thongKe"
+                               class="submenu-link <?= $__isBorrowStats ? 'active' : '' ?>">
+                                Bảng thống kê
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="<?= $appRoot ?>index.php?controller=phieumuon" class="menu-link <?= $activePage === 'phieumuon' ? 'active' : '' ?>">
+                        <span class="icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                <line x1="9" y1="12" x2="15" y2="12"></line>
+                                <line x1="9" y1="16" x2="13" y2="16"></line>
+                            </svg>
+                        </span>
+                        <span>Phiếu mượn</span>
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($vaiTro !== "Độc giả"): ?>
+                <a href="<?= $appRoot ?>index.php?controller=danhmuc" class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
                     <span class="icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                            <line x1="9" y1="12" x2="15" y2="12"></line>
-                            <line x1="9" y1="16" x2="13" y2="16"></line>
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
                         </svg>
                     </span>
-                    <span>Phiếu mượn</span>
+                    <span>Danh mục</span>
                 </a>
-
-                <?php if ($vaiTro === "Thủ thư" || $vaiTro === "Quản trị viên"): ?>
-
-               <a href="<?= $appRoot ?>index.php?controller=danhmuc"
-                  class="menu-link <?= $activePage === 'danhmuc' ? 'active' : '' ?>">
-                <span class="icon">
-                  <svg width="20" height="20"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2"
-                 stroke-linecap="round"
-                 stroke-linejoin="round">
-
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-
-                <line x1="7" y1="7" x2="7.01" y2="7"></line>
-
-            </svg>
-        </span>
-
-        <?php if ($vaiTro === "Thủ thư"): ?>
-            <span>Danh mục sách</span>
-        <?php else: ?>
-            <span>Quản lý danh mục</span>
-        <?php endif; ?>
-
-    </a>
-
-<?php endif; ?>
+                <?php endif; ?>
             </nav>
         </div>
 
@@ -688,21 +688,16 @@ if ($vaiTro === "Quản trị viên") {
                 <div style="padding: 6px 12px; font-size: 11.5px; color: var(--sb-text-muted); border-bottom: 1px solid var(--sb-border); margin-bottom: 4px;">
                     Mã: <strong><?= htmlspecialchars($maNguoiDung) ?></strong>
                 </div>
-                <a href="<?= $appRoot ?>index.php?controller=user&action=profile" class="dropdown-item <?= ($getAction === 'profile') ? 'active' : '' ?>">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <span>Thông tin cá nhân</span>
-                </a>
-                <a href="<?= $appRoot ?>index.php?controller=auth&action=change_password" class="dropdown-item <?= ($getAction === 'change_password') ? 'active' : '' ?>">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    <span>Đổi mật khẩu</span>
-                </a>
-                <div class="dropdown-divider"></div>
+                <?php if ($vaiTro === "Độc giả"): ?>
+                    <a href="<?= $appRoot ?>index.php?controller=auth&action=change_password" class="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span>Đổi mật khẩu</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                <?php endif; ?>
                 <a href="<?= $appRoot ?>index.php?controller=auth&action=logout" class="dropdown-item logout">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -749,11 +744,39 @@ if ($vaiTro === "Quản trị viên") {
 </aside>
 
 <script>
-    function toggleAdminUserSubmenu(event) {
-        if (event) event.stopPropagation();
-        const group = document.getElementById('adminUserMenuGroup');
-        if (group) {
-            group.classList.toggle('open');
+    function toggleUserSubmenu(event) {
+        event.preventDefault();
+
+        const submenu = document.getElementById('userSubmenu');
+        const arrow = document.getElementById('userMenuArrow');
+        const button = event.currentTarget;
+
+        if (!submenu) return;
+
+        const isOpen = submenu.classList.toggle('show');
+        if (arrow) {
+            arrow.classList.toggle('open', isOpen);
+        }
+        if (button) {
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+    }
+
+    function toggleBorrowSubmenu(event) {
+        event.preventDefault();
+
+        const submenu = document.getElementById('borrowSubmenu');
+        const arrow = document.getElementById('borrowMenuArrow');
+        const button = event.currentTarget;
+
+        if (!submenu) return;
+
+        const isOpen = submenu.classList.toggle('show');
+        if (arrow) {
+            arrow.classList.toggle('open', isOpen);
+        }
+        if (button) {
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         }
     }
 
