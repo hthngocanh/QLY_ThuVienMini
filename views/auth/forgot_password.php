@@ -69,17 +69,6 @@
             color: var(--primary);
             text-decoration: underline;
         }
-
-        .alert-error {
-            background: #FEE2E2;
-            color: #991B1B;
-            padding: 12px 14px;
-            border-radius: 6px;
-            margin-bottom: 18px;
-            font-size: 13.5px;
-            border: 1px solid #FECACA;
-            line-height: 1.4;
-        }
     </style>
 </head>
 
@@ -143,46 +132,6 @@
                         required>
                     <?php if (isset($errors["email"])): ?>
                         <div class="field-error"><?= htmlspecialchars($errors["email"]) ?></div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- MẬT KHẨU MỚI -->
-                <div class="form-group">
-                    <label for="matKhauMoi">Mật khẩu mới mong muốn *</label>
-                    <input
-                        type="password"
-                        id="matKhauMoi"
-                        name="matKhauMoi"
-                        placeholder="Nhập mật khẩu mới"
-                        value="<?= htmlspecialchars($matKhauMoi ?? '') ?>"
-                        class="<?= isset($errors["matKhauMoi"]) ? "input-error" : "" ?>"
-                        required>
-                    <div class="password-hint">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <span>Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.</span>
-                    </div>
-                    <?php if (isset($errors["matKhauMoi"])): ?>
-                        <div class="field-error"><?= htmlspecialchars($errors["matKhauMoi"]) ?></div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- XÁC NHẬN MẬT KHẨU MỚI -->
-                <div class="form-group">
-                    <label for="xacNhanMatKhau">Xác nhận mật khẩu mới *</label>
-                    <input
-                        type="password"
-                        id="xacNhanMatKhau"
-                        name="xacNhanMatKhau"
-                        placeholder="Nhập lại mật khẩu mới"
-                        value="<?= htmlspecialchars($xacNhanMatKhau ?? '') ?>"
-                        class="<?= isset($errors["xacNhanMatKhau"]) ? "input-error" : "" ?>"
-                        required>
-                    <?php if (isset($errors["xacNhanMatKhau"])): ?>
-                        <div class="field-error"><?= htmlspecialchars($errors["xacNhanMatKhau"]) ?></div>
                     <?php endif; ?>
                 </div>
 

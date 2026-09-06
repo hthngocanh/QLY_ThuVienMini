@@ -194,4 +194,8 @@ CREATE TABLE IF NOT EXISTS password_reset_requests (
                 'Đã từ chối'
             )
         )
+
+    CONSTRAINT FK_ResetRequests_Users
+        FOREIGN KEY (ma_nguoi_dung)
+        REFERENCES users(ma_nguoi_dung)
 );

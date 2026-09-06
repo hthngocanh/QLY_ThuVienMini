@@ -270,15 +270,15 @@
         }
 
         .user-status-tag.active {
-            background-color: #DCFCE7;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
+            background-color: #F0FDF4;
+            color: var(--success);
+            border: 1px solid #DCFCE7;
         }
 
         .user-status-tag.locked {
-            background-color: #FEE2E2;
-            color: #B91C1C;
-            border: 1px solid #FECACA;
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
         }
 
         .user-role-tag {
@@ -287,9 +287,9 @@
             font-weight: 600;
             padding: 4px 10px;
             border-radius: 6px;
-            background-color: #EFF6FF;
-            color: #1D4ED8;
-            border: 1px solid #DBEAFE;
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid var(--border-blue);
         }
 
         /* BUTTONS */
@@ -299,15 +299,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #FECACA;
+            border: 1px solid #FEE2E2;
             background-color: #FEF2F2;
-            color: #DC2626;
+            color: var(--danger);
             transition: all var(--transition-fast);
         }
 
         .btn-action-lock:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
         }
 
         .btn-action-unlock {
@@ -316,15 +317,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #BBF7D0;
-            background-color: #ECFDF5;
-            color: #059669;
+            border: 1px solid #DCFCE7;
+            background-color: #F0FDF4;
+            color: var(--success);
             transition: all var(--transition-fast);
         }
 
         .btn-action-unlock:hover {
-            background-color: #059669;
-            color: #FFFFFF;
+            background-color: var(--success);
+            color: var(--white);
+            border-color: var(--success);
         }
 
         /* MODALS */
@@ -445,8 +447,8 @@
             font-weight: 500;
         }
 
-        .user-alert.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
-        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+        .user-alert.success { background: #F0FDF4; color: #166534; border: 1px solid #DCFCE7; }
+        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FEE2E2; }
     </style>
 </head>
 
@@ -681,8 +683,8 @@
                     <?php endif; ?>
                 </div>
 
-                <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px 14px; margin-top: 14px; font-size: 13px; color: #166534; line-height: 1.5;">
-                    <div style="font-weight: 600; margin-bottom: 2px;">🔑 Mật khẩu khởi tạo mặc định:</div>
+                <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 8px; padding: 12px 14px; margin-top: 14px; font-size: 13px; color: #166534; line-height: 1.5;">
+                    <div style="font-weight: 600; margin-bottom: 2px;">Mật khẩu khởi tạo mặc định:</div>
                     <div><code>Thuvien12345!</code> (Nhân sự có thể đổi mật khẩu sau khi đăng nhập)</div>
                 </div>
 
@@ -697,7 +699,7 @@
     <!-- MODAL CONFIRM KHÓA TÀI KHOẢN -->
     <div class="modal-overlay" id="modalKhoa">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#991B1B;">Xác nhận khóa tài khoản</h3>
+            <h3 style="margin-top:0; color:var(--danger);">Xác nhận khóa tài khoản</h3>
             <p id="msgConfirmKhoa" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=quanLyNhanSu">
@@ -714,7 +716,7 @@
     <!-- MODAL CONFIRM MỞ KHÓA TÀI KHOẢN -->
     <div class="modal-overlay" id="modalMoKhoa">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#065F46;">Xác nhận mở khóa tài khoản</h3>
+            <h3 style="margin-top:0; color:var(--success);">Xác nhận mở khóa tài khoản</h3>
             <p id="msgConfirmMoKhoa" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=quanLyNhanSu">
@@ -753,6 +755,23 @@
             document.getElementById('modalKhoa').classList.remove('active');
             document.getElementById('modalMoKhoa').classList.remove('active');
         }
+
+        // Tự động ẩn thông báo sau khoảng 5 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            var alertBox = document.querySelector('.user-alert');
+            if (alertBox) {
+                setTimeout(function() {
+                    alertBox.style.transition = 'opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin 0.5s ease, padding 0.5s ease';
+                    alertBox.style.opacity = '0';
+                    alertBox.style.transform = 'translateY(-6px)';
+                    setTimeout(function() {
+                        if (alertBox.parentNode) {
+                            alertBox.style.display = 'none';
+                        }
+                    }, 500);
+                }, 5000);
+            }
+        });
     </script>
 </body>
 

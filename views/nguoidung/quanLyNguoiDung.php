@@ -105,7 +105,7 @@
         }
 
         .bang-quan-ly th {
-            background-color: #F8FAFC;
+            background-color: var(--bg-page);
             color: var(--text-primary);
             font-weight: 700;
             padding: 12px 16px;
@@ -132,9 +132,9 @@
             font-weight: 600;
         }
 
-        .role-badge-tag.doc-gia { background-color: #E0F2FE; color: #0369A1; }
-        .role-badge-tag.thu-thu { background-color: #EFF6FF; color: #1D4ED8; }
-        .role-badge-tag.admin { background-color: #FEF3C7; color: #92400E; }
+        .role-badge-tag.doc-gia { background-color: #F0FDF4; color: var(--success); border: 1px solid #DCFCE7; }
+        .role-badge-tag.thu-thu { background-color: var(--primary-light); color: var(--primary); border: 1px solid var(--border-blue); }
+        .role-badge-tag.admin { background-color: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--border-blue); }
 
         .status-badge-tag {
             display: inline-block;
@@ -144,8 +144,8 @@
             font-weight: 600;
         }
 
-        .status-badge-tag.hoat-dong { background-color: #DCFCE7; color: #166534; }
-        .status-badge-tag.bi-khoa { background-color: #FEE2E2; color: #991B1B; }
+        .status-badge-tag.hoat-dong { background-color: #F0FDF4; color: var(--success); border: 1px solid #DCFCE7; }
+        .status-badge-tag.bi-khoa { background-color: #FEF2F2; color: var(--danger); border: 1px solid #FEE2E2; }
 
         .nhom-nut-thao-tac {
             display: flex;

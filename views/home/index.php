@@ -8,7 +8,689 @@ if ($isLoggedIn):
     $currentUser = $_SESSION["user"];
     $hoTen = $currentUser["ho_ten"] ?? "Người dùng";
     $vaiTro = $currentUser["vai_tro"] ?? "Độc giả";
+    $maNguoiDung = $currentUser["ma_nguoi_dung"] ?? "";
 ?>
+
+<?php if ($vaiTro === 'Độc giả'): ?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ độc giả - Thư viện Mini</title>
+    <link rel="stylesheet" href="assets/css/design-system.css">
+    <style>
+        body {
+            font-family: var(--font-family-base);
+            background: var(--bg-page);
+            color: var(--text-body);
+            min-height: 100vh;
+        }
+        .reader-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+        .reader-main {
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
+            padding: clamp(16px, 3vw, 36px);
+            overflow-x: hidden;
+        }
+        .reader-header {
+            margin-bottom: 24px;
+        }
+        .reader-header h1 {
+            font-size: clamp(24px, 3vw, 32px);
+            line-height: 1.25;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            color: var(--text-primary);
+        }
+        .reader-header h1 span {
+            color: var(--primary);
+        }
+        .reader-header p {
+            margin-top: 6px;
+            color: var(--text-secondary);
+            font-size: var(--font-size-body);
+        }
+        .toolbar {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) minmax(160px, 210px) minmax(160px, 210px);
+            gap: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-card);
+        }
+        .toolbar input, .toolbar select {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 13px;
+            background: var(--white);
+            color: var(--text-body);
+            font-size: var(--font-size-small);
+            outline: none;
+            transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        }
+        .toolbar input:focus, .toolbar select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .table-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .book-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 980px;
+        }
+        .book-table th {
+            background: var(--bg-page);
+            color: var(--text-body);
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
+            padding: 15px 14px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .book-table td {
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            font-size: var(--font-size-small);
+            color: var(--text-body);
+        }
+        .book-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+        .book-table tbody tr:hover {
+            background: #F1F5F9;
+        }
+        .book-name {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .description {
+            max-width: 270px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+        .category-badge {
+            display: inline-flex;
+            padding: 5px 9px;
+            border-radius: var(--radius-badge);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--border-blue);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border-radius: var(--radius-badge);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .status-badge::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        .status-available {
+            color: var(--success);
+            background: #F0FDF4;
+            border: 1px solid #DCFCE7;
+        }
+        .status-borrowed {
+            color: var(--warning);
+            background: #FEF3C7;
+            border: 1px solid #FDE68A;
+        }
+        .status-unavailable {
+            color: var(--danger);
+            background: #FEF2F2;
+            border: 1px solid #FEE2E2;
+        }
+        .btn-borrow {
+            border: 0;
+            border-radius: var(--radius-sm);
+            padding: 9px 15px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            min-width: 78px;
+            transition: all var(--transition-fast);
+        }
+        .btn-borrow.available {
+            background: var(--success);
+            color: var(--white);
+        }
+        .btn-borrow.available:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+        .btn-borrow.unavailable {
+            background: var(--border);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+        .empty-row {
+            text-align: center;
+            padding: 34px !important;
+            color: var(--text-secondary) !important;
+        }
+        .table-footer {
+            padding: 13px 16px;
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        /* ================= POPUP PHIẾU MƯỢN ================= */
+        .borrow-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 3000;
+        }
+        .borrow-modal-overlay.show {
+            display: flex;
+        }
+        .borrow-modal {
+            width: min(560px, 100%);
+            max-height: calc(100vh - 36px);
+            overflow-y: auto;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+            padding: clamp(20px, 4vw, 30px);
+        }
+        .borrow-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        .borrow-modal-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        .borrow-modal-header p {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            line-height: 1.5;
+        }
+        .borrow-modal-close {
+            width: 36px;
+            height: 36px;
+            flex: 0 0 36px;
+            border: 0;
+            border-radius: 9px;
+            background: #F1F5F9;
+            color: var(--text-body);
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+        }
+        .borrow-modal-close:hover {
+            background: var(--border);
+        }
+        .borrow-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .borrow-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 0;
+        }
+        .borrow-form-group.full {
+            grid-column: 1 / -1;
+        }
+        .borrow-form-group label {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-body);
+        }
+        .borrow-form-group input {
+            width: 100%;
+            min-width: 0;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            color: var(--text-primary);
+            font: inherit;
+            outline: none;
+        }
+        .borrow-form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .borrow-form-group input[readonly] {
+            background: var(--bg-page);
+            color: var(--text-secondary);
+        }
+        .borrow-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+        .borrow-modal-actions button {
+            border: 0;
+            border-radius: var(--radius-sm);
+            padding: 11px 17px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .borrow-cancel {
+            background: #F1F5F9;
+            color: var(--text-body);
+        }
+        .borrow-cancel:hover {
+            background: var(--border);
+        }
+        .borrow-submit {
+            background: var(--success);
+            color: var(--white);
+        }
+        .borrow-submit:hover {
+            background: #15803d;
+        }
+
+        @media (max-width: 1100px) {
+            .toolbar { grid-template-columns: 1fr 1fr; }
+            .toolbar .search-box { grid-column: 1 / -1; }
+            .book-table { min-width: 900px; }
+        }
+
+        @media (max-width: 760px) {
+            .reader-main { padding: 16px 12px 26px; }
+            .toolbar { grid-template-columns: 1fr; padding: 12px; gap: 10px; }
+            .toolbar .search-box { grid-column: auto; }
+            .table-card { border-radius: 12px; }
+            .book-table, .book-table tbody, .book-table tr, .book-table td { display: block; width: 100%; }
+            .book-table { min-width: 0; }
+            .book-table thead { display: none; }
+            .book-table tbody { padding: 8px 0; }
+            .book-table tr.book-row {
+                margin: 0 10px 12px;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                overflow: hidden;
+                background: var(--white);
+            }
+            .book-table td {
+                display: grid;
+                grid-template-columns: minmax(105px, 34%) 1fr;
+                gap: 12px;
+                align-items: start;
+                padding: 10px 12px;
+                border-bottom: 1px solid var(--border);
+                font-size: 13px;
+                word-break: break-word;
+            }
+            .book-table td:last-child { border-bottom: 0; }
+            .book-table td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--text-secondary);
+            }
+            .description { max-width: none; }
+            .btn-borrow { width: 100%; max-width: 150px; }
+            .empty-row { display: block !important; }
+            .empty-row::before { display: none; }
+        }
+
+        @media (max-width: 560px) {
+            .borrow-form-grid { grid-template-columns: 1fr; }
+            .borrow-form-group.full { grid-column: auto; }
+            .borrow-modal-actions { flex-direction: column-reverse; }
+            .borrow-modal-actions button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="reader-layout">
+    <!-- Nhúng Sidebar dùng chung -->
+    <?php require_once __DIR__ . '/../../layout/sidebar.php'; ?>
+
+    <main class="reader-main">
+        <div class="reader-header">
+            <h1>Xin chào, <span><?= htmlspecialchars($hoTen) ?></span> 👋</h1>
+            <p>Tra cứu sách và kiểm tra tình trạng bản sao hiện có trong thư viện.</p>
+        </div>
+
+        <?php
+        $danhSachSach = $danhSachSach ?? [];
+        $danhMucOptions = [];
+        foreach ($danhSachSach as $sach) {
+            $dm = trim((string)($sach['danh_muc'] ?? ''));
+            if ($dm !== '') $danhMucOptions[$dm] = $dm;
+        }
+        ksort($danhMucOptions, SORT_NATURAL | SORT_FLAG_CASE);
+        ?>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <input id="bookSearch" type="text" placeholder="Tìm theo mã sách, tên sách, tác giả...">
+            </div>
+            <select id="categoryFilter">
+                <option value="">Tất cả danh mục</option>
+                <?php foreach ($danhMucOptions as $dm): ?>
+                    <option value="<?= htmlspecialchars(mb_strtolower($dm, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($dm) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select id="statusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="có sẵn">Có sẵn</option>
+                <option value="đang mượn">Đang mượn</option>
+                <option value="chưa có sẵn">Chưa có sẵn</option>
+            </select>
+        </div>
+
+        <section class="table-card">
+            <div class="table-wrap">
+                <table class="book-table" id="readerBookTable">
+                    <thead>
+                    <tr>
+                        <th>Mã sách</th>
+                        <th>Tên sách</th>
+                        <th>Tác giả</th>
+                        <th>Mô tả</th>
+                        <th>Danh mục</th>
+                        <th>Trạng thái bản sao</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($danhSachSach)): ?>
+                        <tr><td colspan="7" class="empty-row">Chưa có dữ liệu đầu sách trong hệ thống.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($danhSachSach as $sach): ?>
+                            <?php
+                            $status = $sach['trang_thai_ban_sao'] ?? 'Chưa có sẵn';
+                            $statusLower = mb_strtolower($status, 'UTF-8');
+                            $category = $sach['danh_muc'] ?? 'Chưa phân loại';
+                            $searchText = mb_strtolower(
+                                ($sach['ma_sach'] ?? '') . ' ' .
+                                ($sach['ten_sach'] ?? '') . ' ' .
+                                ($sach['tac_gia'] ?? '') . ' ' .
+                                ($sach['mo_ta'] ?? '') . ' ' .
+                                $category,
+                                'UTF-8'
+                            );
+                            $statusClass = $status === 'Có sẵn'
+                                ? 'status-available'
+                                : ($status === 'Đang mượn' ? 'status-borrowed' : 'status-unavailable');
+                            ?>
+                            <tr class="book-row"
+                                data-search="<?= htmlspecialchars($searchText, ENT_QUOTES, 'UTF-8') ?>"
+                                data-category="<?= htmlspecialchars(mb_strtolower($category, 'UTF-8'), ENT_QUOTES, 'UTF-8') ?>"
+                                data-status="<?= htmlspecialchars($statusLower, ENT_QUOTES, 'UTF-8') ?>">
+                                <td data-label="Mã sách"><?= htmlspecialchars($sach['ma_sach'] ?? '') ?></td>
+                                <td data-label="Tên sách"><span class="book-name"><?= htmlspecialchars($sach['ten_sach'] ?? '') ?></span></td>
+                                <td data-label="Tác giả"><?= htmlspecialchars($sach['tac_gia'] ?? '') ?></td>
+                                <td data-label="Mô tả" class="description"><?= htmlspecialchars($sach['mo_ta'] ?? 'Chưa có mô tả') ?></td>
+                                <td data-label="Danh mục"><span class="category-badge"><?= htmlspecialchars($category) ?></span></td>
+                                <td data-label="Trạng thái"><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span></td>
+                                <td data-label="Thao tác">
+                                    <?php if ($status === 'Có sẵn'): ?>
+                                        <button type="button"
+                                                class="btn-borrow available js-borrow-btn"
+                                                data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            Mượn
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn-borrow unavailable" disabled>
+                                            Mượn
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">Hiển thị <span id="visibleCount"><?= count($danhSachSach) ?></span> / <?= count($danhSachSach) ?> đầu sách</div>
+        </section>
+    </main>
+</div>
+
+<!-- Popup Phiếu mượn -->
+<div class="borrow-modal-overlay" id="borrowModal" aria-hidden="true">
+    <div class="borrow-modal" role="dialog" aria-modal="true" aria-labelledby="borrowModalTitle">
+
+        <div class="borrow-modal-header">
+            <div>
+                <h2 id="borrowModalTitle">Phiếu mượn sách</h2>
+                <p>Kiểm tra thông tin trước khi xác nhận mượn sách.</p>
+            </div>
+
+            <button type="button"
+                    class="borrow-modal-close"
+                    id="borrowModalClose"
+                    aria-label="Đóng">&times;</button>
+        </div>
+
+        <div class="borrow-form-grid">
+            <div class="borrow-form-group">
+                <label>Mã độc giả</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($maNguoiDung) ?>"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Người mượn</label>
+                <input type="text"
+                       value="<?= htmlspecialchars($hoTen) ?>"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Mã sách</label>
+                <input type="text"
+                       id="borrowBookCode"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Tác giả</label>
+                <input type="text"
+                       id="borrowAuthor"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group full">
+                <label>Tên sách</label>
+                <input type="text"
+                       id="borrowBookName"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Ngày gửi yêu cầu</label>
+                <input type="date"
+                       id="borrowDate"
+                       readonly>
+            </div>
+
+            <div class="borrow-form-group">
+                <label>Trạng thái</label>
+                <input type="text"
+                       value="Có sẵn"
+                       readonly>
+            </div>
+        </div>
+
+        <div class="borrow-modal-actions">
+            <button type="button"
+                    class="borrow-cancel"
+                    id="borrowCancel">
+                Hủy
+            </button>
+
+            <button type="button"
+                    class="borrow-submit"
+                    id="borrowSubmit">
+                Xác nhận mượn
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const search = document.getElementById('bookSearch');
+    const category = document.getElementById('categoryFilter');
+    const status = document.getElementById('statusFilter');
+    const rows = Array.from(document.querySelectorAll('.book-row'));
+    const visibleCount = document.getElementById('visibleCount');
+
+    const borrowModal = document.getElementById('borrowModal');
+    const borrowModalClose = document.getElementById('borrowModalClose');
+    const borrowCancel = document.getElementById('borrowCancel');
+    const borrowSubmit = document.getElementById('borrowSubmit');
+
+    const borrowBookCode = document.getElementById('borrowBookCode');
+    const borrowBookName = document.getElementById('borrowBookName');
+    const borrowAuthor = document.getElementById('borrowAuthor');
+    const borrowDate = document.getElementById('borrowDate');
+
+    function normalize(value) {
+        return (value || '')
+            .toString()
+            .trim()
+            .toLocaleLowerCase('vi-VN');
+    }
+
+    function filterRows() {
+        const q = normalize(search ? search.value : '');
+        const cat = normalize(category ? category.value : '');
+        const st = normalize(status ? status.value : '');
+
+        let count = 0;
+
+        rows.forEach(row => {
+            const okSearch = !q || normalize(row.dataset.search).includes(q);
+            const okCategory = !cat || normalize(row.dataset.category) === cat;
+            const okStatus = !st || normalize(row.dataset.status) === st;
+
+            const show = okSearch && okCategory && okStatus;
+            row.style.display = show ? '' : 'none';
+
+            if (show) count++;
+        });
+
+        if (visibleCount) {
+            visibleCount.textContent = count;
+        }
+    }
+
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function openBorrowModal(button) {
+        if (borrowBookCode) borrowBookCode.value = button.dataset.bookCode || '';
+        if (borrowBookName) borrowBookName.value = button.dataset.bookName || '';
+        if (borrowAuthor) borrowAuthor.value = button.dataset.author || '';
+        if (borrowDate) borrowDate.value = formatDate(new Date());
+
+        if (borrowModal) {
+            borrowModal.classList.add('show');
+            borrowModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeBorrowModal() {
+        if (!borrowModal) return;
+        borrowModal.classList.remove('show');
+        borrowModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    if (search) search.addEventListener('input', filterRows);
+    if (category) category.addEventListener('change', filterRows);
+    if (status) status.addEventListener('change', filterRows);
+
+    document.querySelectorAll('.js-borrow-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            openBorrowModal(this);
+        });
+    });
+
+    if (borrowModalClose) borrowModalClose.addEventListener('click', closeBorrowModal);
+    if (borrowCancel) borrowCancel.addEventListener('click', closeBorrowModal);
+
+    if (borrowModal) {
+        borrowModal.addEventListener('click', function (event) {
+            if (event.target === borrowModal) {
+                closeBorrowModal();
+            }
+        });
+    }
+
+    if (borrowSubmit) {
+        borrowSubmit.addEventListener('click', function () {
+            window.location.href = 'index.php?controller=phieumuon';
+        });
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeBorrowModal();
+        }
+    });
+})();
+</script>
+</body>
+</html>
+
+<?php else: ?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -17,21 +699,13 @@ if ($isLoggedIn):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống Quản lý Thư viện Mini - Dashboard</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="assets/css/design-system.css">
 
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Inter', Arial, sans-serif;
-            background: var(--bg-main);
-            color: var(--text-main);
+            font-family: var(--font-family-base);
+            background: var(--bg-page);
+            color: var(--text-body);
             min-height: 100vh;
         }
 
@@ -42,7 +716,7 @@ if ($isLoggedIn):
 
         .main {
             flex: 1;
-            padding: 40px;
+            padding: 35px 40px;
             overflow-y: auto;
         }
 
@@ -51,16 +725,16 @@ if ($isLoggedIn):
         }
 
         .page-header h1 {
-            font-size: 28px;
+            font-size: var(--font-size-page-heading);
             font-weight: 800;
-            color: #0f172a;
+            color: var(--text-primary);
             letter-spacing: -0.5px;
             margin-bottom: 6px;
         }
 
         .page-header p {
-            color: var(--text-muted);
-            font-size: 15px;
+            color: var(--text-secondary);
+            font-size: var(--font-size-body);
         }
 
         .stats-grid {
@@ -71,15 +745,15 @@ if ($isLoggedIn):
         }
 
         .stat-card {
-            background: white;
-            border-radius: 12px;
+            background: var(--white);
+            border-radius: var(--radius-card);
             padding: 22px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 16px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform var(--transition-normal), box-shadow var(--transition-normal);
             text-decoration: none;
             color: inherit;
         }
@@ -87,6 +761,7 @@ if ($isLoggedIn):
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-color: var(--border-blue);
         }
 
         .stat-icon {
@@ -99,41 +774,41 @@ if ($isLoggedIn):
             font-size: 24px;
         }
 
-        .icon-blue { background: #eff6ff; color: #2563eb; }
-        .icon-green { background: #ecfdf5; color: #059669; }
-        .icon-purple { background: #faf5ff; color: #9333ea; }
-        .icon-amber { background: #fffbeb; color: #d97706; }
+        .icon-blue { background: var(--primary-light); color: var(--primary); }
+        .icon-green { background: #F0FDF4; color: var(--success); }
+        .icon-purple { background: var(--primary-light); color: var(--primary-dark); }
+        .icon-amber { background: #FFFBEB; color: var(--warning); }
 
         .stat-info h3 {
             font-size: 20px;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text-primary);
         }
 
         .stat-info span {
-            font-size: 13px;
-            color: var(--text-muted);
+            font-size: var(--font-size-caption);
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
         .welcome-card {
-            background: white;
-            border-radius: 16px;
+            background: var(--white);
+            border-radius: var(--radius-card);
             padding: 35px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-card);
         }
 
         .welcome-content h2 {
             font-size: 22px;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--text-primary);
             margin-bottom: 10px;
         }
 
         .welcome-content p {
-            color: #64748b;
-            font-size: 15px;
+            color: var(--text-body);
+            font-size: var(--font-size-body);
             line-height: 1.6;
             max-width: 700px;
         }
@@ -229,11 +904,9 @@ if ($isLoggedIn):
     </div>
 </body>
 </html>
+<?php endif; ?>
 
-<?php
-else:
-    // Giao diện Landing Page cho khách
-?>
+<?php else: ?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -251,14 +924,8 @@ else:
             --card-shadow: var(--shadow-card);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: var(--font-family-base);
             background-color: var(--white);
             color: var(--text-body);
             min-height: 100vh;
@@ -346,7 +1013,7 @@ else:
         .hero-sub-text {
             font-size: 15px;
             line-height: 1.6;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             margin-bottom: clamp(20px, 3vh, 32px);
             max-width: 560px;
         }
@@ -368,8 +1035,8 @@ else:
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.2s ease;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-fast);
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
         }
 
@@ -389,10 +1056,10 @@ else:
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border-blue);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            transition: all 0.2s ease;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-fast);
         }
 
         .btn-cta-register:hover {
@@ -507,7 +1174,7 @@ else:
         .features-section {
             background-color: var(--white);
             padding: clamp(45px, 6vh, 80px) 0;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--border);
         }
 
         .features-section .landing-wrapper {
@@ -556,11 +1223,11 @@ else:
 
         .feature-item-card {
             background: #FFFFFF;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
             padding: clamp(22px, 2vw, 32px);
-            box-shadow: var(--card-shadow);
-            transition: all 0.2s ease;
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-fast);
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -601,7 +1268,7 @@ else:
         .feature-card-desc {
             font-size: 14.5px;
             line-height: 1.6;
-            color: var(--text-muted);
+            color: var(--text-secondary);
         }
 
         .landing-footer {

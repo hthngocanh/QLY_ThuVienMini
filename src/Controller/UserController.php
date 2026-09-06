@@ -94,14 +94,19 @@ class UserController extends BaseController
                     $_SESSION["user"]["khoa_lop"] = $khoaLop;
                 }
 
-                $currentUser = $this->userModel->layNguoiDungTheoMa($maNguoiDungHienTai);
-
-                $thongBao = "Cập nhật thông tin cá nhân thành công.";
-                $loaiThongBao = "success";
+                $_SESSION['thongBao'] = "Cập nhật thông tin cá nhân thành công.";
+                $_SESSION['loaiThongBao'] = "success";
+                $this->redirect("index.php?controller=user&action=profile");
             } else {
                 $thongBao = "Vui lòng kiểm tra lại thông tin đã nhập.";
                 $loaiThongBao = "error";
             }
+        }
+
+        if (empty($thongBao) && isset($_SESSION['thongBao'])) {
+            $thongBao = $_SESSION['thongBao'];
+            $loaiThongBao = $_SESSION['loaiThongBao'] ?? 'success';
+            unset($_SESSION['thongBao'], $_SESSION['loaiThongBao']);
         }
 
         $this->renderView("nguoidung/profile.php", [
@@ -149,9 +154,6 @@ class UserController extends BaseController
         $this->requireLogin();
         $this->requireRole(['Quản trị viên']);
 
-        $thongBao = "";
-        $loaiThongBao = "";
-
         if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST") {
             $hanhDong = $_POST["hanhDong"] ?? "";
             $maNguoiDung = trim($_POST["ma_nguoi_dung"] ?? "");
@@ -159,15 +161,21 @@ class UserController extends BaseController
             if ($maNguoiDung !== "") {
                 if ($hanhDong === "khoa") {
                     $this->userModel->khoaNguoiDung($maNguoiDung);
-                    $thongBao = "Đã khóa tài khoản độc giả {$maNguoiDung} thành công.";
-                    $loaiThongBao = "success";
+                    $_SESSION['thongBao'] = "Đã khóa tài khoản độc giả {$maNguoiDung} thành công.";
+                    $_SESSION['loaiThongBao'] = "success";
                 } elseif ($hanhDong === "mokhoa") {
                     $this->userModel->moKhoaNguoiDung($maNguoiDung);
-                    $thongBao = "Đã mở khóa tài khoản độc giả {$maNguoiDung} thành công.";
-                    $loaiThongBao = "success";
+                    $_SESSION['thongBao'] = "Đã mở khóa tài khoản độc giả {$maNguoiDung} thành công.";
+                    $_SESSION['loaiThongBao'] = "success";
                 }
             }
+
+            $this->redirect("index.php?controller=user&action=quanLyDocGia");
         }
+
+        $thongBao = $_SESSION['thongBao'] ?? "";
+        $loaiThongBao = $_SESSION['loaiThongBao'] ?? "";
+        unset($_SESSION['thongBao'], $_SESSION['loaiThongBao']);
 
         $tuKhoa = trim($_GET["tuKhoa"] ?? "");
         $danhSachDocGia = $this->userModel->layDanhSachDocGia($tuKhoa);
@@ -242,30 +250,33 @@ class UserController extends BaseController
                     $matKhauMacDinh = 'Thuvien12345!';
                     $hash = password_hash($matKhauMacDinh, PASSWORD_DEFAULT);
                     $this->userModel->themNhanSu($ma, $hoTen, $email, $hash);
-                    $thongBao = "Thêm nhân sự thành công.";
-                    $loaiThongBao = "success";
-                    $formDataThem = [
-                        'ma_nguoi_dung' => '',
-                        'ho_ten' => '',
-                        'email' => ''
-                    ];
-                    $moModalThem = false;
+                    $_SESSION['thongBao'] = "Thêm nhân sự thành công.";
+                    $_SESSION['loaiThongBao'] = "success";
+                    $this->redirect("index.php?controller=user&action=quanLyNhanSu");
                 }
             } elseif ($hanhDong === "khoa") {
                 $ma = trim($_POST["ma_nguoi_dung"] ?? "");
                 if ($ma !== "") {
                     $this->userModel->khoaNguoiDung($ma);
-                    $thongBao = "Đã khóa tài khoản nhân sự {$ma} thành công.";
-                    $loaiThongBao = "success";
+                    $_SESSION['thongBao'] = "Đã khóa tài khoản nhân sự {$ma} thành công.";
+                    $_SESSION['loaiThongBao'] = "success";
+                    $this->redirect("index.php?controller=user&action=quanLyNhanSu");
                 }
             } elseif ($hanhDong === "mokhoa") {
                 $ma = trim($_POST["ma_nguoi_dung"] ?? "");
                 if ($ma !== "") {
                     $this->userModel->moKhoaNguoiDung($ma);
-                    $thongBao = "Đã mở khóa tài khoản nhân sự {$ma} thành công.";
-                    $loaiThongBao = "success";
+                    $_SESSION['thongBao'] = "Đã mở khóa tài khoản nhân sự {$ma} thành công.";
+                    $_SESSION['loaiThongBao'] = "success";
+                    $this->redirect("index.php?controller=user&action=quanLyNhanSu");
                 }
             }
+        }
+
+        if (empty($thongBao) && isset($_SESSION['thongBao'])) {
+            $thongBao = $_SESSION['thongBao'];
+            $loaiThongBao = $_SESSION['loaiThongBao'] ?? 'success';
+            unset($_SESSION['thongBao'], $_SESSION['loaiThongBao']);
         }
 
         $tuKhoa = trim($_GET["tuKhoa"] ?? "");
@@ -294,9 +305,6 @@ class UserController extends BaseController
         $this->requireLogin();
         $this->requireRole(['Quản trị viên']);
 
-        $thongBao = "";
-        $loaiThongBao = "";
-
         if (($_SERVER["REQUEST_METHOD"] ?? "GET") === "POST") {
             $hanhDong = $_POST["hanhDong"] ?? "";
             $id = (int)($_POST["id"] ?? 0);
@@ -305,24 +313,30 @@ class UserController extends BaseController
                 if ($hanhDong === "duyet") {
                     $thanhCong = $this->userModel->duyetYeuCauCapLaiMatKhau($id);
                     if ($thanhCong) {
-                        $thongBao = "Đã duyệt yêu cầu và cập nhật mật khẩu mới cho người dùng thành công.";
-                        $loaiThongBao = "success";
+                        $_SESSION['thongBao'] = "Đã duyệt yêu cầu và cập nhật mật khẩu mới cho người dùng thành công.";
+                        $_SESSION['loaiThongBao'] = "success";
                     } else {
-                        $thongBao = "Không thể duyệt yêu cầu này (có thể yêu cầu đã được xử lý hoặc tài khoản không tồn tại).";
-                        $loaiThongBao = "error";
+                        $_SESSION['thongBao'] = "Không thể duyệt yêu cầu này (có thể yêu cầu đã được xử lý hoặc tài khoản không tồn tại).";
+                        $_SESSION['loaiThongBao'] = "error";
                     }
                 } elseif ($hanhDong === "tuchoi") {
                     $thanhCong = $this->userModel->tuChoiYeuCauCapLaiMatKhau($id);
                     if ($thanhCong) {
-                        $thongBao = "Đã từ chối yêu cầu cấp lại mật khẩu.";
-                        $loaiThongBao = "success";
+                        $_SESSION['thongBao'] = "Đã từ chối yêu cầu cấp lại mật khẩu.";
+                        $_SESSION['loaiThongBao'] = "success";
                     } else {
-                        $thongBao = "Không thể từ chối yêu cầu này (có thể yêu cầu đã được xử lý).";
-                        $loaiThongBao = "error";
+                        $_SESSION['thongBao'] = "Không thể từ chối yêu cầu này (có thể yêu cầu đã được xử lý).";
+                        $_SESSION['loaiThongBao'] = "error";
                     }
                 }
             }
+
+            $this->redirect("index.php?controller=user&action=yeuCauCapLaiMatKhau");
         }
+
+        $thongBao = $_SESSION['thongBao'] ?? "";
+        $loaiThongBao = $_SESSION['loaiThongBao'] ?? "";
+        unset($_SESSION['thongBao'], $_SESSION['loaiThongBao']);
 
         $danhSachYeuCau = $this->userModel->layDanhSachYeuCauCapLaiMatKhau();
 

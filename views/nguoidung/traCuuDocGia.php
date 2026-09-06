@@ -247,15 +247,15 @@
         }
 
         .user-status-tag.active {
-            background-color: #DCFCE7;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
+            background-color: #F0FDF4;
+            color: var(--success);
+            border: 1px solid #DCFCE7;
         }
 
         .user-status-tag.locked {
-            background-color: #FEE2E2;
-            color: #B91C1C;
-            border: 1px solid #FECACA;
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
         }
 
         /* VI PHẠM */
@@ -271,8 +271,8 @@
             padding: 4px 12px;
             border-radius: 6px;
             background-color: #FEF2F2;
-            color: #DC2626;
-            border: 1px solid #FECACA;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
             font-weight: 700;
             font-size: 13px;
             cursor: pointer;
@@ -281,9 +281,9 @@
         }
 
         .btn-vi-pham-co:hover {
-            background-color: #DC2626;
+            background-color: var(--danger);
             color: var(--white);
-            border-color: #DC2626;
+            border-color: var(--danger);
             text-decoration: none;
             box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
         }
@@ -405,10 +405,10 @@
             font-weight: 600;
         }
 
-        .badge-slip.dang-muon { background-color: #EFF6FF; color: #1D4ED8; }
-        .badge-slip.da-tra { background-color: #ECFDF5; color: #047857; }
-        .badge-slip.qua-han { background-color: #FEF2F2; color: #B91C1C; }
-        .badge-slip.cho-duyet { background-color: #FFFBEB; color: #B45309; }
+        .badge-slip.dang-muon { background-color: var(--primary-light); color: var(--primary); border: 1px solid var(--border-blue); }
+        .badge-slip.da-tra { background-color: #F0FDF4; color: var(--success); border: 1px solid #DCFCE7; }
+        .badge-slip.qua-han { background-color: #FEF2F2; color: var(--danger); border: 1px solid #FEE2E2; }
+        .badge-slip.cho-duyet { background-color: #FFFBEB; color: var(--warning); border: 1px solid #FEF3C7; }
     </style>
 </head>
 

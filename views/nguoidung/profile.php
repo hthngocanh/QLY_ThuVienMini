@@ -44,15 +44,15 @@
         }
 
         .user-alert.success {
-            background-color: #ECFDF5;
-            color: #065F46;
-            border: 1px solid #A7F3D0;
+            background-color: #F0FDF4;
+            color: #166534;
+            border: 1px solid #DCFCE7;
         }
 
         .user-alert.error {
             background-color: #FEF2F2;
             color: #991B1B;
-            border: 1px solid #FECACA;
+            border: 1px solid #FEE2E2;
         }
 
         /* 1. KHUNG THÔNG TIN TỔNG QUAN */
@@ -74,8 +74,8 @@
             width: 68px;
             height: 68px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #1e3a8a);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -120,15 +120,15 @@
         }
 
         .user-status-tag.active {
-            background-color: #DCFCE7;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
+            background-color: #F0FDF4;
+            color: var(--success);
+            border: 1px solid #DCFCE7;
         }
 
         .user-status-tag.locked {
-            background-color: #FEE2E2;
-            color: #B91C1C;
-            border: 1px solid #FECACA;
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
         }
 
         /* 2. KHUNG CẬP NHẬT THÔNG TIN CÁ NHÂN */
@@ -432,6 +432,24 @@
         </main>
     </div>
 
+    <script>
+        // Tự động ẩn thông báo sau khoảng 5 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            var alertBox = document.querySelector('.user-alert');
+            if (alertBox) {
+                setTimeout(function() {
+                    alertBox.style.transition = 'opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin 0.5s ease, padding 0.5s ease';
+                    alertBox.style.opacity = '0';
+                    alertBox.style.transform = 'translateY(-6px)';
+                    setTimeout(function() {
+                        if (alertBox.parentNode) {
+                            alertBox.style.display = 'none';
+                        }
+                    }, 500);
+                }, 5000);
+            }
+        });
+    </script>
 </body>
 
 </html>

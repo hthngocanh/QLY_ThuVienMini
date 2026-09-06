@@ -293,15 +293,48 @@ class BookModel
     }
 
     public function xoaDauSach($id)
-{
-    $stmt = $this->pdo->prepare("
-        UPDATE books
-        SET trang_thai = 'Không hoạt động'
-        WHERE id = :id
-    ");
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE books
+            SET trang_thai = 'Không hoạt động'
+            WHERE id = :id
+        ");
 
-    return $stmt->execute([
-        "id" => (int)$id
-    ]);
-}
+        return $stmt->execute([
+            "id" => (int)$id
+        ]);
+    }
+
+    /**
+     * Lấy danh sách đầu sách kèm trạng thái bản sao phục vụ Độc giả tra cứu và mượn sách
+     */
+    public function layDanhSachSachChoDocGia()
+    {
+        try {
+            $sql = "
+                SELECT 
+                    b.id,
+                    b.ma_sach,
+                    b.ten_sach,
+                    b.tac_gia,
+                    b.mo_ta,
+                    c.ten_danh_muc AS danh_muc,
+                    CASE 
+                        WHEN SUM(CASE WHEN bc.trang_thai = 'Có sẵn' AND bc.deleted_at IS NULL THEN 1 ELSE 0 END) > 0 THEN 'Có sẵn'
+                        WHEN SUM(CASE WHEN bc.trang_thai = 'Đang mượn' AND bc.deleted_at IS NULL THEN 1 ELSE 0 END) > 0 THEN 'Đang mượn'
+                        ELSE 'Chưa có sẵn'
+                    END AS trang_thai_ban_sao
+                FROM books b
+                LEFT JOIN Categories c ON b.category_id = c.category_id
+                LEFT JOIN book_copies bc ON b.id = bc.book_id
+                WHERE b.trang_thai = 'Hoạt động'
+                GROUP BY b.id, b.ma_sach, b.ten_sach, b.tac_gia, b.mo_ta, c.ten_danh_muc
+                ORDER BY b.id DESC
+            ";
+            $stmt = $this->pdo->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }

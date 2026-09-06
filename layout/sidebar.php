@@ -71,19 +71,19 @@ if ($vaiTro === "Quản trị viên") {
     }
 
     html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        min-height: 100vh !important;
-        background-color: #F8FAFC !important;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background-color: var(--bg-page);
     }
 
-    .layout {
-        display: flex !important;
-        min-height: 100vh !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background-color: #F8FAFC !important;
+    .layout, .reader-layout {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-page);
     }
 
     .sidebar {
@@ -394,27 +394,27 @@ if ($vaiTro === "Quản trị viên") {
     }
 
     .badge-admin {
-        background: #FEE2E2;
-        color: #B91C1C;
-        border: 1px solid #FECACA;
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        border: 1px solid var(--border-blue);
     }
 
     .badge-librarian {
-        background: #EFF6FF;
-        color: #1D4ED8;
-        border: 1px solid #BFDBFE;
+        background: var(--primary-light);
+        color: var(--primary);
+        border: 1px solid var(--border-blue);
     }
 
     .badge-reader {
-        background: #DCFCE7;
-        color: #15803D;
-        border: 1px solid #BBF7D0;
+        background: #F0FDF4;
+        color: var(--success);
+        border: 1px solid #DCFCE7;
     }
 
     .badge-guest {
-        background: #F1F5F9;
-        color: #64748B;
-        border: 1px solid #E2E8F0;
+        background: var(--bg-page);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
     }
 
     .user-dropdown-arrow {
@@ -433,7 +433,7 @@ if ($vaiTro === "Quản trị viên") {
         bottom: 78px;
         left: 16px;
         right: 16px;
-        background: #FFFFFF;
+        background: var(--white);
         border: 1px solid var(--sb-border);
         border-radius: 12px;
         padding: 8px;
@@ -475,18 +475,18 @@ if ($vaiTro === "Quản trị viên") {
 
     .dropdown-item:hover,
     .dropdown-item.active {
-        background: #EFF6FF;
+        background: var(--primary-light);
         color: var(--sb-primary);
         font-weight: 600;
     }
 
     .dropdown-item.logout {
-        color: #DC2626;
+        color: var(--danger);
     }
 
     .dropdown-item.logout:hover {
         background: #FEF2F2;
-        color: #991B1B;
+        color: var(--danger);
     }
 
     .dropdown-divider {
@@ -734,6 +734,7 @@ if ($vaiTro === "Quản trị viên") {
                 <div style="padding: 6px 12px; font-size: 11.5px; color: var(--sb-text-muted); border-bottom: 1px solid var(--sb-border); margin-bottom: 4px;">
                     Mã: <strong><?= htmlspecialchars($maNguoiDung) ?></strong>
                 </div>
+                <?php if ($vaiTro === "Thủ thư" || $vaiTro === "Quản trị viên"): ?>
                 <a href="<?= $appRoot ?>index.php?controller=user&action=profile" class="dropdown-item <?= ($getAction === 'profile') ? 'active' : '' ?>">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -741,6 +742,7 @@ if ($vaiTro === "Quản trị viên") {
                     </svg>
                     <span>Thông tin cá nhân</span>
                 </a>
+                <?php endif; ?>
                 <a href="<?= $appRoot ?>index.php?controller=auth&action=change_password" class="dropdown-item <?= ($getAction === 'change_password') ? 'active' : '' ?>">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>

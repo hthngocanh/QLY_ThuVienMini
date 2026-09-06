@@ -153,21 +153,21 @@
         }
 
         .status-badge.cho-duyet {
-            background-color: #FEF3C7;
-            color: #92400E;
-            border: 1px solid #FDE68A;
+            background-color: #FFFBEB;
+            color: var(--warning);
+            border: 1px solid #FEF3C7;
         }
 
         .status-badge.da-duyet {
-            background-color: #DCFCE7;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
+            background-color: #F0FDF4;
+            color: var(--success);
+            border: 1px solid #DCFCE7;
         }
 
         .status-badge.da-tu-choi {
-            background-color: #FEE2E2;
-            color: #991B1B;
-            border: 1px solid #FECACA;
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
         }
 
         /* BUTTONS */
@@ -177,15 +177,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #BBF7D0;
-            background-color: #ECFDF5;
-            color: #059669;
+            border: 1px solid #DCFCE7;
+            background-color: #F0FDF4;
+            color: var(--success);
             transition: all var(--transition-fast);
         }
 
         .btn-duyet:hover {
-            background-color: #059669;
-            color: #FFFFFF;
+            background-color: var(--success);
+            color: var(--white);
+            border-color: var(--success);
         }
 
         .btn-tuchoi {
@@ -194,15 +195,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #FECACA;
+            border: 1px solid #FEE2E2;
             background-color: #FEF2F2;
-            color: #DC2626;
+            color: var(--danger);
             transition: all var(--transition-fast);
         }
 
         .btn-tuchoi:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
         }
 
         /* MODALS */
@@ -252,8 +254,8 @@
             font-weight: 500;
         }
 
-        .user-alert.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
-        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+        .user-alert.success { background: #F0FDF4; color: #166534; border: 1px solid #DCFCE7; }
+        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FEE2E2; }
     </style>
 </head>
 
@@ -380,14 +382,14 @@
     <!-- MODAL CONFIRM DUYỆT -->
     <div class="modal-overlay" id="modalDuyet">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#065F46;">Xác nhận duyệt yêu cầu</h3>
+            <h3 style="margin-top:0; color:var(--success);">Xác nhận duyệt yêu cầu</h3>
             <p id="msgConfirmDuyet" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=yeuCauCapLaiMatKhau">
                 <input type="hidden" name="hanhDong" value="duyet">
                 <input type="hidden" name="id" id="inputIdDuyet">
                 <div style="display:flex; justify-content:center; gap:12px;">
-                    <button type="button" class="btn-tuchoi" onclick="dongPopupConfirm()" style="background:#FFFFFF; color:var(--text-body); border-color:var(--border);">Hủy</button>
+                    <button type="button" class="btn-lam-moi" onclick="dongPopupConfirm()">Hủy</button>
                     <button type="submit" class="btn-duyet" style="padding:10px 22px;">Duyệt</button>
                 </div>
             </form>
@@ -397,14 +399,14 @@
     <!-- MODAL CONFIRM TỪ CHỐI -->
     <div class="modal-overlay" id="modalTuChoi">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#991B1B;">Xác nhận từ chối yêu cầu</h3>
+            <h3 style="margin-top:0; color:var(--danger);">Xác nhận từ chối yêu cầu</h3>
             <p id="msgConfirmTuChoi" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=yeuCauCapLaiMatKhau">
                 <input type="hidden" name="hanhDong" value="tuchoi">
                 <input type="hidden" name="id" id="inputIdTuChoi">
                 <div style="display:flex; justify-content:center; gap:12px;">
-                    <button type="button" class="btn-duyet" onclick="dongPopupConfirm()" style="background:#FFFFFF; color:var(--text-body); border-color:var(--border);">Hủy</button>
+                    <button type="button" class="btn-lam-moi" onclick="dongPopupConfirm()">Hủy</button>
                     <button type="submit" class="btn-tuchoi" style="padding:10px 22px;">Từ chối</button>
                 </div>
             </form>
@@ -428,6 +430,23 @@
             document.getElementById('modalDuyet').classList.remove('active');
             document.getElementById('modalTuChoi').classList.remove('active');
         }
+
+        // Tự động ẩn thông báo sau khoảng 5 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            var alertBox = document.querySelector('.user-alert');
+            if (alertBox) {
+                setTimeout(function() {
+                    alertBox.style.transition = 'opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin 0.5s ease, padding 0.5s ease';
+                    alertBox.style.opacity = '0';
+                    alertBox.style.transform = 'translateY(-6px)';
+                    setTimeout(function() {
+                        if (alertBox.parentNode) {
+                            alertBox.style.display = 'none';
+                        }
+                    }, 500);
+                }, 5000);
+            }
+        });
     </script>
 </body>
 

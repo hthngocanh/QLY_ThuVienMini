@@ -242,15 +242,15 @@
         }
 
         .user-status-tag.active {
-            background-color: #DCFCE7;
-            color: #15803D;
-            border: 1px solid #BBF7D0;
+            background-color: #F0FDF4;
+            color: var(--success);
+            border: 1px solid #DCFCE7;
         }
 
         .user-status-tag.locked {
-            background-color: #FEE2E2;
-            color: #B91C1C;
-            border: 1px solid #FECACA;
+            background-color: #FEF2F2;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
         }
 
         /* BUTTONS */
@@ -260,15 +260,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #FECACA;
+            border: 1px solid #FEE2E2;
             background-color: #FEF2F2;
-            color: #DC2626;
+            color: var(--danger);
             transition: all var(--transition-fast);
         }
 
         .btn-action-lock:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
         }
 
         .btn-action-unlock {
@@ -277,15 +278,16 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            border: 1px solid #BBF7D0;
-            background-color: #ECFDF5;
-            color: #059669;
+            border: 1px solid #DCFCE7;
+            background-color: #F0FDF4;
+            color: var(--success);
             transition: all var(--transition-fast);
         }
 
         .btn-action-unlock:hover {
-            background-color: #059669;
-            color: #FFFFFF;
+            background-color: var(--success);
+            color: var(--white);
+            border-color: var(--success);
         }
 
         .btn-vi-pham-co {
@@ -295,8 +297,8 @@
             padding: 3px 10px;
             border-radius: 6px;
             background-color: #FEF2F2;
-            color: #DC2626;
-            border: 1px solid #FECACA;
+            color: var(--danger);
+            border: 1px solid #FEE2E2;
             font-weight: 700;
             font-size: 12.5px;
             cursor: pointer;
@@ -304,8 +306,9 @@
         }
 
         .btn-vi-pham-co:hover {
-            background-color: #DC2626;
-            color: #FFFFFF;
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
             text-decoration: none;
         }
 
@@ -388,8 +391,8 @@
             font-weight: 500;
         }
 
-        .user-alert.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
-        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+        .user-alert.success { background: #F0FDF4; color: #166534; border: 1px solid #DCFCE7; }
+        .user-alert.error { background: #FEF2F2; color: #991B1B; border: 1px solid #FEE2E2; }
     </style>
 </head>
 
@@ -554,7 +557,7 @@
     <!-- MODAL CONFIRM KHÓA TÀI KHOẢN -->
     <div class="modal-overlay" id="modalKhoa">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#991B1B;">Xác nhận khóa tài khoản</h3>
+            <h3 style="margin-top:0; color:var(--danger);">Xác nhận khóa tài khoản</h3>
             <p id="msgConfirmKhoa" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=quanLyDocGia">
@@ -571,7 +574,7 @@
     <!-- MODAL CONFIRM MỞ KHÓA TÀI KHOẢN -->
     <div class="modal-overlay" id="modalMoKhoa">
         <div class="modal-box-confirm">
-            <h3 style="margin-top:0; color:#065F46;">Xác nhận mở khóa tài khoản</h3>
+            <h3 style="margin-top:0; color:var(--success);">Xác nhận mở khóa tài khoản</h3>
             <p id="msgConfirmMoKhoa" style="font-size:14.5px; color:var(--text-body); margin:16px 0 24px 0;"></p>
 
             <form method="POST" action="index.php?controller=user&action=quanLyDocGia">
@@ -650,6 +653,23 @@
         function dongModalKhiClickNgoai(e) {
             if (e.target.id === 'modalLichSu') dongPopupLichSu();
         }
+
+        // Tự động ẩn thông báo sau khoảng 5 giây
+        document.addEventListener('DOMContentLoaded', function() {
+            var alertBox = document.querySelector('.user-alert');
+            if (alertBox) {
+                setTimeout(function() {
+                    alertBox.style.transition = 'opacity 0.5s ease, transform 0.5s ease, max-height 0.5s ease, margin 0.5s ease, padding 0.5s ease';
+                    alertBox.style.opacity = '0';
+                    alertBox.style.transform = 'translateY(-6px)';
+                    setTimeout(function() {
+                        if (alertBox.parentNode) {
+                            alertBox.style.display = 'none';
+                        }
+                    }, 500);
+                }, 5000);
+            }
+        });
     </script>
 </body>
 

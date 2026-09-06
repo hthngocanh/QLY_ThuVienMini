@@ -75,7 +75,7 @@
         <div class="subtitle">Cập nhật mật khẩu tài khoản của bạn</div>
 
         <?php if (isset($errors["chung"])): ?>
-            <div style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; border: 1px solid #fecaca;">
+            <div class="alert-error">
                 <?= htmlspecialchars($errors["chung"]) ?>
             </div>
         <?php endif; ?>
