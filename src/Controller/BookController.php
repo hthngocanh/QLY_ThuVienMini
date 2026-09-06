@@ -78,7 +78,7 @@ class BookController extends BaseController
         } elseif (!ctype_digit($nam_xuat_ban)) {
             $loi["nam_xuat_ban"] = "Năm xuất bản phải là số.";
         } elseif ((int)$nam_xuat_ban < 1000 || (int)$nam_xuat_ban > (int)date("Y")) {
-            $loi["nam_xuat_ban"] = "Năm xuất bản không hợp lệ.";
+$loi["nam_xuat_ban"] = "Năm xuất bản không hợp lệ.";
         }
 
         if ($isbn == "") {
@@ -106,6 +106,7 @@ class BookController extends BaseController
 
     public function index()
     {
+        $this->requireLogin();
         // =========================
         // DỮ LIỆU FORM
         // =========================
@@ -135,7 +136,12 @@ class BookController extends BaseController
         // =========================
         // DANH MỤC
         // =========================
+        // Dùng cho form SỬA và bộ lọc tìm kiếm - lấy TẤT CẢ danh mục
+        // (kể cả đã ngừng hoạt động), để sách cũ vẫn giữ được category hiện tại.
         $danh_sach_danh_muc = $this->bookModel->layDanhSachDanhMuc();
+
+        // Dùng riêng cho form THÊM sách - chỉ lấy danh mục đang "Hoạt động".
+        $danh_sach_danh_muc_hoat_dong = $this->bookModel->layDanhSachDanhMucHoatDong();
 
         // =========================
         // TÌM KIẾM / LỌC
@@ -158,7 +164,7 @@ class BookController extends BaseController
             // SỬA SÁCH
             // =========================
             if (isset($_POST["sua_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $id = (int)$_POST["sua_sach"];
                 $sach = $this->bookModel->layDauSachTheoId($id);
 
@@ -169,7 +175,7 @@ class BookController extends BaseController
                     $ten_sach = $sach["ten_sach"];
                     $ma_tac_gia = $sach["ma_tac_gia"];
                     $tac_gia = $sach["tac_gia"];
-                    $danh_muc = $sach["danh_muc"];
+$danh_muc = $sach["danh_muc"];
                     $nha_xuat_ban = $sach["nha_xuat_ban"];
                     $nam_xuat_ban = $sach["nam_xuat_ban"];
                     $isbn = $sach["isbn"];
@@ -182,7 +188,7 @@ class BookController extends BaseController
             // XÓA SÁCH
             // =========================
             elseif (isset($_POST["xoa_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $id = (int)$_POST["xoa_sach"];
 
                 $this->bookModel->xoaDauSach($id);
@@ -195,7 +201,7 @@ class BookController extends BaseController
             // CẬP NHẬT SÁCH
             // =========================
             elseif (isset($_POST["cap_nhat_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $vi_tri_sua = (int)($_POST["id_sua"] ?? -1);
 
                 // Lấy dữ liệu người dùng nhập
@@ -248,8 +254,7 @@ class BookController extends BaseController
                         $loi["danh_muc"] = "Danh mục không tồn tại.";
                     }
                 }
-
-                // Cập nhật
+// Cập nhật
                 if (empty($loi)) {
 
                     $this->bookModel->suaDauSach($vi_tri_sua, [
@@ -279,7 +284,7 @@ class BookController extends BaseController
             // THÊM SÁCH
             // =========================
             elseif (isset($_POST["them_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 // Chỉ khi FORM THÊM được submit
                 // mới cho phép popup tự mở lại
                 $hien_popup_them = true;
@@ -319,12 +324,16 @@ class BookController extends BaseController
 
                 $categoryId = null;
 
-                // Kiểm tra danh mục
+                // Kiểm tra danh mục: phải tồn tại VÀ đang "Hoạt động"
                 if (empty($loi)) {
-                    $categoryId = $this->bookModel->layCategoryIdTheoTen($danh_muc);
+                    $danhMucInfo = $this->bookModel->layDanhMucTheoTen($danh_muc);
 
-                    if (!$categoryId) {
+                    if (!$danhMucInfo) {
                         $loi["danh_muc"] = "Danh mục không tồn tại.";
+                    } elseif ($danhMucInfo["trang_thai"] !== "Hoạt động") {
+                        $loi["danh_muc"] = "Danh mục này đã ngừng hoạt động, vui lòng chọn danh mục khác.";
+                    } else {
+                        $categoryId = $danhMucInfo["category_id"];
                     }
                 }
 
@@ -414,14 +423,14 @@ class BookController extends BaseController
 
             'loi' => $loi,
             'vi_tri_sua' => $vi_tri_sua,
-
-            // Biến mới chỉ để điều khiển popup thêm
+// Biến mới chỉ để điều khiển popup thêm
             'hien_popup_them' => $hien_popup_them,
 
             'thong_bao' => $thong_bao,
             'loai_thong_bao' => $loai_thong_bao,
 
             'danh_sach_danh_muc' => $danh_sach_danh_muc,
+            'danh_sach_danh_muc_hoat_dong' => $danh_sach_danh_muc_hoat_dong,
 
             'tu_khoa' => $tu_khoa,
             'loc_tac_gia' => $loc_tac_gia,

@@ -2062,7 +2062,7 @@ $dang_loi_them = !empty($hien_popup_them);
                                 -- Chọn danh mục --
                             </option>
 
-                            <?php foreach ($danh_sach_danh_muc as $danh_muc_item) { ?>
+                            <?php foreach ($danh_sach_danh_muc_hoat_dong as $danh_muc_item) { ?>
 
                                 <option
                                     value="<?php echo htmlspecialchars($danh_muc_item["ten_danh_muc"]); ?>"

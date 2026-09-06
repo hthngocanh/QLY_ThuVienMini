@@ -7,10 +7,24 @@ if (session_status() === PHP_SESSION_NONE) {
 $controller = $_GET['controller'] ?? 'home';
 $action = $_GET['action'] ?? 'index';
 
+$currentUser = $_SESSION['user'] ?? null;
+$currentRole = $currentUser['vai_tro'] ?? '';
+
+// Dùng Unicode escape để tránh lỗi mã hóa tiếng Việt trên Windows.
+$roleLibrarian = "Th\u{1EE7} th\u{01B0}";
+$roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
+
+// Nếu đã đăng nhập mà KHÔNG phải Thủ thư/Admin thì coi là Độc giả.
+// Cách này không còn phụ thuộc vào việc chuỗi "Độc giả" có bị lỗi mã hóa hay không.
+$isLoggedIn = !empty($currentUser);
+$isStaff = in_array($currentRole, [$roleLibrarian, $roleAdmin], true);
+$isReader = $isLoggedIn && !$isStaff;
+
 switch (strtolower($controller)) {
     case 'auth':
         require_once __DIR__ . '/src/Controller/AuthController.php';
         $authController = new AuthController();
+
         if ($action === 'login') {
             $authController->login();
         } elseif ($action === 'register') {
@@ -44,8 +58,13 @@ switch (strtolower($controller)) {
     case 'book_copy':
         require_once __DIR__ . '/src/Controller/BookCopyController.php';
         $bookCopyController = new BookCopyController();
-        if (strtolower($action) === 'kiemtra') {
+
+        $actionLower = strtolower($action);
+
+        if ($actionLower === 'kiemtra') {
             $bookCopyController->kiemTra();
+        } elseif ($actionLower === 'apitrangthai' || $actionLower === 'api_trang_thai') {
+            $bookCopyController->apiTrangThai();
         } else {
             $bookCopyController->index();
         }
@@ -53,11 +72,12 @@ switch (strtolower($controller)) {
 
     case 'phieumuon':
     case 'borrow_slip':
+        $actionLower = strtolower($action);
+
+        // Dùng chung Phiếu mượn cho Độc giả, Thủ thư và Quản trị viên.
         require_once __DIR__ . '/src/Controller/BorrowSlipController.php';
         $borrowSlipController = new BorrowSlipController();
-        
-        // --- ĐOẠN ĐÃ ĐƯỢC BỔ SUNG CHO PHIẾU MƯỢN ---
-        $actionLower = strtolower($action);
+
         if ($actionLower === 'cauhinhhanmuc') {
             $borrowSlipController->cauHinhHanMuc();
         } elseif ($actionLower === 'thongke') {
@@ -66,14 +86,13 @@ switch (strtolower($controller)) {
             $borrowSlipController->index();
         }
         break;
-
     case 'nguoidung':
     case 'user':
         require_once __DIR__ . '/src/Controller/UserController.php';
         $userController = new UserController();
-        
-        // Chuyển action về chữ thường để tránh lỗi phân biệt hoa/thường từ URL
+
         $actionLower = strtolower($action);
+
         if ($actionLower === 'profile') {
             $userController->profile();
         } elseif ($actionLower === 'tracuudocgia' || $actionLower === 'tracuu') {
@@ -98,8 +117,16 @@ switch (strtolower($controller)) {
     case 'home':
     case 'trangchu':
     default:
-        require_once __DIR__ . '/src/Controller/HomeController.php';
-        $homeController = new HomeController();
-        $homeController->index();
+        // Độc giả vào giao diện tra cứu/mượn sách riêng.
+        if ($isReader) {
+            require_once __DIR__ . '/src/Controller/ReaderHomeController.php';
+            $readerHomeController = new ReaderHomeController();
+            $readerHomeController->index();
+        } else {
+            // Khách, Thủ thư và Quản trị viên giữ trang hiện tại của nhóm.
+            require_once __DIR__ . '/src/Controller/HomeController.php';
+            $homeController = new HomeController();
+            $homeController->index();
+        }
         break;
 }

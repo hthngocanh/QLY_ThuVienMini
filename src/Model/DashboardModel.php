@@ -18,7 +18,9 @@ class DashboardModel
             'tong_dau_sach' => 0,
             'tong_ban_sao' => 0,
             'tong_phieu_muon' => 0,
-            'tong_nguoi_dung' => 0
+            'tong_nguoi_dung' => 0,
+            'cho_duyet' => 0,
+            'qua_han' => 0
         ];
 
         try {
@@ -33,6 +35,13 @@ class DashboardModel
 
             $stmt = $this->pdo->query("SELECT COUNT(*) FROM users WHERE trang_thai = 'Hoạt động'");
             $stats['tong_nguoi_dung'] = (int)$stmt->fetchColumn();
+
+            // Các công việc cần xử lý dành cho Thủ thư.
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM borrow_slips WHERE TrangThai = 'Chờ duyệt'");
+            $stats['cho_duyet'] = (int)$stmt->fetchColumn();
+
+            $stmt = $this->pdo->query("SELECT COUNT(*) FROM borrow_slips WHERE TrangThai = 'Quá hạn'");
+            $stats['qua_han'] = (int)$stmt->fetchColumn();
         } catch (Exception $e) {
             // Giữ giá trị mặc định nếu có lỗi bảng chưa tạo
         }
