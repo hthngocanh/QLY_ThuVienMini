@@ -917,6 +917,8 @@
     <?php
     $activePage = 'dausach';
     require_once __DIR__ . '/../../layout/sidebar.php';
+    $vaiTro = $_SESSION['user']['vai_tro'] ?? 'Độc giả';
+    $duocCrud = ($vaiTro === 'Thủ thư');
     ?>
 
     <main class="main-content">
@@ -1298,7 +1300,7 @@
 
                         </div>
 
-
+                        <?php if ($duocCrud) { ?>
                         <button
                             type="button"
                             class="btn btn-primary"
@@ -1313,7 +1315,7 @@
                             Thêm đầu sách
 
                         </button>
-
+                    <?php } ?>
                     </div>
 
 
@@ -1736,7 +1738,7 @@
 
 
                                     <td>
-
+                                    <?php if ($vaiTro === 'Thủ thư'): ?>
                                         <form
                                             method="POST"
                                             action="index.php?controller=dausach"
@@ -1785,7 +1787,7 @@
                                             </button>
 
                                         </form>
-
+                                    <?php endif; ?>
                                     </td>
 
                                 </tr>
