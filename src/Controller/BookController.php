@@ -106,6 +106,7 @@ class BookController extends BaseController
 
     public function index()
     {
+        $this->requireLogin();
         // =========================
         // DỮ LIỆU FORM
         // =========================
@@ -158,7 +159,7 @@ class BookController extends BaseController
             // SỬA SÁCH
             // =========================
             if (isset($_POST["sua_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $id = (int)$_POST["sua_sach"];
                 $sach = $this->bookModel->layDauSachTheoId($id);
 
@@ -182,7 +183,7 @@ class BookController extends BaseController
             // XÓA SÁCH
             // =========================
             elseif (isset($_POST["xoa_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $id = (int)$_POST["xoa_sach"];
 
                 $this->bookModel->xoaDauSach($id);
@@ -195,7 +196,7 @@ class BookController extends BaseController
             // CẬP NHẬT SÁCH
             // =========================
             elseif (isset($_POST["cap_nhat_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 $vi_tri_sua = (int)($_POST["id_sua"] ?? -1);
 
                 // Lấy dữ liệu người dùng nhập
@@ -279,7 +280,7 @@ class BookController extends BaseController
             // THÊM SÁCH
             // =========================
             elseif (isset($_POST["them_sach"])) {
-
+                $this->requireRole(['Thủ thư']);
                 // Chỉ khi FORM THÊM được submit
                 // mới cho phép popup tự mở lại
                 $hien_popup_them = true;
