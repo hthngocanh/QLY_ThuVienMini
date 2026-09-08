@@ -9,10 +9,6 @@ $__sidebarRole = $__sidebarUser["vai_tro"] ?? "";
 // Dùng Unicode escape để tránh lỗi mã hóa tiếng Việt trên Windows.
 $__roleLibrarian = "Th\u{1EE7} th\u{01B0}";
 $__roleAdmin = "Qu\u{1EA3}n tr\u{1ECB} vi\u{00EA}n";
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Xác định đường dẫn gốc của ứng dụng web
 $appRoot = '/QLY_ThuVienMini/';
 
@@ -661,7 +657,7 @@ if ($vaiTro === "Quản trị viên") {
                                 <line x1="9" y1="16" x2="13" y2="16"></line>
                             </svg>
                         </span>
-                        <span><?= $vaiTro === "Thủ thư" ? "Quản lý phiếu mượn" : "Phiếu mượn" ?></span>
+                        <span><?= $vaiTro === "Thủ thư" ? "Quản lý phiếu mượn" : "Lịch sử phiếu mượn" ?></span>
                     </a>
                 <?php endif; ?>
 

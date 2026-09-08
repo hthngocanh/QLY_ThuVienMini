@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS QLThuVien
+CREATE DATABASE IF NOT EXISTS qly_thuvienmini
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
-USE QLThuVien;
+USE qly_thuvienmini;
 
 
 -- =========================================
