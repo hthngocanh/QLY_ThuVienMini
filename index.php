@@ -78,7 +78,9 @@ switch (strtolower($controller)) {
         require_once __DIR__ . '/src/Controller/BorrowSlipController.php';
         $borrowSlipController = new BorrowSlipController();
 
-        if ($actionLower === 'cauhinhhanmuc') {
+        if ($actionLower === 'yeucaumuon') {
+            $borrowSlipController->yeuCauMuon();
+        } elseif ($actionLower === 'cauhinhhanmuc') {
             $borrowSlipController->cauHinhHanMuc();
         } elseif ($actionLower === 'thongke') {
             $borrowSlipController->thongKe();

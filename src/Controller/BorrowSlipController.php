@@ -62,6 +62,78 @@ class BorrowSlipController extends BaseController
 
 
     // =========================================================
+    // ĐỘC GIẢ GỬI YÊU CẦU MƯỢN TỪ TRANG CHỦ
+    // =========================================================
+    public function yeuCauMuon()
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            header('Location: index.php');
+            exit;
+        }
+
+        if ($this->getVaiTro() !== 'Độc giả') {
+            header('Location: index.php?controller=phieumuon');
+            exit;
+        }
+
+        $bookId = (int)($_POST['book_id'] ?? 0);
+
+        if ($bookId <= 0) {
+            header('Location: index.php?controller=home&borrow=invalid');
+            exit;
+        }
+
+        $maNguoiDung = trim($this->getMaNguoiDung());
+
+        if ($maNguoiDung === '') {
+            header('Location: index.php?controller=home&borrow=user_invalid');
+            exit;
+        }
+
+        // Tự chọn một bản sao đang Có sẵn của đầu sách.
+        // Không bắt Độc giả phải biết/chọn mã bản sao.
+        $pdo = getDB();
+
+        $stmt = $pdo->prepare("
+            SELECT bc.id, bc.ma_ban_sao
+            FROM book_copies bc
+            WHERE bc.book_id = :book_id
+              AND bc.trang_thai = 'Có sẵn'
+            ORDER BY bc.id ASC
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            'book_id' => $bookId
+        ]);
+
+        $banSao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$banSao) {
+            header('Location: index.php?controller=home&borrow=unavailable&book_id=' . $bookId);
+            exit;
+        }
+
+        $result = $this->model->themPhieuMuon(
+            $maNguoiDung,
+            $banSao['ma_ban_sao'],
+            date('Y-m-d'),
+            null,
+            'Chờ duyệt'
+        );
+
+        if ($result) {
+            // Chuyển thẳng sang Phiếu mượn để Độc giả thấy yêu cầu vừa tạo.
+            header('Location: index.php?controller=phieumuon&success=created');
+            exit;
+        }
+
+        header('Location: index.php?controller=home&borrow=error');
+        exit;
+    }
+
+
+    // =========================================================
     // TRANG QUẢN LÝ PHIẾU MƯỢN
     // =========================================================
     public function index()

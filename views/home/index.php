@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // views/home/index.php
 
 $isLoggedIn = isset($_SESSION["user"]);
@@ -458,6 +458,9 @@ if ($isLoggedIn):
                             $statusClass = $status === 'Có sẵn'
                                 ? 'status-available'
                                 : ($status === 'Đang mượn' ? 'status-borrowed' : 'status-unavailable');
+
+                            $bookId = (int)($sach['book_id'] ?? 0);
+                            $trangThaiCuaToi = $trangThaiMuonCuaToi[$bookId] ?? '';
                             ?>
                             <tr class="book-row"
                                 data-search="<?= htmlspecialchars($searchText, ENT_QUOTES, 'UTF-8') ?>"
@@ -470,20 +473,20 @@ if ($isLoggedIn):
                                 <td data-label="Danh mục"><span class="category-badge"><?= htmlspecialchars($category) ?></span></td>
                                 <td data-label="Trạng thái"><span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars($status) ?></span></td>
                                 <td data-label="Thao tác">
-                                    <?php if ($status === 'Có sẵn'): ?>
-                                        <button type="button"
-                                                class="btn-borrow available js-borrow-btn"
-                                                data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                                data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                                data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                                            Mượn
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn-borrow unavailable" disabled>
-                                            Mượn
-                                        </button>
-                                    <?php endif; ?>
-                                </td>
+    <?php if ($status === 'Có sẵn'): ?>
+        <button type="button"
+        class="btn-borrow available js-borrow-btn"
+        data-book-code="<?= htmlspecialchars($sach['ma_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-book-name="<?= htmlspecialchars($sach['ten_sach'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+        data-author="<?= htmlspecialchars($sach['tac_gia'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+    Mượn
+</button>
+    <?php else: ?>
+        <span class="btn-borrow unavailable">
+            Mượn
+        </span>
+    <?php endif; ?>
+</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -596,6 +599,8 @@ if ($isLoggedIn):
     const borrowAuthor = document.getElementById('borrowAuthor');
     const borrowDate = document.getElementById('borrowDate');
 
+    let selectedBookId = 0;
+
     function normalize(value) {
         return (value || '')
             .toString()
@@ -634,10 +639,21 @@ if ($isLoggedIn):
     }
 
     function openBorrowModal(button) {
-        if (borrowBookCode) borrowBookCode.value = button.dataset.bookCode || '';
-        if (borrowBookName) borrowBookName.value = button.dataset.bookName || '';
-        if (borrowAuthor) borrowAuthor.value = button.dataset.author || '';
-        if (borrowDate) borrowDate.value = formatDate(new Date());
+        if (borrowBookCode) {
+            borrowBookCode.value = button.dataset.bookCode || '';
+        }
+
+        if (borrowBookName) {
+            borrowBookName.value = button.dataset.bookName || '';
+        }
+
+        if (borrowAuthor) {
+            borrowAuthor.value = button.dataset.author || '';
+        }
+
+        if (borrowDate) {
+            borrowDate.value = formatDate(new Date());
+        }
 
         if (borrowModal) {
             borrowModal.classList.add('show');
@@ -676,7 +692,22 @@ if ($isLoggedIn):
 
     if (borrowSubmit) {
         borrowSubmit.addEventListener('click', function () {
-            window.location.href = 'index.php?controller=phieumuon';
+            if (!selectedBookId || selectedBookId <= 0) {
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = 'index.php?controller=phieumuon&action=yeuCauMuon';
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'book_id';
+            input.value = String(selectedBookId);
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
         });
     }
 
